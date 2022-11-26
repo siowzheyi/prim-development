@@ -10,6 +10,7 @@
 |
 */
 
+use App\Http\Controllers\ExpensesController;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
 
@@ -95,6 +96,12 @@ Route::group(['prefix' => 'student'], function () {
     Route::get('list', 'StudentController@getStudentDatatable')->name('student.getStudentDatatable');
     Route::post('student/fetchClass', 'StudentController@fetchClass')->name('student.fetchClass');
 });
+
+// Route::group(['prefix' => 'recurring_fees'],function(){
+//     Route::get('/add','ExpensesController@create')->name('recurring_fees.create');
+// });
+
+Route::resource('recurring_fees','ExpensesController');
 
 Route::group(['prefix' => 'fees'], function () {
     Route::post('/year', 'FeesController@fetchYear')->name('fees.fetchYear');
