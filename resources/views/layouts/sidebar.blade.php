@@ -324,6 +324,7 @@
                                 <span>Bayar</span>
                             </a>
                         </li>
+                        @endrole
 
                         {{-- <li>
                             <a href="{{ route('parent.dependent') }}" class=" waves-effect">
@@ -332,6 +333,8 @@
                         </a>
                 </li> --}}
                 @endrole
+
+                
 
                 @role('Superadmin|Pentadbir')
                 <li>
@@ -390,10 +393,39 @@
                     </a>
                 </li>
                 @endrole
-
             </ul>
             </li>
+            <!-- micole recurring expenses system -->
+            @role('Superadmin|Pentadbir|Guru|Penjaga')
+
+            <li>
+                <a href="javascript: void(0);" class="has-arrow waves-effect">
+                    <i class="fas fa-file-invoice-dollar"></i>
+                    <span>Yuran Berulangan</span>
+                </a>
+                <ul class="sub-menu mm-collapse" aria-expanded="false">
+                    @role('Superadmin|Penjaga')
+                    <li>
+                        <!-- wrong route -->
+                        <a href="{{ route('dependent_fees') }}" class=" waves-effect">
+                            <i class="far fa-credit-card"></i>
+                            <span>Bayar</span>
+                        </a>
+                    </li>
+                    @endrole
+                    @role('Superadmin|Pentadbir|Admin')
+                     <li>
+                        <!-- wrong route -->
+                        <a href="{{ route('parent.dependent') }}" class=" waves-effect">
+                        <i class="fas fa-child"></i>
+                        <span>Butiran Perbelanjaan</span>
+                        </a>
+                    </li> 
+                    @endrole
+                </ul>
+            </li>
             @endrole
+           
             </ul>
         </div>
     </div>
