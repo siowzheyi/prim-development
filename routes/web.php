@@ -102,6 +102,10 @@ Route::group(['prefix' => 'student'], function () {
 // });
 
 Route::resource('recurring_fees','ExpensesController');
+Route::get('/getExpensesDatatable','ExpensesController@getExpensesDatatable')->name('recurring_fees.getExpensesDatatable');
+// Route::group(['prefix'=>'recurring_fees'],function(){
+//     Route::get('/getExpensesDatatable','ExpensesController@getExpensesDatatable')->name('recurring_fees.getExpensesDatatable');
+// });
 
 Route::group(['prefix' => 'fees'], function () {
     Route::post('/year', 'FeesController@fetchYear')->name('fees.fetchYear');

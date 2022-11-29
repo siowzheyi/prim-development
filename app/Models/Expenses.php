@@ -10,4 +10,10 @@ class Expenses extends Model
     protected $fillable = ['name', 'description', 'amount','start_date','end_date','status','organization_id','recurring_id'];
 
     public $timestamps = false;
+
+    public function recurring()
+    {
+        return $this->hasMany(Recurring::class);
+    }
+
 }

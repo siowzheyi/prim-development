@@ -416,7 +416,7 @@
                     @role('Superadmin|Pentadbir|Admin')
                      <li>
                         <!-- wrong route -->
-                        <a href="{{ route('parent.dependent') }}" class=" waves-effect">
+                        <a href="{{ route('recurring_fees.index') }}" class=" waves-effect">
                         <i class="fas fa-child"></i>
                         <span>Butiran Perbelanjaan</span>
                         </a>
