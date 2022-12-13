@@ -125,6 +125,7 @@ Route::group(['prefix' => 'fees'], function () {
     Route::get('/C', 'FeesController@CategoryC')->name('fees.C');
     Route::get('/add/C', 'FeesController@createCategoryC')->name('fees.createC');
     Route::post('/store/C', 'FeesController@StoreCategoryC')->name('fees.storeC');
+    Route::post('/update/C', 'FeesController@updateCategoryC')->name('fees.updateC');
 
     Route::get('/dependent_fees', 'FeesController@dependent_fees')->name('dependent_fees');
     Route::get('/pay', 'PayController@pay')->name('pay');

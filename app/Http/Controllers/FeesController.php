@@ -516,18 +516,20 @@ class FeesController extends AppBaseController
 
         if(is_array($data)){
             foreach($data as $r){
-                $data = $r;
+                $data = DB::table('classes')
+                ->where('classes.id', $r)
+                ->value('classes.levelid');
             }
         }
         
         if($selectedFee->category == "Kategory C"){
             $gender = json_decode($selectedFee->target)->gender;
 
-            if(is_array($gender)){
-                foreach($gender as $r){
-                    $gender = $r;
-                }
-            }
+            // if(is_array($gender)){
+            //     foreach($gender as $r){
+            //         $gender = $r;
+            //     }
+            // }
         }
         
         $permit = DB::table('organization_user')
@@ -889,6 +891,33 @@ class FeesController extends AppBaseController
         }
     }
 
+    public function updateCategoryC(Request $request)
+    {
+        // dd($request->toArray());
+        $id         = $request->get('id');
+        $gender     = $request->get('gender');
+        $class      = $request->get('cb_class');
+        $level      = $request->get('level');
+        $year       = $request->get('year');
+        $name       = $request->get('name');
+        $price          = $request->get('price');
+        $quantity       = $request->get('quantity');
+        $desc           = $request->get('description');
+        $oid            = $request->get('organization');
+        $date_started   = $request->get('date_started');
+        $date_end       = $request->get('date_end');
+        $total          = $price * $quantity;
+        $category       = "Kategory C";
+
+        if ($level == "All_Level") {
+            return $this->allLevel($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
+        } elseif ($year == "All_Year") {
+            return $this->allYear($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
+        } else {
+            return $this->allClasses($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category);
+        }
+    }
+
     public function fetchClassYear(Request $request)
     {
 
@@ -1007,17 +1036,11 @@ class FeesController extends AppBaseController
                 'name'          => $name,
                 'desc'          => $desc,
                 'category'      => $category,
-                'quantity'      => $quantity,
-                'price'         => $price,
-                'totalAmount'       => $total,
                 'start_date'        => $date_started,
                 'end_date'          => $date_end,
-                'status'            => "1",
-                'target'            => $target,
-                'organization_id'   => $oid,
-
             ];
-
+            // dd($name, $desc, $category, $date_started, $date_end);
+            
             $result = DB::table('fees_new')
             ->where('fees_new.id', $id)
             ->update($fees);
@@ -1027,6 +1050,13 @@ class FeesController extends AppBaseController
                     return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dikemaskini');
                 } else {
                     return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dikemaskini');
+                }
+            }
+            else{
+                if ($category == "Kategory B") {
+                    return redirect('/fees/B');
+                } else {
+                    return redirect('/fees/C');
                 }
             }
         }
@@ -1105,14 +1135,14 @@ class FeesController extends AppBaseController
                 'name'          => $name,
                 'desc'          => $desc,
                 'category'      => $category,
-                'quantity'      => $quantity,
-                'price'         => $price,
-                'totalAmount'       => $total,
+                // 'quantity'      => $quantity,
+                // 'price'         => $price,
+                // 'totalAmount'       => $total,
                 'start_date'        => $date_started,
                 'end_date'          => $date_end,
-                'status'            => "1",
-                'target'            => $target,
-                'organization_id'   => $oid,
+                // 'status'            => "1",
+                // 'target'            => $target,
+                // 'organization_id'   => $oid,
 
             ];
 
@@ -1127,21 +1157,29 @@ class FeesController extends AppBaseController
                     return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dikemaskini');
                 }
             }
+            else{
+                if ($category == "Kategory B") {
+                    return redirect('/fees/B');
+                } else {
+                    return redirect('/fees/C');
+                }
+            }
         }
     }
 
     public function allClasses($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category)
     {
         // get list class checked from checkbox
-
-        $list = DB::table('classes')
+        if($class){
+            $list = DB::table('classes')
             ->where('status', "1")
             ->whereIn('id', $class)
             ->get();
 
-        // dd(count($list));
-        for ($i = 0; $i < count($list); $i++) {
-            $class_arr[] = $list[$i]->id;
+            // dd(count($list));
+            for ($i = 0; $i < count($list); $i++) {
+                $class_arr[] = $list[$i]->id;
+            }
         }
 
         if ($gender) {
@@ -1159,7 +1197,7 @@ class FeesController extends AppBaseController
                 'data' => $class_arr,
                 'gender' => $gender
             );
-        } else {
+        } elseif($class) {
             $list_student = DB::table('class_organization')
                 ->join('class_student', 'class_student.organclass_id', '=', 'class_organization.id')
                 ->join('classes', 'classes.id', '=', 'class_organization.class_id')
@@ -1171,6 +1209,8 @@ class FeesController extends AppBaseController
             $data = array(
                 'data' => $class_arr
             );
+        }else{
+            $data = NULL;
         }
 
         $target = json_encode($data);
@@ -1214,14 +1254,14 @@ class FeesController extends AppBaseController
                 'name'              => $name,
                 'desc'              => $desc,
                 'category'          => $category,
-                'quantity'          => $quantity,
-                'price'             => $price,
-                'totalAmount'       => $total,
+                // 'quantity'          => $quantity,
+                // 'price'             => $price,
+                // 'totalAmount'       => $total,
                 'start_date'        => $date_started,
                 'end_date'          => $date_end,
-                'status'            => "1",
-                'target'            => $target,
-                'organization_id'   => $oid,
+                // 'status'            => "1",
+                // 'target'            => $target,
+                // 'organization_id'   => $oid,
             ];
 
             $result = DB::table('fees_new')
@@ -1233,6 +1273,13 @@ class FeesController extends AppBaseController
                     return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dikemaskini');
                 } else {
                     return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dikemaskini');
+                }
+            }
+            else{
+                if ($category == "Kategory B") {
+                    return redirect('/fees/B');
+                } else {
+                    return redirect('/fees/C');
                 }
             }
         }

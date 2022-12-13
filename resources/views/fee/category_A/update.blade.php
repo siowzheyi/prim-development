@@ -82,7 +82,7 @@
                 <div class="form-group">
                     <label>Penerangan</label>
                     <textarea name="description" class="form-control" placeholder="Penerangan" cols="30"
-                        rows="5" value="{{ $selectedFee->desc }}"></textarea>
+                        rows="5">{{ $selectedFee->desc }}</textarea>
                 </div>
 
                 <div class="form-group mb-0">

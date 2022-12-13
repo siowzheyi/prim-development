@@ -9,7 +9,10 @@
 <div class="row align-items-center">
     <div class="col-sm-6">
         <div class="page-title-box">
-            <h4 class="font-size-18">Kemaskini Butiran Kategori B</h4>
+            <h4 class="font-size-18">Tambah Butiran Kategori C</h4>
+            {{-- <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item active">Murid >> Tambah Murid</li>
+            </ol> --}}
         </div>
     </div>
 </div>
@@ -25,7 +28,7 @@
             </ul>
         </div>
         @endif
-        <form class="form-validation" method="POST" action="{{ route('fees.updateB') }}" enctype="multipart/form-data">
+        <form class="form-validation" method="POST" action="{{ route('fees.updateC') }}" enctype="multipart/form-data">
 
             @csrf
             <div class="card-body">
@@ -41,8 +44,7 @@
                 <div class="form-group">
                     <label>Nama Butiran</label>
                     <input type="text" name="name" class="form-control"
-                        data-parsley-required-message="Sila masukkan nama butiran" required placeholder="Nama Butiran"
-                        value="{{ $selectedFee->name }}">
+                        data-parsley-required-message="Sila masukkan nama butiran" required placeholder="Nama Butiran" value="{{$selectedFee->name}}">
                 </div>
 
                 <div class="form-row">
@@ -51,14 +53,14 @@
                         <input class="form-control input-mask text-left"
                             data-inputmask="'alias': 'numeric', 'groupSeparator': ',', 'digits': 2, 'digitsOptional': false, 'placeholder': '0'"
                             im-insert="true" name="price" data-parsley-required-message="Sila masukkan harga"
-                            data-parsley-errors-container=".errorMessagePrice" value="{{ $selectedFee->price }}" required readonly>
+                            data-parsley-errors-container=".errorMessagePrice" value="{{$selectedFee->price}}" required readonly>
                         <i>*Harga per kuantiti</i>
                         <div class="errorMessagePrice"></div>
                     </div>
                     <div class="form-group col-md-6">
                         <label>Kuantiti</label>
                         <input type="text" name="quantity" class="form-control" placeholder="Kuantiti"
-                            data-parsley-required-message="Sila masukkan kuantiti" value="{{ $selectedFee->quantity }}" required readonly>
+                            data-parsley-required-message="Sila masukkan kuantiti" value="{{$selectedFee->quantity}}" required readonly>
 
 
                     </div>
@@ -73,10 +75,10 @@
                         <div class="input-daterange input-group" id="date">
                             <input type="text" class="form-control" name="date_started" placeholder="Tarikh Awal"
                                 autocomplete="off" data-parsley-required-message="Sila masukkan tarikh awal"
-                                data-parsley-errors-container=".errorMessage" value="{{ $selectedFee->start_date }}" required />
+                                data-parsley-errors-container=".errorMessage" value="{{$selectedFee->start_date}}" required />
                             <input type="text" class="form-control" name="date_end" placeholder="Tarikh Akhir"
                                 autocomplete="off" data-parsley-required-message="Sila masukkan tarikh akhir"
-                                data-parsley-errors-container=".errorMessage" value="{{ $selectedFee->end_date }}" required />
+                                data-parsley-errors-container=".errorMessage" value="{{$selectedFee->end_date}}" required />
                         </div>
                         <div class="errorMessage"></div>
                         <div class="errorMessage"></div>
@@ -86,7 +88,6 @@
 
                 <div class="form-group">
                     <label>Tahap</label>
-                    <!-- <input type="text" value="{{$data}}"> -->
                     <select name="level" id="level" class="form-control"
                         data-parsley-required-message="Sila pilih tahap"
                         data-parsley-required-message="Sila pilih tahap" required>
@@ -119,10 +120,23 @@
 
                 </div>
 
+                <div class="genderhide form-group">
+                    <label>Jantina</label>
+                    <div class="radio">
+                        @if(str_contains($gender, "L"))
+                            <label class="radio-inline pl-2"><input type="radio" name="gender" value="L" checked > Lelaki </label>
+                            <label class="radio-inline pl-2"><input type="radio" name="gender" value="P" disabled> Perempuan </label>
+                        @else
+                            <label class="radio-inline pl-2"><input type="radio" name="gender" value="L" disabled> Lelaki </label>
+                            <label class="radio-inline pl-2"><input type="radio" name="gender" value="P" checked> Perempuan </label>
+                        @endif
+                    </div>
+                </div>
+                
                 <div class="form-group">
                     <label>Penerangan</label>
                     <textarea name="description" class="form-control" placeholder="Penerangan" cols="30"
-                        rows="5">{{ $selectedFee->desc }}</textarea>
+                        rows="5">{{$selectedFee->desc}}</textarea>
                 </div>
 
                 <div class="form-group mb-0">
@@ -172,21 +186,6 @@
             orientation: 'bottom'
           });
 
-        // if($("#tahap").val() == "All_Level"){
-        //     $("#level").prop("selectedIndex", 0).trigger('change');
-        // }
-        // else if($("#tahap").val() == 1){
-        //     $('.yearhide').show();
-        //     $('.cbhide').show();
-        //     $("#level").prop("selectedIndex", 1).trigger('change');
-            
-        // }
-        // else if($("#tahap").val() == 2){
-        //     $("#level").prop("selectedIndex", 2).trigger('change');
-        //     $('.yearhide').show();
-        //     $('.cbhide').show();
-        // }
-
           // ************************** organization on change ********************************
 
         $('#organization').change(function() {
@@ -199,6 +198,7 @@
         // if($("#organization").val() != ""){
         //     $("#organization").prop("selectedIndex", 1).trigger('change');
         // }
+
 
           // ************************** checkbox class ********************************
 
@@ -217,6 +217,7 @@
         // ************************** checkbox class ********************************
 
         $(document).on('change', '.checkSingle', function() {
+            console.log('asdf');
             // $('#cb_class').not(this).prop('checked', this.checked);
             if ($(this).is(":checked")) {
                 var isAllChecked = 0;
@@ -311,6 +312,8 @@
                 })
             }
         });
+
+        
         
     });
 </script>
