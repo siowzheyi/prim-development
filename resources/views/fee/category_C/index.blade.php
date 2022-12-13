@@ -83,7 +83,7 @@
                                 <th>Jumlah Amaun (RM)</th>
                                 <th>Rujukan</th>
                                 <th>Status</th>
-                                <!-- <th>Action</th> -->
+                                <th>Action</th>
                             </tr>
                         </thead>
                     </table>
@@ -201,6 +201,11 @@
                     },{
                         data: 'status',
                         name: 'status',
+                        orderable: false,
+                        searchable: false
+                    },{
+                        data: 'action',
+                        name: 'action',
                         orderable: false,
                         searchable: false
                     }, ],

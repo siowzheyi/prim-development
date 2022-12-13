@@ -180,7 +180,7 @@ class DormController extends Controller
                 ->first();
         }
 
-        if(isset($dorm) || Auth::user()->hasRole('Superadmin')){
+        if(isset($dorm) ){
             $organ = $organization->toArray();
             foreach($organ as $organ){
                 if(in_array($dorm->organization_id, $organ) || Auth::user()->hasRole('Superadmin')){

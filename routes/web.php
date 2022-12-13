@@ -110,13 +110,17 @@ Route::group(['prefix' => 'fees'], function () {
     Route::get('/reportByOid', 'FeesController@feesReportByOrganizationId')->name('fees.reportByOid');
     Route::get('/report/{type}/class/{class_id}', 'FeesController@reportByClass')->name('fees.reportByClass');
 
+    Route::get('/edit/{id}', 'FeesController@editCategory')->name('fees.editCategory');
+
     Route::get('/A', 'FeesController@CategoryA')->name('fees.A');
     Route::get('/add/A', 'FeesController@createCategoryA')->name('fees.createA');
     Route::post('/store/A', 'FeesController@StoreCategoryA')->name('fees.storeA');
+    Route::post('/update/A', 'FeesController@updateCategoryA')->name('fees.updateA');
 
     Route::get('/B', 'FeesController@CategoryB')->name('fees.B');
     Route::get('/add/B', 'FeesController@createCategoryB')->name('fees.createB');
     Route::post('/store/B', 'FeesController@StoreCategoryB')->name('fees.storeB');
+    Route::post('/update/B', 'FeesController@updateCategoryB')->name('fees.updateB');
 
     Route::get('/C', 'FeesController@CategoryC')->name('fees.C');
     Route::get('/add/C', 'FeesController@createCategoryC')->name('fees.createC');

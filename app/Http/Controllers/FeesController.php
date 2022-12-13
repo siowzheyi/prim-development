@@ -504,6 +504,55 @@ class FeesController extends AppBaseController
         return view('fee.category_A.add', compact('organization'));
     }
 
+    public function editCategory($id)
+    {
+        $selectedFee = DB::table('fees_new')
+        ->join('organizations', 'organizations.id', '=', 'fees_new.organization_id')
+        ->where('fees_new.id', $id)
+        ->select('fees_new.*', 'organizations.nama as orgName')
+        ->first();
+
+        $data = json_decode($selectedFee->target)->data;
+
+        if(is_array($data)){
+            foreach($data as $r){
+                $data = $r;
+            }
+        }
+        
+        if($selectedFee->category == "Kategory C"){
+            $gender = json_decode($selectedFee->target)->gender;
+
+            if(is_array($gender)){
+                foreach($gender as $r){
+                    $gender = $r;
+                }
+            }
+        }
+        
+        $permit = DB::table('organization_user')
+        ->where('organization_user.user_id', Auth::user()->id)
+        ->select('organization_user.organization_id', 'organization_user.role_id')
+        ->get();
+
+        if(count($permit) > 0 && $selectedFee != NULL)
+        {   
+            foreach($permit as $permit){
+                if($permit->role_id == 1 || ($permit->role_id != 6 && $permit->organization_id == $selectedFee->organization_id))
+                {
+                    if($selectedFee->category == "Kategory A")
+                        return view('fee.category_A.update', compact('selectedFee', 'data'));
+                    elseif($selectedFee->category == "Kategory B")
+                        return view('fee.category_B.update', compact('selectedFee', 'data'));
+                    elseif($selectedFee->category == "Kategory C")
+                        return view('fee.category_C.update', compact('selectedFee', 'data', 'gender'));
+                }
+            }
+        }
+        
+        return view('errors.404');
+    }
+
     public function StoreCategoryA(Request $request)
     {
         $price          = $request->get('price');
@@ -556,6 +605,45 @@ class FeesController extends AppBaseController
             }
 
             return redirect('/fees/A')->with('success', 'Yuran Kategori A telah berjaya dimasukkan');
+        }
+    }
+
+    public function updateCategoryA(Request $request)
+    {
+        $price          = $request->get('price');
+        $quantity       = $request->get('quantity');
+        $oid            = $request->get('organization');
+        $date_started   = $request->get('date_started');
+        $date_end       = $request->get('date_end');
+        $total          = $price * $quantity;
+
+        $target = ['data' => 'ALL'];
+
+        // $target = json_encode($data);
+
+        // dd($target);
+
+        $fee = [
+            'name'              =>  $request->get('name'),
+            'desc'              =>  $request->get('description'),
+            'category'          =>  "Kategory A",
+            'quantity'          =>  $request->get('quantity'),
+            'price'             =>  $request->get('price'),
+            'totalAmount'       =>  $total,
+            'start_date'        =>  $date_started,
+            'end_date'          =>  $date_end,
+            'status'            =>  "1",
+            'target'            =>  $target,
+            'organization_id'   =>  $oid,
+        ];
+
+        // dd($fee);
+        $result = DB::table('fees_new')
+        ->where('fees_new.id', $request->get('id'))
+        ->update($fee);
+
+        if ($result) {
+            return redirect('/fees/A')->with('success', 'Yuran Kategori A telah berjaya dikemaskinikan');
         }
     }
 
@@ -671,6 +759,14 @@ class FeesController extends AppBaseController
                 }
             });
 
+            $table->addColumn('action', function($row){
+                $token = csrf_token();
+                $btn = '<div class="d-flex justify-content-center">';
+                $btn = $btn . '<a href="' . route('fees.editCategory', $row->id) . '" class="btn btn-primary m-1">Edit</a>';
+                // $btn = $btn . '<button id="' . $row->id . '" data-token="' . $token . '" class="btn btn-danger m-1">Buang</button></div>';
+                return $btn;
+            });
+
             /* $table->addColumn('action', function ($row) {
                 $token = csrf_token();
                 $btn = '<div class="d-flex justify-content-center">';
@@ -680,7 +776,7 @@ class FeesController extends AppBaseController
             }); */
 
             // $table->rawColumns(['status', 'action']);
-            $table->rawColumns(['target', 'status']);
+            $table->rawColumns(['target', 'status', 'action']);
             return $table->make(true);
         }
     }
@@ -702,6 +798,7 @@ class FeesController extends AppBaseController
 
     public function StoreCategoryB(Request $request)
     {
+        $id             = NULL;
         $gender         = "";
         $class          = $request->get('cb_class');
         $level          = $request->get('level');
@@ -717,11 +814,37 @@ class FeesController extends AppBaseController
         $category       = "Kategory B";
 
         if ($level == "All_Level") {
-            return $this->allLevel($name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
+            return $this->allLevel($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
         } elseif ($year == "All_Year") {
-            return $this->allYear($name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
+            return $this->allYear($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
         } else {
-            return $this->allClasses($name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category);
+            return $this->allClasses($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category);
+        }
+    }
+
+    public function updateCategoryB(Request $request)
+    {
+        $id             = $request->get('id');
+        $gender         = "";
+        $class          = $request->get('cb_class');
+        $level          = $request->get('level');
+        $year           = $request->get('year');
+        $name           = $request->get('name');
+        $price          = $request->get('price');
+        $quantity       = $request->get('quantity');
+        $desc           = $request->get('description');
+        $oid            = $request->get('organization');
+        $date_started   = $request->get('date_started');
+        $date_end       = $request->get('date_end');
+        $total          = $price * $quantity;
+        $category       = "Kategory B";
+
+        if ($level == "All_Level") {
+            return $this->allLevel($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
+        } elseif ($year == "All_Year") {
+            return $this->allYear($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
+        } else {
+            return $this->allClasses($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category);
         }
     }
 
@@ -742,6 +865,7 @@ class FeesController extends AppBaseController
     public function StoreCategoryC(Request $request)
     {
         // dd($request->toArray());
+        $id         = NULL;
         $gender     = $request->get('gender');
         $class      = $request->get('cb_class');
         $level      = $request->get('level');
@@ -757,11 +881,11 @@ class FeesController extends AppBaseController
         $category       = "Kategory C";
 
         if ($level == "All_Level") {
-            return $this->allLevel($name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
+            return $this->allLevel($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
         } elseif ($year == "All_Year") {
-            return $this->allYear($name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
+            return $this->allYear($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
         } else {
-            return $this->allClasses($name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category);
+            return $this->allClasses($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category);
         }
     }
 
@@ -810,7 +934,7 @@ class FeesController extends AppBaseController
         }
     }
 
-    public function allLevel($name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category)
+    public function allLevel($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category)
     {
         if ($gender) {
             $list = DB::table('class_organization')
@@ -843,42 +967,72 @@ class FeesController extends AppBaseController
 
         $target = json_encode($data);
 
-        $fees = DB::table('fees_new')->insertGetId([
-            'name'          => $name,
-            'desc'          => $desc,
-            'category'      => $category,
-            'quantity'      => $quantity,
-            'price'         => $price,
-            'totalAmount'       => $total,
-            'start_date'        => $date_started,
-            'end_date'          => $date_end,
-            'status'            => "1",
-            'target'            => $target,
-            'organization_id'   => $oid,
+        if($id == NULL){
+            $fees = DB::table('fees_new')->insertGetId([
+                'name'          => $name,
+                'desc'          => $desc,
+                'category'      => $category,
+                'quantity'      => $quantity,
+                'price'         => $price,
+                'totalAmount'       => $total,
+                'start_date'        => $date_started,
+                'end_date'          => $date_end,
+                'status'            => "1",
+                'target'            => $target,
+                'organization_id'   => $oid,
 
-        ]);
-
-        for ($i = 0; $i < count($list); $i++) {
-
-            $fees_student = DB::table('class_student')
-                ->where('id', $list[$i]->class_student_id)
-                ->update(['fees_status' => 'Not Complete']);
-            
-            DB::table('student_fees_new')->insert([
-                'status' => 'Debt',
-                'fees_id' => $fees,
-                'class_student_id' => $list[$i]->class_student_id,
             ]);
-        }
 
-        if ($category == "Kategory B") {
-            return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dimasukkan');
-        } else {
-            return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dimasukkan');
+            for ($i = 0; $i < count($list); $i++) {
+
+                $fees_student = DB::table('class_student')
+                    ->where('id', $list[$i]->class_student_id)
+                    ->update(['fees_status' => 'Not Complete']);
+                
+                DB::table('student_fees_new')->insert([
+                    'status' => 'Debt',
+                    'fees_id' => $fees,
+                    'class_student_id' => $list[$i]->class_student_id,
+                ]);
+            }
+
+            if ($category == "Kategory B") {
+                return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dimasukkan');
+            } else {
+                return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dimasukkan');
+            }
+        }
+        else{
+            $fees = [
+                'name'          => $name,
+                'desc'          => $desc,
+                'category'      => $category,
+                'quantity'      => $quantity,
+                'price'         => $price,
+                'totalAmount'       => $total,
+                'start_date'        => $date_started,
+                'end_date'          => $date_end,
+                'status'            => "1",
+                'target'            => $target,
+                'organization_id'   => $oid,
+
+            ];
+
+            $result = DB::table('fees_new')
+            ->where('fees_new.id', $id)
+            ->update($fees);
+
+            if($result){
+                if ($category == "Kategory B") {
+                    return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dikemaskini');
+                } else {
+                    return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dikemaskini');
+                }
+            }
         }
     }
 
-    public function allYear($name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category)
+    public function allYear($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category)
     {
         if ($gender) {
             $list = DB::table('class_organization')
@@ -911,42 +1065,72 @@ class FeesController extends AppBaseController
 
         $target = json_encode($data);
 
-        $fees = DB::table('fees_new')->insertGetId([
-            'name'          => $name,
-            'desc'          => $desc,
-            'category'      => $category,
-            'quantity'      => $quantity,
-            'price'         => $price,
-            'totalAmount'       => $total,
-            'start_date'        => $date_started,
-            'end_date'          => $date_end,
-            'status'            => "1",
-            'target'            => $target,
-            'organization_id'   => $oid,
-
-        ]);
-
-        for ($i = 0; $i < count($list); $i++) {
-
-            $fees_student = DB::table('class_student')
-                ->where('id', $list[$i]->class_student_id)
-                ->update(['fees_status' => 'Not Complete']);
-
-            DB::table('student_fees_new')->insert([
-                'status' => 'Debt',
-                'fees_id' => $fees,
-                'class_student_id' => $list[$i]->class_student_id,
+        if($id == NULL){
+            $fees = DB::table('fees_new')->insertGetId([
+                'name'          => $name,
+                'desc'          => $desc,
+                'category'      => $category,
+                'quantity'      => $quantity,
+                'price'         => $price,
+                'totalAmount'       => $total,
+                'start_date'        => $date_started,
+                'end_date'          => $date_end,
+                'status'            => "1",
+                'target'            => $target,
+                'organization_id'   => $oid,
+    
             ]);
+    
+            for ($i = 0; $i < count($list); $i++) {
+    
+                $fees_student = DB::table('class_student')
+                    ->where('id', $list[$i]->class_student_id)
+                    ->update(['fees_status' => 'Not Complete']);
+    
+                DB::table('student_fees_new')->insert([
+                    'status' => 'Debt',
+                    'fees_id' => $fees,
+                    'class_student_id' => $list[$i]->class_student_id,
+                ]);
+            }
+    
+            if ($category == "Kategory B") {
+                return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dimasukkan');
+            } else {
+                return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dimasukkan');
+            }
         }
+        else{
+            $fees = [
+                'name'          => $name,
+                'desc'          => $desc,
+                'category'      => $category,
+                'quantity'      => $quantity,
+                'price'         => $price,
+                'totalAmount'       => $total,
+                'start_date'        => $date_started,
+                'end_date'          => $date_end,
+                'status'            => "1",
+                'target'            => $target,
+                'organization_id'   => $oid,
 
-        if ($category == "Kategory B") {
-            return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dimasukkan');
-        } else {
-            return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dimasukkan');
+            ];
+
+            $result = DB::table('fees_new')
+            ->where('fees_new.id', $id)
+            ->update($fees);
+
+            if($result){
+                if ($category == "Kategory B") {
+                    return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dikemaskini');
+                } else {
+                    return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dikemaskini');
+                }
+            }
         }
     }
 
-    public function allClasses($name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category)
+    public function allClasses($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category)
     {
         // get list class checked from checkbox
 
@@ -991,36 +1175,66 @@ class FeesController extends AppBaseController
 
         $target = json_encode($data);
 
-        $fees = DB::table('fees_new')->insertGetId([
-            'name'              => $name,
-            'desc'              => $desc,
-            'category'          => $category,
-            'quantity'          => $quantity,
-            'price'             => $price,
-            'totalAmount'       => $total,
-            'start_date'        => $date_started,
-            'end_date'          => $date_end,
-            'status'            => "1",
-            'target'            => $target,
-            'organization_id'   => $oid,
-        ]);
-        
-        for ($i = 0; $i < count($list_student); $i++) {
-            $fees_student = DB::table('class_student')
-                ->where('id', $list_student[$i]->class_student_id)
-                ->update(['fees_status' => 'Not Complete']);
-
-            DB::table('student_fees_new')->insert([
-                'status' => 'Debt',
-                'fees_id' => $fees,
-                'class_student_id' => $list_student[$i]->class_student_id,
+        if($id == NULL)
+        {
+            $fees = DB::table('fees_new')->insertGetId([
+                'name'              => $name,
+                'desc'              => $desc,
+                'category'          => $category,
+                'quantity'          => $quantity,
+                'price'             => $price,
+                'totalAmount'       => $total,
+                'start_date'        => $date_started,
+                'end_date'          => $date_end,
+                'status'            => "1",
+                'target'            => $target,
+                'organization_id'   => $oid,
             ]);
+            
+            for ($i = 0; $i < count($list_student); $i++) {
+                $fees_student = DB::table('class_student')
+                    ->where('id', $list_student[$i]->class_student_id)
+                    ->update(['fees_status' => 'Not Complete']);
+    
+                DB::table('student_fees_new')->insert([
+                    'status' => 'Debt',
+                    'fees_id' => $fees,
+                    'class_student_id' => $list_student[$i]->class_student_id,
+                ]);
+            }
+            
+            if ($category == "Kategory B") {
+                return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dimasukkan');
+            } else {
+                return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dimasukkan');
+            }
         }
-        
-        if ($category == "Kategory B") {
-            return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dimasukkan');
-        } else {
-            return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dimasukkan');
+        else{
+            $fees = [
+                'name'              => $name,
+                'desc'              => $desc,
+                'category'          => $category,
+                'quantity'          => $quantity,
+                'price'             => $price,
+                'totalAmount'       => $total,
+                'start_date'        => $date_started,
+                'end_date'          => $date_end,
+                'status'            => "1",
+                'target'            => $target,
+                'organization_id'   => $oid,
+            ];
+
+            $result = DB::table('fees_new')
+            ->where('fees_new.id', $id)
+            ->update($fees);
+
+            if($result){
+                if ($category == "Kategory B") {
+                    return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dikemaskini');
+                } else {
+                    return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dikemaskini');
+                }
+            }
         }
     }
 
