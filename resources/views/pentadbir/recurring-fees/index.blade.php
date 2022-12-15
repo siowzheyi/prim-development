@@ -96,7 +96,6 @@
                                 <th>Tarikh Bermula</th>
                                 <th>Tarikh Berakhir</th>
                                 <th>Status Berulangan</th>
-                                <th>Status</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
@@ -210,7 +209,7 @@
                     "className": "text-center",
                     "width": "15%"
                 }, {
-                    "targets": [ 2,3,5,6,7,8],
+                    "targets": [ 2,3,5,6,7],
                     "className": "text-center",
                 }, ],
                 order: [
@@ -248,14 +247,7 @@
                     data: "status_recurring",
                     name: 'status_recurring',
                     searchable: false,
-                    orderable: false,
-
-                }, {
-                    data: "status",
-                    name: 'status',
-                    searchable: false,
-                    orderable: false,
-
+                    orderable: false
                 }, {
                     data: 'action',
                     name: 'action',

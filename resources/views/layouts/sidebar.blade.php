@@ -407,7 +407,7 @@
                     @role('Superadmin|Penjaga')
                     <li>
                         <!-- wrong route -->
-                        <a href="{{ route('dependent_fees') }}" class=" waves-effect">
+                        <a href="{{ route('related_fees') }}" class=" waves-effect">
                             <i class="far fa-credit-card"></i>
                             <span>Bayar</span>
                         </a>

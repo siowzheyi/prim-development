@@ -97,12 +97,12 @@
 
                 <div class="form-group">
                     <label>Tempoh Bermula</label>
-                    <input type="date" name="start_date" class="form-control" min="{{ $start }}" value="{{ $expenses->start_date }}">
+                    <input type="date" name="start_date" class="form-control"  value="{{ $expenses->start_date }}">
                 </div>
 
                 <div class="form-group">
                     <label>Tempoh Berakhir</label>
-                    <input type="date" name="end_date" class="form-control" min="{{ $start }}" value="{{ $expenses->end_date }}">
+                    <input type="date" name="end_date" class="form-control"  value="{{ $expenses->end_date }}">
                 </div>
 
                 <div class="form-group">
