@@ -56,60 +56,58 @@
                 </div>
 
                 <div class="form-group">
-                    <div class="form-check-inline">
-                        <input type="radio" name="recurring" class="form-check-input" id="is_recurring"  value="is_recurring">
-                        <label class="form-check-label">Berulangan</label>
+                        <label>Berulangan</label>
 
-                        <div class="form-group" id="recurring_section">
-                            <div class="form-check">
-                                <input type="radio" name="recurring_type" class="form-check-input" value="annually">
+                        <div class="form-check">
+                            <div>
+                                <input type="radio"  id="is_recurring_annual" name="recurring_type" class="form-check-input" value="annually" >
                                 <label class="form-check-label">Setiap Tahun</label>
                             </div>
 
-                            <div class="form-check">
-                                <input type="radio" name="recurring_type" class="form-check-input"  value="semester">
+                            <div>
+                                <input type="radio"  id="is_recurring_semester" name="recurring_type" class="form-check-input"  value="semester">
                                 <label class="form-check-label">Setiap Semester</label>
                             </div>
 
-                            <div class="form-check">
-                                <input type="radio" name="recurring_type" class="form-check-input"  value="monthly">
+                            <div>
+                                <input type="radio" id="is_recurring_month" name="recurring_type" class="form-check-input"  value="monthly">
                                 <label class="form-check-label">Setiap Bulan</label>
                             </div>
-
                         </div>
-                    </div>
-                    <div class="form-check-inline">
-                        <input type="radio" name="recurring" class="form-check-input"  id="is_not_recurring" value="is_not_recurring">
-                        <label class="form-check-label">Tidak Berulangan</label>
-
-                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tempoh Bermula Berulang</label>
+                    <input type="date" name="start_date_recurring" class="form-control">
                 </div>
 
                 <div class="form-group">
-                    <label>Tempoh Bermula</label>
-                    <input type="date" name="start_date" class="form-control" min="{{ $start }}">
+                    <label>Tempoh Berakhir Berulang</label>
+                    <input type="date" name="end_date_recurring" class="form-control" min="{{ $start }}">
                 </div>
-
-                <div class="form-group">
-                    <label>Tempoh Berakhir</label>
-                    <input type="date" name="end_date" class="form-control" min="{{ $start }}">
-                </div>
-
                 <div class="form-group">
                     <label>Amaun Perbelanjaan</label>
                     <input type="number" name="amount" class="form-control" step="any" min="0">
                 </div>
 
+                <div class="form-group">
+                    <label>Tempoh Bermula Berkesan</label>
+                    <input type="date" name="start_date" class="form-control" min="{{ $start }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Tempoh Berakhir Berkesan</label>
+                    <input type="date" name="end_date" class="form-control" min="{{ $start }}">
+                </div>
+
                 <div class="form-group mb-0">
                     <div>
+                        <input type="button" class="checkBtn" value="check">  
                         <button type="submit" class="btn btn-primary waves-effect waves-light mr-1">
                             Simpan
                         </button>
                     </div>
                 </div>
             </div>
-            <!-- /.card-body -->
-
         </form>
     </div>
 </div>
@@ -128,38 +126,8 @@
 <script>
     $(document).ready(function() {
 
-
         // ************************** radio button recurring ********************************
-        $('#recurring_section').hide();
-
-        $(document).on('change', '#is_recurring', function() {
-            if (this.checked) {
-                $('#recurring_section').show();
-                $(document).on('change', '#recurring_section', function() {
-                    if($('#recurring_section').val()!=null)
-                    {
-                        console.log( $('#recurring_section').val());
-                        console.log("entered");
-                    }
-
-                })
-
-
-            } 
-        });
-
-        $(document).on('change', '#is_not_recurring', function() {
-            if (this.checked) {
-                console.log( "now is "+$('#recurring_section').val());
-
-                $('#recurring_section').hide();
-                $('#recurring_section').val()="";
-
-               console.log("then is "+ $('#recurring_section').val());
-            } 
-        });
-
-
+        
     });
 </script>
 

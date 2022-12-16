@@ -65,12 +65,11 @@
 
                 <div class="form-group">
                     <div class="form-check-inline">
-                        <label class="form-check-label"><input type="radio" name="recurring"  id="is_recurring"  value="is_recurring"
-                            {{ ($expenses->recurring_id != null)?"checked":"" }}>Berulangan</label>
+                        <label class="form-check-label">Berulangan</label>
 
-                        <div class="form-group" id="recurring_section">
+                        <div class="form-group">
                             <div class="form-check">
-                                <input type="text" id="getRecurringType" class="form-control" value={{ $recurring_type }} hidden>
+                                <input type="text" id="getRecurringType" class="form-control" value={{ $expenses->recurring_type }} hidden>
 
                                 <input type="radio" name="recurring_type" class="form-check-input" value="annually" id="recurring_annualy">
                                 <label class="form-check-label">Setiap Tahun</label>
@@ -88,27 +87,33 @@
 
                         </div>
                     </div>
-                    <div class="form-check-inline">
-                        <label class="form-check-label"><input type="radio" name="recurring"  id="is_not_recurring"  value="is_not_recurring"
-                            {{ ($expenses->recurring_id == null)?"checked":"" }}>Tidak Berulangan</label>
-
-                    </div>
+                </div>
+                <div class="form-group">
+                    <label>Tempoh Bermula Berulang</label>
+                    <input type="date" name="start_date_recurring" class="form-control" value="{{ $expenses->start_date_recurring }}">
                 </div>
 
                 <div class="form-group">
-                    <label>Tempoh Bermula</label>
-                    <input type="date" name="start_date" class="form-control"  value="{{ $expenses->start_date }}">
-                </div>
-
-                <div class="form-group">
-                    <label>Tempoh Berakhir</label>
-                    <input type="date" name="end_date" class="form-control"  value="{{ $expenses->end_date }}">
+                    <label>Tempoh Berakhir Berulang</label>
+                    <input type="date" name="end_date_recurring" class="form-control" value="{{ $expenses->end_date_recurring }}">
                 </div>
 
                 <div class="form-group">
                     <label>Amaun Perbelanjaan</label>
-                    <input type="number" name="amount" class="form-control" step="any" min="0" value="{{ $expenses->amount }}">
+                    <input type="number" name="amount" class="form-control" step="any" min="0" value="{{ $expenses->amount }}" readonly>
                 </div>
+
+                <div class="form-group">
+                    <label>Tempoh Bermula Berkesan</label>
+                    <input type="date" name="start_date" class="form-control"  value="{{ $expenses->start_date }}">
+                </div>
+
+                <div class="form-group">
+                    <label>Tempoh Berakhir Berkesan</label>
+                    <input type="date" name="end_date" class="form-control"  value="{{ $expenses->end_date }}">
+                </div>
+
+               
 
                 <div class="form-group mb-0">
                     <div>
@@ -135,49 +140,21 @@
 <script src="{{ URL::asset('assets/js/pages/dashboard.init.js')}}"></script>
 <script>
      $(document).ready(function() {
-
-        $('#recurring_section').hide();
-
-        if($('#is_recurring').is(':checked'))
-        {
-            $('#recurring_section').show();
-            if($("#getRecurringType").val()=="annualy"){
-                $("#recurring_annualy").prop("checked", true);
-                console.log("annualy")
-
-            }
-            else if($("#getRecurringType").val()=="semester"){
-                $("#recurring_semester").prop("checked", true);
-                console.log("semester")
-
-            }
-            else if($("#getRecurringType").val()=="monthly"){
-                $("#recurring_monthly").prop("checked", true);
-                console.log("monthly")
-            }
+        
+        if($("#getRecurringType").val()=="annualy"){
+            $("#recurring_annualy").prop("checked", true);
+            // console.log("annualy")
 
         }
+        else if($("#getRecurringType").val()=="semester"){
+            $("#recurring_semester").prop("checked", true);
+            // console.log("semester")
 
-    // ************************** checkbox recurring ********************************
-
-    $(document).on('change', '#is_recurring', function() {
-        if (this.checked) {
-            $('#recurring_section').show();
-            
-        } 
-    });
-
-    $(document).on('change', '#is_not_recurring', function() {
-        if (this.checked) {
-            console.log( "now is "+$('#recurring_section').val());
-
-            $('#recurring_section').hide();
-            $('#recurring_section').val()="";
-
-        console.log("then is "+ $('#recurring_section').val());
-        } 
-    });
-
+        }
+        else if($("#getRecurringType").val()=="monthly"){
+            $("#recurring_monthly").prop("checked", true);
+            // console.log("monthly")
+        }
 
     });
 </script>

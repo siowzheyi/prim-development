@@ -29,9 +29,7 @@ class ExpensesController extends Controller
         $maxDate = date('Y-m-d', strtotime(Expenses::orderBy('end_date', 'desc')
         ->value('end_date')));
 
-        $recurring_type = ['Semua','Tidak Berulang','Setiap Bulan','Setiap Tahun','Setiap Semester'];
-
-
+        $recurring_type = ['Semua', 'Setiap Bulan','Setiap Tahun','Setiap Semester'];
 
         return view('pentadbir.recurring-fees.index', compact('recurring_type', 'minDate','maxDate', 'organization'));
 
@@ -50,67 +48,50 @@ class ExpensesController extends Controller
     public function store(Request $request)
     {
         //
-       
         $this->validate($request, [
-            'name'         =>  'required',
-            'recurring'     =>  'required',
-            'end_date'       =>  'required',
-            'start_date'   =>  'required',
-            'organization' =>  'required',
-            'amount' =>  'required',
+            'name'                      =>  'required',
+            'recurring_type'             =>  'required',
+            'end_date'                   =>  'required',
+            'start_date'                 =>  'required',
+            'end_date_recurring'          =>  'required',
+            'start_date_recurring'       =>  'required',
+            'organization'              =>  'required',
+            'amount'                    =>  'required',
         ]);
+        
+        //check if the recurring existed in the db or not
+        $getType = Recurring::where('name','=',$request->get('recurring_type'))
+                    ->where('start_date','=',$request->get('start_date_recurring'))
+                    ->where('end_date','=',$request->get('end_date_recurring'))
+                    ->value('id');
 
-        $checkRecurring = Recurring::all();
-
-        //if the expenses is recurring
-        if ($request->get('recurring')=="is_recurring")
-        {
-            //check if the recurring existed in the db or not
-            $getType = Recurring::where('name','=',$request->get('recurring_type'))
-                        ->where('start_date','=',$request->get('start_date'))
-                        ->where('end_date','=',$request->get('end_date'))
-                        ->value('id');
-
-            //if recurring existed got record
-            if ($getType != null) {
-                //QUESTION: how to auto update recurring fees date?
-                    $recurring_id = $getType;
-            }  
-            else{
-                    $recurring = Recurring::create([
-                        'name'          => $request->get('recurring_type'),
-                        'start_date'    => $request->get('start_date'),
-                        'end_date'      => $request->get('end_date')
-                    ]);
-                    $recurring_id = $recurring->value('id');
-            }
-            $expenses = Expenses::create([
-                'name'          =>  $request->get('name'),
-                'description'   =>  $request->get('description'),
-                'amount'        =>  $request->get('amount'),
-                'start_date'    =>  $request->get('start_date'),
-                'end_date'      =>  $request->get('end_date'),
-                'recurring_id'  =>  $recurring_id,
-                'organization_id'=> $request->get('organization')
-
-            ]);
-        }
-        //if the expenses is not recurring
+        //if recurring existed got record
+        if ($getType != null) {
+            //QUESTION: how to auto update recurring fees date?
+                $recurring_id = $getType;
+        }  
         else{
-            $expenses = Expenses::create([
-                'name'          =>  $request->get('name'),
-                'description'   =>  $request->get('description'),
-                'amount'        =>  $request->get('amount'),
-                'start_date'    =>  $request->get('start_date'),
-                'end_date'      =>  $request->get('end_date'),
-                'organization_id'=> $request->get('organization')
-            ]);
+                $recurring = Recurring::create([
+                    'name'          => $request->get('recurring_type'),
+                    'start_date'    => $request->get('start_date'),
+                    'end_date'      => $request->get('end_date')
+                ]);
+                $recurring_id = $recurring->value('id');
         }
+        $expenses = Expenses::create([
+            'name'          =>  $request->get('name'),
+            'description'   =>  $request->get('description'),
+            'amount'        =>  $request->get('amount'),
+            'start_date'    =>  $request->get('start_date'),
+            'end_date'      =>  $request->get('end_date'),
+            'recurring_id'  =>  $recurring_id,
+            'organization_id'=> $request->get('organization')
 
+        ]);
+        
         //if the expenses successfully created
         if($expenses)
         {
-            
             $arrayStudent = DB::table('class_student')
                             ->get();
 
@@ -133,7 +114,7 @@ class ExpensesController extends Controller
             if($result)
                 return redirect('/recurring_fees')->with('success', 'Perbelanjaan telah ditambahkan');
             else
-                return redirect('/recurring_fees')->with('fail','Perbelanjaan tidak ditambahkan kenana tiada pelajar dalam sekolah ini');
+                return redirect('/recurring_fees')->with('fail','Perbelanjaan tidak ditambahkan kerana tiada pelajar dalam sekolah ini');
         }
         else
              return redirect('/recurring_fees')->with('fail','Perbelanjaan tidak ditambahkan');
@@ -157,21 +138,17 @@ class ExpensesController extends Controller
             */
         public function edit($id)
         {
-            $start = date('Y-m-d');
-            
-            $expenses = Expenses::where('expenses.id', $id)
-            // ->select('id', 'name', 'description', 'amount', 'organization_id')
-            ->first();
-
-            $recurring_type = Expenses::join('recurrings','recurrings.id','=','expenses.recurring_id')
-                // ->select('recurrings.name as recurring_type')
+            $expenses = Expenses::join('recurrings','recurrings.id','=','expenses.recurring_id')
+                ->select('expenses.*',
+                'recurrings.name as recurring_type',
+                'recurrings.start_date as start_date_recurring',
+                'recurrings.end_date as end_date_recurring')
                 ->where('expenses.id', $id)
-                ->value('recurrings.name');
+                ->first();
 
             $organization = $this->getOrganizationByUserId();
 
-
-            return view('pentadbir.recurring-fees.update', compact('expenses', 'organization', 'recurring_type', 'id','start'));
+            return view('pentadbir.recurring-fees.update', compact('expenses', 'organization', 'id'));
         }
         /**
         * Update the specified resource in storage.
@@ -184,18 +161,17 @@ class ExpensesController extends Controller
 
         $this->validate($request, [
             'name'         =>  'required',
-            'recurring'     =>  'required',
+            'recurring_type'     =>  'required',
+            'end_date_recurring'       =>  'required',
+            'start_date_recurring'   =>  'required',
             'end_date'       =>  'required',
             'start_date'   =>  'required',
             'organization' =>  'required',
-            'amount' =>  'required',
         ]);
 
         $checkRecurring = Recurring::all();
 
-        //if the expenses is recurring
-        if ($request->get('recurring')=="is_recurring")
-        {
+        
             //check if the recurring existed in the db or not
             $getType = Recurring::where('name','=',$request->get('recurring_type'))
                         ->where('start_date','=',$request->get('start_date'))
@@ -219,26 +195,13 @@ class ExpensesController extends Controller
                 ->update([
                 'name'          =>  $request->get('name'),
                 'description'   =>  $request->get('description'),
-                'amount'        =>  $request->get('amount'),
                 'start_date'    =>  $request->get('start_date'),
                 'end_date'      =>  $request->get('end_date'),
                 'recurring_id'  =>  $recurring_id,
                 'organization_id'=> $request->get('organization')
 
             ]);
-        }
-        //if the expenses is not recurring
-        else{
-            $expenses = Expenses::where('id',$id)
-            ->update([
-                'name'          =>  $request->get('name'),
-                'description'   =>  $request->get('description'),
-                'amount'        =>  $request->get('amount'),
-                'start_date'    =>  $request->get('start_date'),
-                'end_date'      =>  $request->get('end_date'),
-                'organization_id'=> $request->get('organization')
-            ]);
-        }
+        
 
         if($expenses)
             return redirect('/recurring_fees')->with('success', 'The application has been updated');
@@ -302,63 +265,38 @@ class ExpensesController extends Controller
             $hasOrganizaton = $request->hasOrganization;            
 
             // create recurring data that only contain data which have recurring id
-            $recurring_data = DB::table('expenses')
+            $data = DB::table('expenses')
                     ->join('recurrings','recurrings.id','=','expenses.recurring_id')
-                    ->select('expenses.id as id','expenses.name as name','expenses.description as description','expenses.amount as amount',
-                                'expenses.start_date as start_date','expenses.end_date as end_date','expenses.status as status',
-                                'expenses.recurring_id as recurring_id','expenses.organization_id as organization_id','recurrings.id as recurrings_id',
+                    ->select('expenses.*','recurrings.id as recurrings_id',
                                 'recurrings.name as recurrings_name')
                     ->where('expenses.organization_id','=',$oid)
+                    ->where('status','active')
                     ->orderBy('expenses.start_date');
 
-            $data = DB::table('expenses')
-                    ->where('organization_id',$oid)
-                    ->where('status','active')
-                    ->orderBy('start_date');
+            // $data = DB::table('expenses')
+            //         ->where('organization_id',$oid)
+            //         ->where('status','active')
+            //         ->orderBy('start_date');
 
-            //['name', 'description', 'amount','start_date','end_date','status_recurring','status','action'];
+            //['name', 'description', 'amount','start_date','end_date','status_recurring','action'];
 
             if ($oid != '' && !is_null($hasOrganizaton)) {
                   // if user select any time period AND select non recurring type
-                  if (($fromTime == '' || $untilTime == '') &&  ($recurringType =='Tidak Berulang')) {
+                  if ($fromTime == '' || $untilTime == '') {
                     $data = $data;
                 }
                 // if user select time period AND select non recurring type
-                elseif (($fromTime != '' && $untilTime != '') &&  ($recurringType =='Tidak Berulang')) {
+                elseif ($fromTime != '' && $untilTime != '') {
                     $data = $data
                     ->where('expenses.start_date', '>=', $fromTime)
                     ->where('expenses.end_date', '<=', $untilTime);
                 }
-                
-                // if user got select time period AND select all or didnt select recurring type
-                elseif (($fromTime != '' && $untilTime != '') &&  ($recurringType == 'Semua' || $recurringType == '')) {
-                    $data = $data
-                            ->where('expenses.start_date', '>=', $fromTime)
-                            ->where('expenses.end_date', '<=', $untilTime);
-                }
-                // if user select any time period AND select all or didnt select recurring type
-                elseif (($fromTime == '' || $untilTime == '') &&  ($recurringType == 'Semua' || $recurringType == '')) {
-                    $data = $data;
-                }
-                // if user select time period AND select recurring type
-                elseif (($fromTime != '' && $untilTime != '') &&  ($recurringType != 'Semua' && $recurringType != '')) {
-                    $data = $recurring_data
-                    ->where('expenses.start_date', '>=', $fromTime)
-                    ->where('expenses.end_date', '<=', $untilTime);
-                }
-              
-                else {
-                    $data = $recurring_data;
-                }
+            
 
 
                 // $recurring_type = ['Semua','Tidak Berulang','Setiap Bulan','Setiap Tahun','Setiap Semester'];
 
-                if ($recurringType == 'Tidak Berulang' ) {
-                    $data = $data
-                            ->whereNull('expenses.recurring_id')
-                            ->get();
-                } elseif ($recurringType == 'Setiap Bulan') {
+                if ($recurringType == 'Setiap Bulan') {
                     $data = $data
                             ->where('recurrings.name', '=', 'monthly')
                             ->get();
@@ -377,15 +315,21 @@ class ExpensesController extends Controller
 
                 $table->addColumn('status_recurring', function ($row) {
                     // if the expenses is recurring
-                    if ($row->recurring_id != null) {
+                    if ($row->recurrings_name == 'monthly') {
                         $btn = '<div class="d-flex justify-content-center">';
-                        $btn = $btn . '<span class="badge badge-success"> Berulang </span></div>';
+                        $btn = $btn . '<span class="badge badge-success"> Setiap Bulan </span></div>';
                                     //
                         return $btn;
                     // else the expenses is not recurring
-                    } else {
+                    } elseif ($row->recurrings_name == 'semester') {
                         $btn = '<div class="d-flex justify-content-center">';
-                        $btn = $btn . '<span class="badge badge-danger"> Tidak Berulang </span></div>';
+                        $btn = $btn . '<span class="badge badge-danger"> Setiap Semester </span></div>';
+
+                        return $btn;
+                    }
+                    elseif ($row->recurrings_name == 'annual') {
+                        $btn = '<div class="d-flex justify-content-center">';
+                        $btn = $btn . '<span class="badge badge-danger"> Setiap Tahun </span></div>';
 
                         return $btn;
                     }
