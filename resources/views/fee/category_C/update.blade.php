@@ -73,6 +73,7 @@
                         <label class="control-label">Tempoh Aktif</label>
 
                         <div class="input-daterange input-group" id="date">
+                            <input type="text" id="define_sdate" value="{{ $selectedFee->start_date }}" hidden>
                             <input type="text" class="form-control" name="date_started" placeholder="Tarikh Awal"
                                 autocomplete="off" data-parsley-required-message="Sila masukkan tarikh awal"
                                 data-parsley-errors-container=".errorMessage" value="{{$selectedFee->start_date}}" required />
@@ -180,9 +181,8 @@
 
         $('#date').datepicker({
             toggleActive: true,
-            startDate: today,
-            todayHighlight:true,
-            format: 'dd/mm/yyyy',
+            startDate: $("#define_sdate").val(),
+            format: 'yyyy-mm-dd',
             orientation: 'bottom'
           });
 

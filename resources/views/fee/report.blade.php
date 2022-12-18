@@ -315,6 +315,8 @@
                         document.getElementById("type-name").innerHTML="Senarai Penjaga Yang " + type + " Membayar Yuran";
                         $('#type-name').show();
                     });
+
+                    
                     
                 }
             });

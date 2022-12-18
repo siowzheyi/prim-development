@@ -389,6 +389,13 @@
                         <span>Kategori C</span>
                     </a>
                 </li>
+
+                <li>
+                    <a href="{{ route('fees.D') }}" class=" waves-effect" aria-expanded="true">
+                        <i class="fas fa-user-cog"></i>
+                        <span>Kategori D</span>
+                    </a>
+                </li>
                 @endrole
 
             </ul>

@@ -9,7 +9,7 @@
 <div class="row align-items-center">
     <div class="col-sm-6">
         <div class="page-title-box">
-            <h4 class="font-size-18">Kemaskini Butiran Kategori A</h4>
+            <h4 class="font-size-18">Tambah Butiran Kategori D</h4>
         </div>
     </div>
 </div>
@@ -25,23 +25,25 @@
             </ul>
         </div>
         @endif
-        <form class="form-validation" method="post" action="{{ route('fees.updateA') }}" enctype="multipart/form-data">
+        <form class="form-validation" method="post" action="{{ route('fees.storeD') }}" enctype="multipart/form-data">
             {{csrf_field()}}
             <div class="card-body">
-                <input type="text" name="id" value="{{$selectedFee->id}}" hidden>
+
                 <div class="form-group">
                     <label class="control-label required">Nama Organisasi</label>
                     <select name="organization" id="organization" class="form-control"
                         data-parsley-required-message="Sila masukkan nama organisasi" required>
-                        <option value="{{ $selectedFee->organization_id }}" selected>{{ $selectedFee->orgName }}</option>
+                        <option value="" disabled selected>Pilih Organisasi</option>
+                        @foreach($organization as $row)
+                        <option value="{{ $row->id }}">{{ $row->nama }}</option>
+                        @endforeach
                     </select>
                 </div>
 
                 <div class="form-group">
                     <label class="control-label required">Nama Butiran</label>
                     <input type="text" name="name" class="form-control"
-                        data-parsley-required-message="Sila masukkan nama butiran" required placeholder="Nama Butiran"
-                        value="{{ $selectedFee->name }}">
+                        data-parsley-required-message="Sila masukkan nama butiran" required placeholder="Nama Butiran">
                 </div>
 
 
@@ -51,14 +53,13 @@
                         <label class="control-label required">Harga (RM)</label>
                         <input class="form-control input-mask text-left"
                             data-inputmask="'alias': 'numeric', 'groupSeparator': ',', 'digits': 2, 'digitsOptional': false, 'placeholder': '0'"
-                            im-insert="true" name="price" value="{{ $selectedFee->price }}" readonly>
+                            im-insert="true" name="price">
                         <i>*Harga per kuantiti</i>
                     </div>
-                    <div class="form-group col-md-6">
+                    <!-- <div class="form-group col-md-6">
                         <label class="control-label required">Kuantiti</label>
-                        <input type="text" name="quantity" class="form-control quantity text-left"  
-                        data-inputmask="'alias': 'numeric'" placeholder="Kuantiti" value="{{ $selectedFee->quantity }}" readonly>
-                    </div>
+                        <input type="text" name="quantity" class="form-control quantity text-left"  data-inputmask="'alias': 'numeric'" placeholder="Kuantiti">
+                    </div> -->
 
                 </div>
 
@@ -67,13 +68,12 @@
                         <label class="control-label required">Tempoh Aktif</label>
 
                         <div class="input-daterange input-group" id="date">
-                            <input type="text" id="define_sdate" value="{{ $selectedFee->start_date }}" hidden>
                             <input type="text" class="form-control" name="date_started" placeholder="Tarikh Awal"
                                 autocomplete="off" data-parsley-required-message="Sila masukkan tarikh awal"
-                                data-parsley-errors-container=".errorMessage" value="{{ $selectedFee->start_date }}" required />
+                                data-parsley-errors-container=".errorMessage" required />
                             <input type="text" class="form-control" name="date_end" placeholder="Tarikh Akhir"
                                 autocomplete="off" data-parsley-required-message="Sila masukkan tarikh akhir"
-                                data-parsley-errors-container=".errorMessage" value="{{ $selectedFee->end_date }}" required />
+                                data-parsley-errors-container=".errorMessage" required />
                         </div>
                         <div class="errorMessage"></div>
                         <div class="errorMessage"></div>
@@ -81,15 +81,22 @@
                 </div>
 
                 <div class="form-group">
+                    <label>Nama Asrama</label>
+                    <select name="dorm" id="dorm" class="form-control" required>
+                        <option value="" disabled selected>Pilih Asrama</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label>Penerangan</label>
                     <textarea name="description" class="form-control" placeholder="Penerangan" cols="30"
-                        rows="5">{{ $selectedFee->desc }}</textarea>
+                        rows="5"></textarea>
                 </div>
 
                 <div class="form-group mb-0">
                     <div class="text-right">
                         <button type="submit" class="btn btn-primary waves-effect waves-light mr-1">
-                            Kemaskini
+                            Simpan
                         </button>
                     </div>
                 </div>
@@ -125,11 +132,59 @@
 
         $('#date').datepicker({
             toggleActive: true,
-            startDate: $("#define_sdate").val(),
-            format: 'yyyy-mm-dd',
+            startDate: today,
+            todayHighlight:true,
+            format: 'dd/mm/yyyy',
             orientation: 'bottom'
         });
         
+        $("#organization").prop("selectedIndex", 1).trigger('change');
+        $("#name").prop("selectedIndex", 0);
+        fetchDorm($("#organization").val());
+
+        $('#organization').change(function() {
+            
+            if($(this).val() != '')
+            {
+                var organizationid    = $("#organization option:selected").val();
+                var _token            = $('input[name="_token"]').val();
+                $.ajax({
+                    url:"{{ route('fees.fetchDorm') }}",
+                    method:"POST",
+                    data:{ oid:organizationid,
+                            _token:_token },
+                    success:function(result)
+                    {  
+                        $('#dorm').empty();
+                        "<option value='' disabled selected>Pilih Asrama</option>"
+                        $("#dorm").append("<option value='' disabled selected> Pilih Asrama</option>");
+                        jQuery.each(result.success, function(key, value){
+                            console.log(value.id);
+                            $("#dorm").append("<option value='"+ value.id +"'>" + value.name + "</option>");
+                        });
+                    }
+
+                });
+            }
+        });
+
+        function fetchDorm(organizationid = ''){
+            var _token = $('input[name="_token"]').val();
+            $.ajax({
+                url:"{{ route('fees.fetchDorm') }}",
+                method:"POST",
+                data:{ oid:organizationid,
+                        _token:_token },
+                success:function(result)
+                {
+                    $('#dorm').empty();
+                    $("#dorm").append("<option value='' disabled selected> Pilih Asrama </option>");
+                    jQuery.each(result.success, function(key, value){
+                        $("#dorm").append("<option value='"+ value.id +"'>" + value.name + "</option>");
+                    });
+                }
+            })
+        }
     });
 </script>
 @endsection
