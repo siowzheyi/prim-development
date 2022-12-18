@@ -57,6 +57,16 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="control-label required">Jenis Asrama</label>
+                    <option value="">Pilih Jenis Asrama</option>
+                    @if($dorm->grade == 1)
+                    <option value="1">Bilik Peribadi</option>
+                    @else
+                    <option value="2">Bilik Kongsi</option>
+                    @endif
+                </div>
+
+                <div class="form-group">
                     <label>Kapasiti</label>
                     <input type="number" name="capacity" class="form-control" placeholder="Kapasiti" value="{{ $dorm->accommodate_no }}">
                 </div>

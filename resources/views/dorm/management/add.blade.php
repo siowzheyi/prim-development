@@ -52,6 +52,15 @@
                 </div>
 
                 <div class="form-group">
+                    <label class="control-label required">Jenis Asrama</label>
+                    <select name="grade" id="grade" class="form-control">
+                        <option value="" selected>Pilih Jenis Asrama</option>
+                        <option value="1">Bilik Peribadi</option>
+                        <option value="2">Bilik Kongsi</option>
+                    </select>
+                </div>
+
+                <div class="form-group">
                     <label>Kapasiti</label>
                     <input type="number" name="capacity" class="form-control" placeholder="Kapasiti">
                 </div>

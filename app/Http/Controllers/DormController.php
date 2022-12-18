@@ -895,6 +895,7 @@ class DormController extends Controller
             'name'        =>  'required|unique:dorms',
             'capacity'    =>  'required',
             'organization'      =>  'required',
+            'grade'
             //'name', 'accommodate_no', 'student_inside_no'
         ]);
         //echo ({{ $request->get('organization') }});
@@ -1101,7 +1102,7 @@ class DormController extends Controller
         //  
         $dorm = DB::table('dorms')
             ->where('dorms.id', $id)
-            ->select('dorms.id', 'dorms.name', 'dorms.accommodate_no', 'dorms.student_inside_no', 'organization_id')
+            ->select('dorms.id', 'dorms.name', 'dorms.accommodate_no', 'dorms.student_inside_no', 'dorms.grade', 'organization_id')
             ->first();
 
         //calculate sum of resident inside this dorm
