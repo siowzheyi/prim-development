@@ -49,7 +49,7 @@
 
 
                 <div class="form-row">
-                    <div class="form-group col-md-6">
+                    <div class="form-group col-md-12">
                         <label class="control-label required">Harga (RM)</label>
                         <input class="form-control input-mask text-left"
                             data-inputmask="'alias': 'numeric', 'groupSeparator': ',', 'digits': 2, 'digitsOptional': false, 'placeholder': '0'"
@@ -81,10 +81,17 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Nama Asrama</label>
+                    <label class="control-label required">Jenis Asrama</label>
+                    <select name="grade" id="grade" class="form-control">
+                        <option value="" selected>Pilih Jenis Asrama</option>
+                    </select>
+                </div>
+
+                <div class="cbhide form-check-inline pb-3 pt-3">
+                    <!-- <label class="control-label required">Nama Asrama</label>
                     <select name="dorm" id="dorm" class="form-control" required>
                         <option value="" disabled selected>Pilih Asrama</option>
-                    </select>
+                    </select> -->
                 </div>
 
                 <div class="form-group">
@@ -127,6 +134,8 @@
         $('.form-validation').parsley();
         $(".input-mask").inputmask();
         $(".quantity").inputmask();
+        
+        $(".cbhide").hide();
 
         var today = new Date();
 
@@ -137,6 +146,91 @@
             format: 'dd/mm/yyyy',
             orientation: 'bottom'
         });
+
+        // ************************** grade on change ********************************
+
+        $('#grade').change(function() {
+            if($(this).val() != '')
+            {
+                var organizationid    = $("#organization option:selected").val();
+                var _token            = $('input[name="_token"]').val();
+                var grade             = $("#grade option:selected").val();
+                $.ajax({
+                    url:"{{ route('fees.fetchDorm') }}",
+                    method:"POST",
+                    data:{ oid:organizationid,
+                            grade:grade,
+                            _token:_token },
+                    success:function(result)
+                    {
+                        console.log(result.success);
+                        if(grade == "ALL_TYPE")
+                        {
+                            $('.cbhide').hide();
+                            $("#cb_dorm").remove();
+                            $(".cbhide label").remove();
+                        }
+                        else
+                        {
+                            $('.cbhide').show();
+                            $("#cb_dorm").remove();
+                            $(".cbhide label").remove();
+                            $(".cbhide").append(
+                                "<label for='checkAll' style='margin-right: 22px;' class='form-check-label'> <input class='form-check-input' type='checkbox' id='checkedAll' name='all_dorm' value=''/> Semua Asrama </label>"
+                            );
+                            // console.log(result.success.oid);
+                            jQuery.each(result.success, function(key, value) {
+                                $(".cbhide").append(
+                                    "<label for='cb_dorm' style='margin-right: 22px;' class='form-check-label'> <input class='checkSingle form-check-input' data-parsley-required-message='Sila Pilih Asrama' data-parsley-errors-container='.errorMessageCB' type='checkbox' id='cb_dorm' name='cb_dorm[]' value='" +
+                                    value.id + "'/> " + value.name + " </label><br> <div class='errorMessageCB'></div>");
+
+                                    console.log(result.success.length);
+                            });
+                            $("#cb_dorm").attr('required', '');  
+                        }
+                    }
+
+                });
+            }
+        });
+            
+        if($("#grade").val() != ""){
+            $("#grade").prop("selectedIndex", 1).trigger('change');
+        }
+
+        // ************************** checkbox class ********************************
+
+        $(document).on('change', '#checkedAll', function() {
+            if (this.checked) {
+                $(".checkSingle").each(function() {
+                    this.checked = true;
+                })
+            } else {
+                $(".checkSingle").each(function() {
+                    this.checked = false;
+                })
+            }
+        });
+
+        // ************************** checkbox class ********************************
+
+        $(document).on('change', '.checkSingle', function() {
+            // $('#cb_class').not(this).prop('checked', this.checked);
+            if ($(this).is(":checked")) {
+                var isAllChecked = 0;
+                $(".checkSingle").each(function() {
+                    if (!this.checked)
+                        isAllChecked = 1;
+                })
+                if (isAllChecked == 0) {
+                    $("#checkedAll").prop("checked", true);
+                }
+            } else {
+                $("#checkedAll").prop("checked", false);
+            }
+        });
+
+        // ************************** organization on change ********************************
         
         $("#organization").prop("selectedIndex", 1).trigger('change');
         $("#name").prop("selectedIndex", 0);
@@ -148,20 +242,36 @@
             {
                 var organizationid    = $("#organization option:selected").val();
                 var _token            = $('input[name="_token"]').val();
+                $('.cbhide').hide();
+                $("#cb_dorm").remove();
+                $(".cbhide label").remove();
                 $.ajax({
                     url:"{{ route('fees.fetchDorm') }}",
                     method:"POST",
                     data:{ oid:organizationid,
                             _token:_token },
                     success:function(result)
-                    {  
-                        $('#dorm').empty();
-                        "<option value='' disabled selected>Pilih Asrama</option>"
-                        $("#dorm").append("<option value='' disabled selected> Pilih Asrama</option>");
-                        jQuery.each(result.success, function(key, value){
-                            console.log(value.id);
-                            $("#dorm").append("<option value='"+ value.id +"'>" + value.name + "</option>");
-                        });
+                    {
+                        if(result.success.length > 0)
+                        {
+                            $('#grade').empty();
+                            "<option value='' disabled selected>Pilih Jenis Asrama</option>"
+                            $('#grade').append(
+                                '<option value="" disabled selected> Pilih Jenis Asrama</option>' +
+                                '<option value="ALL_TYPE">Semua Jenis</option>' +
+                                '<option value="1">Bilik Peribadi</option>' +
+                                '<option value="2">Bilik Kongsi</option>'
+                                // '<option value="3">Spesifik Asrama</option>'
+                            );
+                        }
+                        else
+                        {
+                            $('#grade').empty();
+                            "<option value='' disabled selected>Pilih Jenis Asrama</option>"
+                            $('#grade').append(
+                                '<option value="" disabled selected> Pilih Jenis Asrama</option>'
+                            );
+                        }
                     }
 
                 });
@@ -174,14 +284,35 @@
                 url:"{{ route('fees.fetchDorm') }}",
                 method:"POST",
                 data:{ oid:organizationid,
+                        // grade:grade,
                         _token:_token },
                 success:function(result)
                 {
-                    $('#dorm').empty();
-                    $("#dorm").append("<option value='' disabled selected> Pilih Asrama </option>");
-                    jQuery.each(result.success, function(key, value){
-                        $("#dorm").append("<option value='"+ value.id +"'>" + value.name + "</option>");
-                    });
+                    console.log(result.success);
+                    if(grade == "ALL_TYPE")
+                    {
+                        $('.cbhide').hide();
+                        $("#cb_dorm").remove();
+                        $(".cbhide label").remove();
+                    }
+                    else
+                    {
+                        $('.cbhide').show();
+                        $("#cb_dorm").remove();
+                        $(".cbhide label").remove();
+                        $(".cbhide").append(
+                            "<label for='checkAll' style='margin-right: 22px;' class='form-check-label'> <input class='form-check-input' type='checkbox' id='checkedAll' name='all_dorm' value=''/> Semua Asrama </label>"
+                        );
+                        // console.log(result.success.oid);
+                        jQuery.each(result.success, function(key, value) {
+                            $(".cbhide").append(
+                                "<label for='cb_dorm' style='margin-right: 22px;' class='form-check-label'> <input class='checkSingle form-check-input' data-parsley-required-message='Sila Pilih Asrama' data-parsley-errors-container='.errorMessageCB' type='checkbox' id='cb_dorm' name='cb_dorm[]' value='" +
+                                value.id + "'/> " + value.name + " </label><br> <div class='errorMessageCB'></div>");
+
+                                console.log(result.success.length);
+                        });
+                        $("#cb_dorm").attr('required', '');  
+                    }
                 }
             })
         }

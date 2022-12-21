@@ -46,7 +46,7 @@
                 </div>
 
                 <div class="form-row">
-                    <div class="form-group col-md-6">
+                    <div class="form-group col-md-12">
                         <label>Harga (RM)</label>
                         <input class="form-control input-mask text-left"
                             data-inputmask="'alias': 'numeric', 'groupSeparator': ',', 'digits': 2, 'digitsOptional': false, 'placeholder': '0'"
@@ -85,9 +85,15 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Nama Asrama</label>
+                    <label class="control-label required">Nama Asrama</label>
                     <select name="dorm" id="dorm" class="form-control">
-                        <option value="{{ $data }}" disabled selected>{{ $dorm }}</option>
+                        @if($data == "ALL_TYPE")
+                        <option value="{{ $data }}" disabled selected>Semua Jenis</option>
+                        @elseif($data == 1)
+                        <option value="{{ $data }}" disabled selected>Bilik Peribadi</option>
+                        @else
+                        <option value="{{ $data }}" disabled selected>Bilik Kongsi</option>
+                        @endif
                     </select>
                 </div>
 

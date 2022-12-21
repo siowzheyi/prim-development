@@ -59,12 +59,21 @@
 
                 <div class="form-group">
                     <label class="control-label required">Jenis Asrama</label>
-                    <option value="">Pilih Jenis Asrama</option>
-                    @if($dorm->grade == 1)
-                    <option value="1">Bilik Peribadi</option>
-                    @else
-                    <option value="2">Bilik Kongsi</option>
-                    @endif
+                    <select name="grade" id="grade" class="form-control">
+                        @if($dorm->grade == 0)
+                        <option value="" selected>Pilih Jenis Asrama</option>
+                        <option value="1">Bilik Peribadi</option>
+                        <option value="2">Bilik Kongsi</option>
+                        @elseif($dorm->grade == 1)
+                        <option value="">Pilih Jenis Asrama</option>
+                        <option value="1" selected>Bilik Peribadi</option>
+                        <option value="2">Bilik Kongsi</option>
+                        @else
+                        <option value="">Pilih Jenis Asrama</option>
+                        <option value="1">Bilik Peribadi</option>
+                        <option value="2" selected>Bilik Kongsi</option>
+                        @endif
+                    </select>
                 </div>
 
                 <div class="form-group">

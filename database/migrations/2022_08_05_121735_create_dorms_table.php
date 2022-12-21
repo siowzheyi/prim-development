@@ -18,7 +18,7 @@ class CreateDormsTable extends Migration
             $table->string('name');
             $table->integer('accommodate_no')->unsigned();
             $table->integer('student_inside_no')->unsigned();
-
+            $table->integer('grade')->unsigned();
             $table->bigInteger('organization_id')->unsigned();
             $table->foreign('organization_id')->references('id')->on('organizations')->onDelete('cascade');
         });

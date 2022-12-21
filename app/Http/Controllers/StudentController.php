@@ -301,6 +301,12 @@ class StudentController extends Controller
                     }
                 }
             }
+
+            DB::table('class_student')
+            ->where('id', $classStu->id)
+            ->update([
+                'fees_status' => "Not Complete"
+            ]);
         }
 
         return redirect('/student')->with('success', 'New student has been added successfully');

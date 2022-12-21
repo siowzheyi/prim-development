@@ -888,8 +888,49 @@ class DormController extends Controller
 
         if ($result > 0) {
             DB::table('dorms')
-                ->where('dorms.id', $newdormid)
-                ->update(['student_inside_no' => $dorm[0]->student_inside_no + 1]);
+            ->where('dorms.id', $newdormid)
+            ->update(['student_inside_no' => $dorm[0]->student_inside_no + 1]);
+
+            $classStu = DB::table('class_student')
+            ->where('student_id', $student[0]->id)
+            ->first();
+    
+            $ifExitsCateD = DB::table('fees_new')
+            ->where('category', 'Kategory D')
+            ->where('organization_id', $neworganizationid)
+            ->where('status', 1)
+            ->get();
+
+            $dorms = DB::table('dorms')
+            ->where('dorms.id', $newdormid)
+            ->first();
+    
+            if (!$ifExitsCateD->isEmpty()) {
+                foreach ($ifExitsCateD as $kateD) {
+                    $target = json_decode($kateD->target);
+                    if ($target->data == "ALL_TYPE" && $classStu->dorm_id != NULL) {
+                        DB::table('student_fees_new')->insert([
+                            'status'            => 'Debt',
+                            'fees_id'           =>  $kateD->id,
+                            'class_student_id'  =>  $classStu->id
+                        ]);
+                    } else if (is_array($target->dorm) && $classStu->dorm_id != NULL) {
+                        if (in_array($dorms->id, $target->dorm)) {
+                            DB::table('student_fees_new')->insert([
+                                'status'            => 'Debt',
+                                'fees_id'           =>  $kateD->id,
+                                'class_student_id'  =>  $classStu->id
+                            ]);
+                        }
+                    }
+                }
+    
+                DB::table('class_student')
+                ->where('id', $classStu->id)
+                ->update([
+                    'fees_status' => "Not Complete"
+                ]);
+            }
 
             return redirect()->to('/sekolah/dorm/indexResident/' . $newdormid)->with('success', 'New student has been added successfully');
         }
@@ -902,19 +943,20 @@ class DormController extends Controller
     {
         // 
         $this->validate($request, [
-            'name'        =>  'required|unique:dorms',
-            'capacity'    =>  'required',
-            'organization'      =>  'required',
-            'grade'
+            'name'          =>  'required|unique:dorms',
+            'capacity'      =>  'required',
+            'organization'  =>  'required',
+            'grade'         =>  'required'
             //'name', 'accommodate_no', 'student_inside_no'
         ]);
         //echo ({{ $request->get('organization') }});
 
         DB::table('dorms')->insert([
-            'name' => $request->get('name'),
-            'accommodate_no'   => $request->get('capacity'),
-            'organization_id' => $request->get('organization'),
-            'student_inside_no' => 0
+            'name'              => $request->get('name'),
+            'accommodate_no'    => $request->get('capacity'),
+            'organization_id'   => $request->get('organization'),
+            'student_inside_no' => 0,
+            'grade'             => $request->get('grade')
         ]);
 
         return redirect('/sekolah/dorm/indexDorm')->with('success', 'New dorm has been added successfully');
@@ -1334,9 +1376,10 @@ class DormController extends Controller
         //
         // dd($id);
         $this->validate($request, [
-            'name'        =>  'required|unique:dorms',
-            'capacity'    =>  'required',
-            'organization'      =>  'required',
+            'name'          =>  'required',
+            'capacity'      =>  'required',
+            'organization'  =>  'required',
+            'grade'         =>  'required'
             //'name', 'accommodate_no', 'student_inside_no'
 
         ]);
@@ -1345,8 +1388,9 @@ class DormController extends Controller
             ->where('id', $id)
             ->update(
                 [
-                    'name' => $request->get('name'),
-                    'accommodate_no'   => $request->get('capacity'),
+                    'name'              => $request->get('name'),
+                    'accommodate_no'    => $request->get('capacity'),
+                    'grade'             => $request->get('grade')
                 ]
             );
 

@@ -38,8 +38,10 @@
                         @endforeach
                     </select>
                 </div>
+                
                 <br>
                 <div class="row">
+
                     <div class="col-sm-6">
                         <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> murid mengikut
                             pecahan kelas </h4>
@@ -66,6 +68,7 @@
                             </div>
                         </div>
                     </div>
+                    
                     <div class="col-sm-6">
                         <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori A
                             mengikut keluarga </h4>
@@ -92,6 +95,89 @@
                             </div>
                         </div>
                     </div>
+                
+                    <div class="col-sm-6">
+                        <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori B mengikut
+                            pecahan kelas </h4>
+
+                        <div class="row justify-content-center">
+                            <div class="col-sm-6">
+                                <div class="text-center">
+                                    <h5 class="mb-0 font-size-20" id="catB-complete">0 /
+                                        0</h5>
+                                    <p class="text-muted">Orang Selesai Membayar</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-center">
+                                    <h5 class="mb-0 font-size-20" id="catB-not-complete">0 /
+                                        0</h5>
+                                    <p class="text-muted">Orang Belum Selesai Membayar</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="pie-chart-yuran-category-B" style="width:500px;height:250px; margin: 0 auto;">
+                            <div id="pie-chart-container" class="flot-charts flot-charts-height">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori C mengikut
+                            pecahan kelas </h4>
+
+                        <div class="row justify-content-center">
+                            <div class="col-sm-6">
+                                <div class="text-center">
+                                    <h5 class="mb-0 font-size-20" id="catC-complete">0 /
+                                        0</h5>
+                                    <p class="text-muted">Orang Selesai Membayar</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-center">
+                                    <h5 class="mb-0 font-size-20" id="catC-not-complete">0 /
+                                        0</h5>
+                                    <p class="text-muted">Orang Belum Selesai Membayar</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="pie-chart-yuran-category-C" style="width:500px;height:250px; margin: 0 auto;">
+                            <div id="pie-chart-container" class="flot-charts flot-charts-height">
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="col-sm-6">
+                        <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori D mengikut
+                            pecahan asrama </h4>
+
+                        <div class="row justify-content-center">
+                            <input type="checkbox" id="cat_cb" hidden>
+                            <div class="col-sm-6">
+                                <div class="text-center">
+                                    <h5 class="mb-0 font-size-20" id="catD-complete">0 /
+                                        0</h5>
+                                    <p class="text-muted">Orang Selesai Membayar</p>
+                                </div>
+                            </div>
+                            <div class="col-sm-6">
+                                <div class="text-center">
+                                    <h5 class="mb-0 font-size-20" id="catD-not-complete">0 /
+                                        0</h5>
+                                    <p class="text-muted">Orang Belum Selesai Membayar</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div id="pie-chart-yuran-category-D" style="width:500px;height:250px; margin: 0 auto;">
+                            <div id="pie-chart-container" class="flot-charts flot-charts-height">
+                            </div>
+                        </div>
+                    </div>
+
                 </div>
             </div>
 
@@ -174,6 +260,7 @@
         </div>
 
     </div>
+    
 </div>
 
 
@@ -200,6 +287,15 @@
         var completed;
         var notcompleted;
 
+        var catB_completed;
+        var catB_notcompleted;
+
+        var catC_completed;
+        var catC_notcompleted;
+
+        var catD_completed;
+        var catD_notcompleted;
+
         var parent_completed;
         var parent_notcompleted;
 
@@ -209,7 +305,6 @@
         $('#reportClass').hide();
         $('#table-parent').hide();
         $('#type-name').hide();
-
 
         function data_pie(oid) {
 
@@ -224,11 +319,26 @@
                     completed       = response.student_complete;
                     notcompleted    = response.student_notcomplete;
 
+                    catB_completed      = response.catB_complete;
+                    catB_notcompleted   = response.catB_notcomplete;
+
+                    catC_completed      = response.catC_complete;
+                    catC_notcompleted   = response.catC_notcomplete;
+
+                    catD_completed      = response.catD_complete;
+                    catD_notcompleted   = response.catD_notcomplete;
+
                     parent_completed       = response.parent_complete;
                     parent_notcompleted    = response.parent_notcomplete;
 
                     document.getElementById("student-complete").innerHTML = completed +" / "+ response.all_student;
                     document.getElementById("student-not-complete").innerHTML = notcompleted +" / "+ response.all_student;
+                    document.getElementById("catB-complete").innerHTML = catB_completed +" / "+ response.catB_student;
+                    document.getElementById("catB-not-complete").innerHTML = catB_notcompleted +" / "+ response.catB_student;
+                    document.getElementById("catC-complete").innerHTML = catC_completed +" / "+ response.catC_student;
+                    document.getElementById("catC-not-complete").innerHTML = catC_notcompleted +" / "+ response.catC_student;
+                    document.getElementById("catD-complete").innerHTML = catD_completed +" / "+ response.catD_student;
+                    document.getElementById("catD-not-complete").innerHTML = catD_notcompleted +" / "+ response.catD_student;
                     document.getElementById("parent-complete").innerHTML = parent_completed +" / "+ response.all_parent;
                     document.getElementById("parent-not-complete").innerHTML = parent_notcompleted +" / "+ response.all_parent;
 
@@ -246,6 +356,30 @@
                     }, {
                         label: "Selesai",  
                         data: parent_completed,
+                    }];
+
+                    var data_category_B = [{
+                        label: "Belum Selesai",  
+                        data: catB_notcompleted,
+                    }, {
+                        label: "Selesai",  
+                        data: catB_completed,
+                    }];
+
+                    var data_category_C = [{
+                        label: "Belum Selesai",  
+                        data: catC_notcompleted,
+                    }, {
+                        label: "Selesai",  
+                        data: catC_completed,
+                    }];
+
+                    var data_category_D = [{
+                        label: "Belum Selesai",  
+                        data: catD_notcompleted,
+                    }, {
+                        label: "Selesai",  
+                        data: catD_completed,
                     }];
 
                     var options = {
@@ -274,7 +408,11 @@
 
                     $.plot($("#pie-chart-yuran-category-A"), data_category_A, options);
 
-                    
+                    $.plot($("#pie-chart-yuran-category-B"), data_category_B, options);
+
+                    $.plot($("#pie-chart-yuran-category-C"), data_category_C, options);
+
+                    $.plot($("#pie-chart-yuran-category-D"), data_category_D, options);
 
                     $("#pie-chart-yuran").bind("plotclick", function(event, pos, item){
                         // alert(item.datapoint);
@@ -286,11 +424,10 @@
                         $('#table').show();
                         $('#reportClass').show();
 
-                        var type = item.series.label;
-                        oid = $("#organization option:selected").val();
+                        var type = item.series.label; //+ "#" + "IS_GENERAL";
                         
+                        oid = $("#organization option:selected").val();
                         fetch_data(oid, type);
-
                         document.getElementById("type-name").innerHTML="Senarai Kelas Yang " + type + " Membayar Yuran";
                         $('#type-name').show();
 
@@ -316,7 +453,9 @@
                         $('#type-name').show();
                     });
 
-                    
+                    $("#pie-chart-yuran-category-B").bind("plotclick", function(event, pos, item){
+                       
+                    });
                     
                 }
             });
@@ -338,6 +477,7 @@
             reportClass = $('#reportClass').DataTable({
                     processing: true,
                     serverSide: true,
+
                     ajax: {
                         url: "{{ route('fees.getTypeDatatable') }}",
                         data: {

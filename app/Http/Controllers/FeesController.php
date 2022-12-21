@@ -307,6 +307,111 @@ class FeesController extends AppBaseController
             ->where('class_student.fees_status', 'Not Complete')
             ->count();
 
+        $catB_student = DB::table('students')
+            ->join('class_student', 'class_student.student_id', '=', 'students.id')
+            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+            ->where([
+                ['class_organization.organization_id', $oid],
+                ['fees_new.category', 'Kategory B'],
+            ])
+            ->count();
+
+        $catB_complete = DB::table('students')
+            ->join('class_student', 'class_student.student_id', '=', 'students.id')
+            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+            ->where([
+                ['class_organization.organization_id', $oid],
+                ['fees_new.category', 'Kategory B'],
+                ['student_fees_new.status', 'Paid']
+            ])
+            ->count();
+
+        $catB_notcomplete = DB::table('students')
+            ->join('class_student', 'class_student.student_id', '=', 'students.id')
+            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+            ->where([
+                ['class_organization.organization_id', $oid],
+                ['fees_new.category', 'Kategory B'],
+                ['student_fees_new.status', 'Debt']
+            ])
+            ->count();
+
+        $catC_student = DB::table('students')
+            ->join('class_student', 'class_student.student_id', '=', 'students.id')
+            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+            ->where([
+                ['class_organization.organization_id', $oid],
+                ['fees_new.category', 'Kategory C'],
+            ])
+            ->count();
+
+        $catC_complete = DB::table('students')
+            ->join('class_student', 'class_student.student_id', '=', 'students.id')
+            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+            ->where([
+                ['class_organization.organization_id', $oid],
+                ['fees_new.category', 'Kategory C'],
+                ['student_fees_new.status', 'Paid']
+            ])
+            ->count();
+
+        $catC_notcomplete = DB::table('students')
+            ->join('class_student', 'class_student.student_id', '=', 'students.id')
+            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+            ->where([
+                ['class_organization.organization_id', $oid],
+                ['fees_new.category', 'Kategory C'],
+                ['student_fees_new.status', 'Debt']
+            ])
+            ->count();
+
+        $catD_student = DB::table('students')
+            ->join('class_student', 'class_student.student_id', '=', 'students.id')
+            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+            ->where([
+                ['class_organization.organization_id', $oid],
+                ['fees_new.category', 'Kategory D'],
+            ])
+            ->count();
+
+        $catD_complete = DB::table('students')
+            ->join('class_student', 'class_student.student_id', '=', 'students.id')
+            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+            ->where([
+                ['class_organization.organization_id', $oid],
+                ['fees_new.category', 'Kategory D'],
+                ['student_fees_new.status', 'Paid']
+            ])
+            ->count();
+
+        $catD_notcomplete = DB::table('students')
+            ->join('class_student', 'class_student.student_id', '=', 'students.id')
+            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+            ->where([
+                ['class_organization.organization_id', $oid],
+                ['fees_new.category', 'Kategory D'],
+                ['student_fees_new.status', 'Debt']
+            ])
+            ->count();
+
         $all_parent =  DB::table('organization_user')
             ->where('organization_id', $oid)
             ->where('role_id', 6)
@@ -327,7 +432,11 @@ class FeesController extends AppBaseController
             ->where('fees_status', 'Not Complete')
             ->count();
 
-        return response()->json(['all_student' => $all_student, 'student_complete' => $student_complete, 'student_notcomplete' => $student_notcomplete, 'all_parent' => $all_parent, 'parent_complete' => $parent_complete, 'parent_notcomplete' => $parent_notcomplete], 200);
+        return response()->json(['all_student' => $all_student, 'student_complete' => $student_complete, 'student_notcomplete' => $student_notcomplete, 
+        'all_parent' => $all_parent, 'parent_complete' => $parent_complete, 'parent_notcomplete' => $parent_notcomplete, 
+        'catB_student' => $catB_student, 'catB_complete' => $catB_complete, 'catB_notcomplete' => $catB_notcomplete, 
+        'catC_student' => $catC_student, 'catC_complete' => $catC_complete, 'catC_notcomplete' => $catC_notcomplete,
+        'catD_student' => $catD_student, 'catD_complete' => $catD_complete, 'catD_notcomplete' => $catD_notcomplete], 200);
 
     }
 
@@ -342,25 +451,26 @@ class FeesController extends AppBaseController
     public function getTypeDatatable(Request $request)
     {
         // dd($request->oid);
-
         if (request()->ajax()) {
             $type = $request->type;
             $oid = $request->oid;
             // dd($type);
             $userId = Auth::id();
 
+            // $type = explode('#', $type);
             if ($type == 'Selesai') {
-
+                
                 $data = DB::table('students')
                     ->join('class_student', 'class_student.student_id', '=', 'students.id')
                     ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
                     ->join('classes', 'classes.id', '=', 'class_organization.class_id')
                     ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
                     ->where('class_organization.organization_id', $oid)
-                    ->where('class_student.fees_status', 'Completed')
+                    ->where('class_student.fees_status', "Completed")
                     ->groupBy('classes.nama')
                     ->orderBy('classes.nama')
                     ->get();
+                
             } else {
                 $data = DB::table('students')
                     ->join('class_student', 'class_student.student_id', '=', 'students.id')
@@ -368,10 +478,11 @@ class FeesController extends AppBaseController
                     ->join('classes', 'classes.id', '=', 'class_organization.class_id')
                     ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
                     ->where('class_organization.organization_id', $oid)
-                    ->where('class_student.fees_status', 'Not Complete')
+                    ->where('class_student.fees_status', "Not Complete")
                     ->groupBy('classes.nama')
                     ->orderBy('classes.nama')
                     ->get();
+                
             }
 
             // dd($first);
@@ -380,15 +491,16 @@ class FeesController extends AppBaseController
             $table->addColumn('total', function ($row) {
 
                 $first = DB::table('students')
-                    ->join('class_student', 'class_student.student_id', '=', 'students.id')
-                    ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-                    ->join('classes', 'classes.id', '=', 'class_organization.class_id')
-                    ->select('classes.nama', DB::raw('COUNT(students.id) as totalallstudent'))
-                    ->where('class_organization.organization_id', $row->oid)
-                    ->where('classes.id', $row->id)
-                    ->groupBy('classes.nama')
-                    ->orderBy('classes.nama')
-                    ->first();
+                ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+                ->select('classes.nama', DB::raw('COUNT(students.id) as totalallstudent'))
+                ->where('class_organization.organization_id', $row->oid)
+                ->where('classes.id', $row->id)
+                ->groupBy('classes.nama')
+                ->orderBy('classes.nama')
+                ->first();
+                
 
                 $btn = '<div class="d-flex justify-content-center">';
                 $btn = $btn . $row->totalstudent . '/' . $first->totalallstudent . '</div>';
@@ -525,12 +637,6 @@ class FeesController extends AppBaseController
         if($selectedFee->category == "Kategory C"){
             $gender = json_decode($selectedFee->target)->gender;
         }
-
-        if($selectedFee->category == "Kategory D"){
-            $dorm = DB::table('dorms')
-            ->where('dorms.id', $data)
-            ->value('dorms.name');
-        }
         
         $permit = DB::table('organization_user')
         ->where('organization_user.user_id', Auth::user()->id)
@@ -549,7 +655,7 @@ class FeesController extends AppBaseController
                     elseif($selectedFee->category == "Kategory C")
                         return view('fee.category_C.update', compact('selectedFee', 'data', 'gender'));
                     elseif($selectedFee->category == "Kategory D")
-                        return view('fee.category_D.update', compact('selectedFee', 'data', 'dorm'));
+                        return view('fee.category_D.update', compact('selectedFee', 'data'));
                 }
             }
         }
@@ -759,10 +865,32 @@ class FeesController extends AppBaseController
                     
                     foreach($data as $d)
                     {
-                        $dorm = json_decode($d->target);
-                        $d->target = "Dorm " . $dorm->data;
-                    }
+                        $level = json_decode($d->target);
+                        if($level->data == "ALL_TYPE")
+                        {
+                            $d->target = "Semua Jenis";
+                        }
+                        elseif(is_array($level->dorm))
+                        {
+                            $dorms = DB::table('dorms')
+                                        ->whereIN('id', $level->dorm)
+                                        ->get();
 
+                            if($level->data == "1"){
+                                $d->target = "Jenis : Bilik Peribadi<br>";
+                            }
+                            elseif($level->data == "2"){
+                                $d->target = "Jenis : Bilik Kongsi<br>";
+                            }
+                            
+
+                            $d->target = $d->target . "Asrama : ";
+                            foreach($dorms as $i=>$dorm)
+                            {
+                                $d->target = $d->target .  $dorm->name  . (sizeof($dorms) - 1 == $i ? "" : ", ");
+                            }
+                        }
+                    }
                 } 
             }
 
@@ -953,103 +1081,136 @@ class FeesController extends AppBaseController
 
     public function StoreCategoryD(Request $request)
     {
+        $id             = NULL;
+        $name           = $request->get('name');
+        $desc           = $request->get('desc');
         $price          = $request->get('price');
         $quantity       = 1;
         $oid            = $request->get('organization');
         $date_started   = Carbon::createFromFormat(config('app.date_format'), $request->get('date_started'))->format('Y-m-d');
         $date_end       = Carbon::createFromFormat(config('app.date_format'), $request->get('date_end'))->format('Y-m-d');
         $total          = $price * $quantity;
-        $dorm           = $request->get('dorm');
+        $dorm           = $request->get('cb_dorm');
+        $grade          = $request->get('grade');
+        $category       = "Kategory D";
 
-        $data = array(
-            'data' => $dorm
-        );
+        // dd($dorm);
 
-        $target = json_encode($data);
-
-        // dd($target);
-
-        $fees = DB::table('fees_new')->insertGetId([
-            'name'              =>  $request->get('name'),
-            'desc'              =>  $request->get('description'),
-            'category'          =>  "Kategory D",
-            'quantity'          =>  $request->get('quantity'),
-            'price'             =>  $request->get('price'),
-            'totalAmount'       =>  $total,
-            'start_date'        =>  $date_started,
-            'end_date'          =>  $date_end,
-            'status'            =>  "1",
-            'target'            =>  $target,
-            'organization_id'   =>  $oid,
-
-        ]);
-
-        $list = DB::table('class_organization')
-            ->join('class_student', 'class_student.organclass_id', '=', 'class_organization.id')
-            ->join('classes', 'classes.id', '=', 'class_organization.class_id')
-            ->where('class_organization.organization_id', $oid)
-            ->where('classes.status', "1")
-            ->whereNull('class_student.end_date_time')
-            ->where('class_student.dorm_id', $dorm)
-            ->whereNotNull('class_student.dorm_id')
-            ->select('class_student.id as class_student_id')
-            ->get();
-
-        for ($i = 0; $i < count($list); $i++) {
-            $fees_student = DB::table('class_student')
-                ->where('id', $list[$i]->class_student_id)
-                ->update(['fees_status' => 'Not Complete']);
-            
-            DB::table('student_fees_new')->insert([
-                'status' => 'Debt',
-                'fees_id' => $fees,
-                'class_student_id' => $list[$i]->class_student_id,
-            ]);
+        if ($grade == "ALL_TYPE") 
+        {
+            // dd($grade);
+            return $this->allType($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $oid, $grade, $category);
+        }
+        else 
+        {
+            // dd($grade);
+            // dd($dorm);
+            return $this->allDorm($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $dorm, $oid, $grade, $category);
         }
 
-        return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dimasukkan');
+        // $data = array(
+        //     'data' => $dorm
+        // );
+
+        // $target = json_encode($data);
+
+        // // dd($target);
+
+        // $fees = DB::table('fees_new')->insertGetId([
+        //     'name'              =>  $request->get('name'),
+        //     'desc'              =>  $request->get('description'),
+        //     'category'          =>  "Kategory D",
+        //     'quantity'          =>  $request->get('quantity'),
+        //     'price'             =>  $request->get('price'),
+        //     'totalAmount'       =>  $total,
+        //     'start_date'        =>  $date_started,
+        //     'end_date'          =>  $date_end,
+        //     'status'            =>  "1",
+        //     'target'            =>  $target,
+        //     'organization_id'   =>  $oid,
+
+        // ]);
+
+        // $list = DB::table('class_organization')
+        //     ->join('class_student', 'class_student.organclass_id', '=', 'class_organization.id')
+        //     ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+        //     ->where('class_organization.organization_id', $oid)
+        //     ->where('classes.status', "1")
+        //     ->whereNull('class_student.end_date_time')
+        //     ->where('class_student.dorm_id', $dorm)
+        //     ->whereNotNull('class_student.dorm_id')
+        //     ->select('class_student.id as class_student_id')
+        //     ->get();
+
+        // for ($i = 0; $i < count($list); $i++) {
+        //     $fees_student = DB::table('class_student')
+        //         ->where('id', $list[$i]->class_student_id)
+        //         ->update(['fees_status' => 'Not Complete']);
+            
+        //     DB::table('student_fees_new')->insert([
+        //         'status' => 'Debt',
+        //         'fees_id' => $fees,
+        //         'class_student_id' => $list[$i]->class_student_id,
+        //     ]);
+        // }
+
+        // return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dimasukkan');
     }
 
     public function updateCategoryD(Request $request)
     {
+        $id             = $request->get('id');
+        $name           = $request->get('name');
+        $desc           = $request->get('desc');
         $price          = $request->get('price');
-        $quantity       = $request->get('quantity');
+        $quantity       = 1;
         $oid            = $request->get('organization');
         $date_started   = $request->get('date_started');
         $date_end       = $request->get('date_end');
         $total          = $price * $quantity;
+        $dorm           = $request->get('cb_dorm');
+        $grade          = $request->get('grade');
+        $category       = "Kategory D";
 
-        $target = ['data' => 'ALL'];
-
-        // $target = json_encode($data);
-
-        // dd($target);
-
-        $fee = [
-            'name'              =>  $request->get('name'),
-            'desc'              =>  $request->get('description'),
-            'category'          =>  "Kategory A",
-            'quantity'          =>  $request->get('quantity'),
-            'price'             =>  $request->get('price'),
-            'totalAmount'       =>  $total,
-            'start_date'        =>  $date_started,
-            'end_date'          =>  $date_end,
-            'status'            =>  "1",
-            'target'            =>  $target,
-            'organization_id'   =>  $oid,
-        ];
-
-        // dd($fee);
-        $result = DB::table('fees_new')
-        ->where('fees_new.id', $request->get('id'))
-        ->update($fee);
-
-        if ($result) {
-            return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dikemaskinikan');
+        if ($grade == "ALL_TYPE") 
+        {
+            return $this->allType($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $oid, $grade, $category);
         }
-        else{
-            return redirect('/fees/D');
+        else 
+        {
+            return $this->allDorm($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $dorm, $oid, $grade, $category);
         }
+        // $target = ['data' => 'ALL'];
+
+        // // $target = json_encode($data);
+
+        // // dd($target);
+
+        // $fee = [
+        //     'name'              =>  $request->get('name'),
+        //     'desc'              =>  $request->get('description'),
+        //     'category'          =>  "Kategory A",
+        //     'quantity'          =>  $request->get('quantity'),
+        //     'price'             =>  $request->get('price'),
+        //     'totalAmount'       =>  $total,
+        //     'start_date'        =>  $date_started,
+        //     'end_date'          =>  $date_end,
+        //     'status'            =>  "1",
+        //     'target'            =>  $target,
+        //     'organization_id'   =>  $oid,
+        // ];
+
+        // // dd($fee);
+        // $result = DB::table('fees_new')
+        // ->where('fees_new.id', $request->get('id'))
+        // ->update($fee);
+
+        // if ($result) {
+        //     return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dikemaskinikan');
+        // }
+        // else{
+        //     return redirect('/fees/D');
+        // }
     }
 
     public function fetchClassYear(Request $request)
@@ -1419,10 +1580,175 @@ class FeesController extends AppBaseController
         }
     }
 
+    public function allType($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $oid, $grade, $category)
+    {
+        $list = DB::table('class_organization')
+            ->join('class_student', 'class_student.organclass_id', '=', 'class_organization.id')
+            ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+            ->select('class_student.id as class_student_id')
+            ->where('class_organization.organization_id', $oid)
+            ->where('classes.status', "1")
+            ->get();
+
+        $data = array(
+            'data' => $grade,
+        );
+
+        // $target = ['data' => 'ALL_TYPE'];
+        $target = json_encode($data);
+
+        // dd($target);
+        if($id == NULL){
+            $fees = DB::table('fees_new')->insertGetId([
+                'name'              =>  $name,
+                'desc'              =>  $desc,
+                'category'          =>  $category,
+                'quantity'          =>  $quantity,
+                'price'             =>  $price,
+                'totalAmount'       =>  $total,
+                'start_date'        =>  $date_started,
+                'end_date'          =>  $date_end,
+                'status'            =>  "1",
+                'target'            =>  $target,
+                'organization_id'   =>  $oid,
+            ]);
+
+            // dd($fees);
+
+            for ($i = 0; $i < count($list); $i++) {
+
+                $fees_student = DB::table('class_student')
+                    ->where('id', $list[$i]->class_student_id)
+                    ->update(['fees_status' => 'Not Complete']);
+                
+                DB::table('student_fees_new')->insert([
+                    'status' => 'Debt',
+                    'fees_id' => $fees,
+                    'class_student_id' => $list[$i]->class_student_id,
+                ]);
+            }
+
+            return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dimasukkan');
+        }
+        else{
+            $fees = [
+                'name'          => $name,
+                'desc'          => $desc,
+                'start_date'    => $date_started,
+                'end_date'      => $date_end,
+            ];
+            // dd($name, $desc, $category, $date_started, $date_end);
+            
+            $result = DB::table('fees_new')
+            ->where('fees_new.id', $id)
+            ->update($fees);
+
+            if($result){
+                return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dimasukkan');
+            }
+            else{
+                return redirect('/fees/D');
+            }
+        }
+    }
+
+    public function allDorm($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $dorm, $oid, $grade, $category)
+    {
+        if($dorm){
+            $list = DB::table('dorms')
+            ->whereIn('dorms.id', $dorm)
+            ->get();
+
+            // dd(count($list));
+            for($i=0; $i < count($list); $i++){
+                $dorm_arr[] = $list[$i]->id;
+            }
+
+            $data = array(
+                'data' => $grade,
+                'dorm' => $dorm_arr
+            );
+
+            // dd($data);
+        }
+        else
+        {
+            $data = NULL;
+        }
+
+        $target = json_encode($data);
+
+        if($id == NULL)
+        {
+            $fees = DB::table('fees_new')->insertGetId([
+                'name'              =>  $name,
+                'desc'              =>  $desc,
+                'category'          =>  $category,
+                'quantity'          =>  $quantity,
+                'price'             =>  $price,
+                'totalAmount'       =>  $total,
+                'start_date'        =>  $date_started,
+                'end_date'          =>  $date_end,
+                'status'            =>  "1",
+                'target'            =>  $target,
+                'organization_id'   =>  $oid,
+            ]);
+
+            // dd($fees);
+    
+            $list = DB::table('class_organization')
+                ->join('class_student', 'class_student.organclass_id', '=', 'class_organization.id')
+                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+                ->where('class_organization.organization_id', $oid)
+                ->where('classes.status', "1")
+                ->whereNull('class_student.end_date_time')
+                ->where('class_student.dorm_id', $dorm)
+                ->whereNotNull('class_student.dorm_id')
+                ->select('class_student.id as class_student_id')
+                ->get();
+
+            // dd(count($list));
+    
+            for ($i = 0; $i < count($list); $i++) {
+                $fees_student = DB::table('class_student')
+                    ->where('id', $list[$i]->class_student_id)
+                    ->update(['fees_status' => 'Not Complete']);
+                
+                DB::table('student_fees_new')->insert([
+                    'status' => 'Debt',
+                    'fees_id' => $fees,
+                    'class_student_id' => $list[$i]->class_student_id,
+                ]);
+            }
+    
+            return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dimasukkan');
+        }
+        else
+        {
+            $fees = [
+                'name'              =>  $name,
+                'desc'              =>  $desc,
+                'start_date'        =>  $date_started,
+                'end_date'          =>  $date_end,
+            ];
+
+            $result = DB::table('fees_new')
+            ->where('fees_new.id', $id)
+            ->update($fees);
+
+            if($result){
+                return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dimasukkan');
+            }
+            else{
+                return redirect('/fees/D');
+            }
+
+        }
+    }
+
     public function dependent_fees()
     {
         $userid = Auth::id();
-
         // ************************* get list dependent from user id  *******************************
 
         $list = DB::table('organizations')
@@ -1831,6 +2157,17 @@ class FeesController extends AppBaseController
             ->where('dorms.organization_id', $oid)
             ->orderBy('dorms.name')
             ->get();
+
+        if($request->get('grade')){
+            $list = DB::table('dorms')
+            ->where([
+                ['dorms.organization_id', $oid],
+                ['dorms.grade', $request->get('grade')]
+            ])
+            ->orderBy('dorms.name')
+            ->distinct()
+            ->get();
+        }
 
         return response()->json(['success' => $list]);
     }
