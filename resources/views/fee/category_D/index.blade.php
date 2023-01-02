@@ -211,25 +211,6 @@
                         alert(error.toString());
                     }
             });
-
-            /* 
-                {
-                    data: "target",
-                    name: 'target',
-                    orderable: false,
-                    searchable: false,
-                    render: function(data, type, full) {
-                        return data;
-                    }
-                }
-
-                {
-                    data: 'action',
-                    name: 'action',
-                    orderable: false,
-                    searchable: false
-                },
-            */
         }
   
         $('#organization').change(function() {

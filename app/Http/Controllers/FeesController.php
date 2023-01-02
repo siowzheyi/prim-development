@@ -907,6 +907,10 @@ class FeesController extends AppBaseController
         if($selectedFee->category == "Kategory C"){
             $gender = json_decode($selectedFee->target)->gender;
         }
+
+        if($selectedFee->category == "Kategory D"){
+            $repeat = json_decode($selectedFee->target)->repeat;
+        }
         
         $permit = DB::table('organization_user')
         ->where('organization_user.user_id', Auth::user()->id)
@@ -925,7 +929,7 @@ class FeesController extends AppBaseController
                     elseif($selectedFee->category == "Kategory C")
                         return view('fee.category_C.update', compact('selectedFee', 'data', 'gender'));
                     elseif($selectedFee->category == "Kategory D")
-                        return view('fee.category_D.update', compact('selectedFee', 'data'));
+                        return view('fee.category_D.update', compact('selectedFee', 'data', 'repeat'));
                 }
             }
         }
@@ -1137,8 +1141,10 @@ class FeesController extends AppBaseController
                     {
                         $level = json_decode($d->target);
                         if($level->data == "ALL_TYPE")
-                        {
+                        {  
                             $d->target = "Semua Jenis";
+                            if($level->repeat > 0)
+                                $d->target = "Semua Jenis<br>Ulang setiap " . $level->repeat . " bulan";
                         }
                         elseif(is_array($level->dorm))
                         {
@@ -1159,6 +1165,8 @@ class FeesController extends AppBaseController
                             {
                                 $d->target = $d->target .  $dorm->name  . (sizeof($dorms) - 1 == $i ? "" : ", ");
                             }
+                            if($level->repeat > 0)
+                                $d->target = $d->target . "<br>Ulang setiap " . $level->repeat . " bulan";
                         }
                     }
                 } 
@@ -1360,71 +1368,19 @@ class FeesController extends AppBaseController
         $date_started   = Carbon::createFromFormat(config('app.date_format'), $request->get('date_started'))->format('Y-m-d');
         $date_end       = Carbon::createFromFormat(config('app.date_format'), $request->get('date_end'))->format('Y-m-d');
         $total          = $price * $quantity;
+        $repeat         = $request->get('renew');
         $dorm           = $request->get('cb_dorm');
         $grade          = $request->get('grade');
         $category       = "Kategory D";
 
-        // dd($dorm);
-
         if ($grade == "ALL_TYPE") 
         {
-            // dd($grade);
-            return $this->allType($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $oid, $grade, $category);
+            return $this->allType($id, $name, $desc, $quantity, $price, $total, $repeat, $date_started, $date_end, $oid, $grade, $category);
         }
         else 
         {
-            // dd($grade);
-            // dd($dorm);
-            return $this->allDorm($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $dorm, $oid, $grade, $category);
+            return $this->allDorm($id, $name, $desc, $quantity, $price, $total, $repeat, $date_started, $date_end, $dorm, $oid, $grade, $category);
         }
-
-        // $data = array(
-        //     'data' => $dorm
-        // );
-
-        // $target = json_encode($data);
-
-        // // dd($target);
-
-        // $fees = DB::table('fees_new')->insertGetId([
-        //     'name'              =>  $request->get('name'),
-        //     'desc'              =>  $request->get('description'),
-        //     'category'          =>  "Kategory D",
-        //     'quantity'          =>  $request->get('quantity'),
-        //     'price'             =>  $request->get('price'),
-        //     'totalAmount'       =>  $total,
-        //     'start_date'        =>  $date_started,
-        //     'end_date'          =>  $date_end,
-        //     'status'            =>  "1",
-        //     'target'            =>  $target,
-        //     'organization_id'   =>  $oid,
-
-        // ]);
-
-        // $list = DB::table('class_organization')
-        //     ->join('class_student', 'class_student.organclass_id', '=', 'class_organization.id')
-        //     ->join('classes', 'classes.id', '=', 'class_organization.class_id')
-        //     ->where('class_organization.organization_id', $oid)
-        //     ->where('classes.status', "1")
-        //     ->whereNull('class_student.end_date_time')
-        //     ->where('class_student.dorm_id', $dorm)
-        //     ->whereNotNull('class_student.dorm_id')
-        //     ->select('class_student.id as class_student_id')
-        //     ->get();
-
-        // for ($i = 0; $i < count($list); $i++) {
-        //     $fees_student = DB::table('class_student')
-        //         ->where('id', $list[$i]->class_student_id)
-        //         ->update(['fees_status' => 'Not Complete']);
-            
-        //     DB::table('student_fees_new')->insert([
-        //         'status' => 'Debt',
-        //         'fees_id' => $fees,
-        //         'class_student_id' => $list[$i]->class_student_id,
-        //     ]);
-        // }
-
-        // return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dimasukkan');
     }
 
     public function updateCategoryD(Request $request)
@@ -1438,49 +1394,29 @@ class FeesController extends AppBaseController
         $date_started   = $request->get('date_started');
         $date_end       = $request->get('date_end');
         $total          = $price * $quantity;
-        $dorm           = $request->get('cb_dorm');
-        $grade          = $request->get('grade');
+        $repeat         = $request->get('renew');
         $category       = "Kategory D";
+
+        $getTarget = DB::table('fees_new')
+            ->where('fees_new.id', $id)
+            ->select('fees_new.target')
+            ->get();
+
+        foreach($getTarget as $list){
+            $target = json_decode($list->target);
+        }
+
+        $grade  = $target->data;
 
         if ($grade == "ALL_TYPE") 
         {
-            return $this->allType($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $oid, $grade, $category);
+            return $this->allType($id, $name, $desc, $quantity, $price, $total, $repeat, $date_started, $date_end, $oid, $grade, $category);
         }
         else 
         {
-            return $this->allDorm($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $dorm, $oid, $grade, $category);
+            $dorm = $target->dorm;
+            return $this->allDorm($id, $name, $desc, $quantity, $price, $total, $repeat, $date_started, $date_end, $dorm, $oid, $grade, $category);
         }
-        // $target = ['data' => 'ALL'];
-
-        // // $target = json_encode($data);
-
-        // // dd($target);
-
-        // $fee = [
-        //     'name'              =>  $request->get('name'),
-        //     'desc'              =>  $request->get('description'),
-        //     'category'          =>  "Kategory A",
-        //     'quantity'          =>  $request->get('quantity'),
-        //     'price'             =>  $request->get('price'),
-        //     'totalAmount'       =>  $total,
-        //     'start_date'        =>  $date_started,
-        //     'end_date'          =>  $date_end,
-        //     'status'            =>  "1",
-        //     'target'            =>  $target,
-        //     'organization_id'   =>  $oid,
-        // ];
-
-        // // dd($fee);
-        // $result = DB::table('fees_new')
-        // ->where('fees_new.id', $request->get('id'))
-        // ->update($fee);
-
-        // if ($result) {
-        //     return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dikemaskinikan');
-        // }
-        // else{
-        //     return redirect('/fees/D');
-        // }
     }
 
     public function fetchClassYear(Request $request)
@@ -1850,7 +1786,7 @@ class FeesController extends AppBaseController
         }
     }
 
-    public function allType($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $oid, $grade, $category)
+    public function allType($id, $name, $desc, $quantity, $price, $total, $repeat, $date_started, $date_end, $oid, $grade, $category)
     {
         $list = DB::table('class_organization')
             ->join('class_student', 'class_student.organclass_id', '=', 'class_organization.id')
@@ -1861,7 +1797,8 @@ class FeesController extends AppBaseController
             ->get();
 
         $data = array(
-            'data' => $grade,
+            'data'      => $grade,
+            'repeat'    => $repeat,
         );
 
         // $target = ['data' => 'ALL_TYPE'];
@@ -1906,15 +1843,15 @@ class FeesController extends AppBaseController
                 'desc'          => $desc,
                 'start_date'    => $date_started,
                 'end_date'      => $date_end,
+                'target'        => $target,
             ];
-            // dd($name, $desc, $category, $date_started, $date_end);
             
             $result = DB::table('fees_new')
             ->where('fees_new.id', $id)
             ->update($fees);
 
             if($result){
-                return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dimasukkan');
+                return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dikemaskini');
             }
             else{
                 return redirect('/fees/D');
@@ -1922,7 +1859,7 @@ class FeesController extends AppBaseController
         }
     }
 
-    public function allDorm($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $dorm, $oid, $grade, $category)
+    public function allDorm($id, $name, $desc, $quantity, $price, $total, $repeat, $date_started, $date_end, $dorm, $oid, $grade, $category)
     {
         if($dorm){
             $list = DB::table('dorms')
@@ -1935,11 +1872,10 @@ class FeesController extends AppBaseController
             }
 
             $data = array(
-                'data' => $grade,
-                'dorm' => $dorm_arr
+                'data'   => $grade,
+                'dorm'   => $dorm_arr,
+                'repeat' => $repeat,
             );
-
-            // dd($data);
         }
         else
         {
@@ -1994,12 +1930,13 @@ class FeesController extends AppBaseController
             return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dimasukkan');
         }
         else
-        {
+        {   
             $fees = [
-                'name'              =>  $name,
-                'desc'              =>  $desc,
-                'start_date'        =>  $date_started,
-                'end_date'          =>  $date_end,
+                'name'          => $name,
+                'desc'          => $desc,
+                'start_date'    => $date_started,
+                'end_date'      => $date_end,
+                'target'        => $target,
             ];
 
             $result = DB::table('fees_new')
@@ -2007,7 +1944,7 @@ class FeesController extends AppBaseController
             ->update($fees);
 
             if($result){
-                return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dimasukkan');
+                return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dikemaskini');
             }
             else{
                 return redirect('/fees/D');

@@ -85,6 +85,13 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="renew" class="control-label required"> Tempoh Ulang (bulan) </label> 
+                    <input type="number" name="renew" id="renew" class="form-control"
+                        data-parsley-required-message="Sila masukkan tempoh ulangan butiran" required value="{{ $repeat }}" placeholder="0" min="0">
+                    <i>* 0 jika tidak berulang</i>
+                </div>
+
+                <div class="form-group">
                     <label class="control-label required">Nama Asrama</label>
                     <select name="dorm" id="dorm" class="form-control">
                         @if($data == "ALL_TYPE")

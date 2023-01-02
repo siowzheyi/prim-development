@@ -46,21 +46,13 @@
                         data-parsley-required-message="Sila masukkan nama butiran" required placeholder="Nama Butiran">
                 </div>
 
-
-
                 <div class="form-row">
                     <div class="form-group col-md-12">
                         <label class="control-label required">Harga (RM)</label>
                         <input class="form-control input-mask text-left"
                             data-inputmask="'alias': 'numeric', 'groupSeparator': ',', 'digits': 2, 'digitsOptional': false, 'placeholder': '0'"
                             im-insert="true" name="price">
-                        <i>*Harga per kuantiti</i>
                     </div>
-                    <!-- <div class="form-group col-md-6">
-                        <label class="control-label required">Kuantiti</label>
-                        <input type="text" name="quantity" class="form-control quantity text-left"  data-inputmask="'alias': 'numeric'" placeholder="Kuantiti">
-                    </div> -->
-
                 </div>
 
                 <div class="form-row">
@@ -81,6 +73,13 @@
                 </div>
 
                 <div class="form-group">
+                    <label for="renew" class="control-label required"> Tempoh Ulang (bulan) </label> 
+                    <input type="number" name="renew" id="renew" class="form-control"
+                        data-parsley-required-message="Sila masukkan tempoh ulangan butiran" required placeholder="0" min="0">
+                    <i>* 0 jika tidak berulang</i>
+                </div>
+
+                <div class="form-group">
                     <label class="control-label required">Jenis Asrama</label>
                     <select name="grade" id="grade" class="form-control">
                         <option value="" selected>Pilih Jenis Asrama</option>
@@ -88,10 +87,7 @@
                 </div>
 
                 <div class="cbhide form-check-inline pb-3 pt-3">
-                    <!-- <label class="control-label required">Nama Asrama</label>
-                    <select name="dorm" id="dorm" class="form-control" required>
-                        <option value="" disabled selected>Pilih Asrama</option>
-                    </select> -->
+
                 </div>
 
                 <div class="form-group">
@@ -134,8 +130,7 @@
         $('.form-validation').parsley();
         $(".input-mask").inputmask();
         $(".quantity").inputmask();
-        
-        $(".cbhide").hide();
+        $('.cbhide').hide();
 
         var today = new Date();
 
@@ -242,6 +237,8 @@
             {
                 var organizationid    = $("#organization option:selected").val();
                 var _token            = $('input[name="_token"]').val();
+                var private           = 0;
+                var share             = 0;
                 $('.cbhide').hide();
                 $("#cb_dorm").remove();
                 $(".cbhide label").remove();
@@ -255,14 +252,39 @@
                         if(result.success.length > 0)
                         {
                             $('#grade').empty();
+                            
+                            jQuery.each(result.success, function(key, value) {
+                                if(value.grade == 1){
+                                    private = 1;
+                                }
+                                else if(value.grade == 2){
+                                    share = 1;
+                                }
+                            });
+
                             "<option value='' disabled selected>Pilih Jenis Asrama</option>"
-                            $('#grade').append(
-                                '<option value="" disabled selected> Pilih Jenis Asrama</option>' +
-                                '<option value="ALL_TYPE">Semua Jenis</option>' +
-                                '<option value="1">Bilik Peribadi</option>' +
-                                '<option value="2">Bilik Kongsi</option>'
-                                // '<option value="3">Spesifik Asrama</option>'
-                            );
+                            if(private == 1 && share != 1){
+                                $('#grade').append(
+                                    '<option value="" disabled selected> Pilih Jenis Asrama</option>' +
+                                    '<option value="ALL_TYPE">Semua Jenis</option>' +
+                                    '<option value="1">Bilik Peribadi</option>'
+                                )
+                            }
+                            else if(share == 1 && private != 1){
+                                $('#grade').append(
+                                    '<option value="" disabled selected> Pilih Jenis Asrama</option>' +
+                                    '<option value="ALL_TYPE">Semua Jenis</option>' +
+                                    '<option value="2">Bilik Kongsi</option>'
+                                )
+                            }
+                            else{
+                                $('#grade').append(
+                                    '<option value="" disabled selected> Pilih Jenis Asrama</option>' +
+                                    '<option value="ALL_TYPE">Semua Jenis</option>' +
+                                    '<option value="1">Bilik Peribadi</option>' +
+                                    '<option value="2">Bilik Kongsi</option>'
+                                )
+                            }
                         }
                         else
                         {
