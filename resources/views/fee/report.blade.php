@@ -454,9 +454,49 @@
                     });
 
                     $("#pie-chart-yuran-category-B").bind("plotclick", function(event, pos, item){
-                       
+                        $('#reportClass').DataTable().destroy();
+                        $('#table-parent').hide();
+                        $('#table-parent_wrapper').hide();
+                        $('#table').show();
+                        $('#reportClass').show();
+
+                        var type = item.series.label; //+ "#" + "IS_GENERAL";
+                        
+                        oid = $("#organization option:selected").val();
+                        fetch_dataB(oid, type, "Kategory B");
+                        document.getElementById("type-name").innerHTML="Senarai Kelas Yang " + type + " Membayar Yuran Kategori B";
+                        $('#type-name').show();
                     });
-                    
+
+                    $("#pie-chart-yuran-category-C").bind("plotclick", function(event, pos, item){
+                        $('#reportClass').DataTable().destroy();
+                        $('#table-parent').hide();
+                        $('#table-parent_wrapper').hide();
+                        $('#table').show();
+                        $('#reportClass').show();
+
+                        var type = item.series.label; //+ "#" + "IS_GENERAL";
+                        
+                        oid = $("#organization option:selected").val();
+                        fetch_dataC(oid, type, "Kategory C");
+                        document.getElementById("type-name").innerHTML="Senarai Kelas Yang " + type + " Membayar Yuran Kategori C";
+                        $('#type-name').show();
+                    });
+
+                    $("#pie-chart-yuran-category-D").bind("plotclick", function(event, pos, item){
+                        $('#reportClass').DataTable().destroy();
+                        $('#table-parent').hide();
+                        $('#table-parent_wrapper').hide();
+                        $('#table').show();
+                        $('#reportClass').show();
+
+                        var type = item.series.label; //+ "#" + "IS_GENERAL";
+                        
+                        oid = $("#organization option:selected").val();
+                        fetch_dataD(oid, type);
+                        document.getElementById("type-name").innerHTML="Senarai Kelas Yang " + type + " Membayar Yuran Kategori D";
+                        $('#type-name').show();
+                    });
                 }
             });
         }
@@ -480,6 +520,171 @@
 
                     ajax: {
                         url: "{{ route('fees.getTypeDatatable') }}",
+                        data: {
+                            type: type,
+                            oid: oid,
+                        },
+                        type: 'GET',
+  
+                    },
+                    'columnDefs': [{
+                        "targets": [0], // your case first column
+                        "className": "text-center",
+                        "width": "2%"
+                    },{
+                        "targets": [1,2,3], // your case first column
+                        "className": "text-center",
+                    },],
+                    order: [
+                        [1, 'asc']
+                    ],
+                    columns: [{
+                        "data": null,
+                        searchable: false,
+                        "sortable": false,
+                        render: function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    }, {
+                        data: "nama",
+                        name: 'nama'
+                    }, {
+                        data: "total",
+                        name: 'total',
+                        orderable: false,
+                        searchable: false,
+                        defaultContent: 0,
+                        
+                    }, {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    },],
+                    error: function (error) {
+                        alert('error');
+                        alert(error.toString());
+                    }
+            });
+        }
+
+        function fetch_dataB(oid, type, category) {
+            reportClass = $('#reportClass').DataTable({
+                    processing: true,
+                    serverSide: true,
+
+                    ajax: {
+                        url: "{{ route('fees.getCategoryBDatatable') }}",
+                        data: {
+                            type: type,
+                            oid: oid,
+                        },
+                        type: 'GET',
+  
+                    },
+                    'columnDefs': [{
+                        "targets": [0], // your case first column
+                        "className": "text-center",
+                        "width": "2%"
+                    },{
+                        "targets": [1,2,3], // your case first column
+                        "className": "text-center",
+                    },],
+                    order: [
+                        [1, 'asc']
+                    ],
+                    columns: [{
+                        "data": null,
+                        searchable: false,
+                        "sortable": false,
+                        render: function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    }, {
+                        data: "nama",
+                        name: 'nama'
+                    }, {
+                        data: "total",
+                        name: 'total',
+                        orderable: false,
+                        searchable: false,
+                        defaultContent: 0,
+                        
+                    }, {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    },],
+                    error: function (error) {
+                        alert('error');
+                        alert(error.toString());
+                    }
+            });
+        }
+
+        function fetch_dataC(oid, type, category) {
+            reportClass = $('#reportClass').DataTable({
+                    processing: true,
+                    serverSide: true,
+
+                    ajax: {
+                        url: "{{ route('fees.getCategoryCDatatable') }}",
+                        data: {
+                            type: type,
+                            oid: oid,
+                        },
+                        type: 'GET',
+  
+                    },
+                    'columnDefs': [{
+                        "targets": [0], // your case first column
+                        "className": "text-center",
+                        "width": "2%"
+                    },{
+                        "targets": [1,2,3], // your case first column
+                        "className": "text-center",
+                    },],
+                    order: [
+                        [1, 'asc']
+                    ],
+                    columns: [{
+                        "data": null,
+                        searchable: false,
+                        "sortable": false,
+                        render: function (data, type, row, meta) {
+                            return meta.row + meta.settings._iDisplayStart + 1;
+                        }
+                    }, {
+                        data: "nama",
+                        name: 'nama'
+                    }, {
+                        data: "total",
+                        name: 'total',
+                        orderable: false,
+                        searchable: false,
+                        defaultContent: 0,
+                        
+                    }, {
+                        data: 'action',
+                        name: 'action',
+                        orderable: false,
+                        searchable: false
+                    },],
+                    error: function (error) {
+                        alert('error');
+                        alert(error.toString());
+                    }
+            });
+        }
+
+        function fetch_dataD(oid, type, category) {
+            reportClass = $('#reportClass').DataTable({
+                    processing: true,
+                    serverSide: true,
+
+                    ajax: {
+                        url: "{{ route('fees.getCategoryDDatatable') }}",
                         data: {
                             type: type,
                             oid: oid,

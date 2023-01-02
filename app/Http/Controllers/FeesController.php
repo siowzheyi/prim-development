@@ -521,6 +521,276 @@ class FeesController extends AppBaseController
         }
     }
 
+    public function getCategoryBDatatable(Request $request)
+    {
+        // dd($request->oid);
+        if (request()->ajax()) {
+            $type = $request->type;
+            $oid = $request->oid;
+            // dd($type);
+            $userId = Auth::id();
+
+            // $type = explode('#', $type);
+            if ($type == 'Selesai') {
+            
+                $data = DB::table('students')
+                    ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                    ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+                    ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+                    ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                    ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                    ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
+                    ->where([
+                        ['class_organization.organization_id', $oid],
+                        ['fees_new.category', "Kategory B"],
+                        ['student_fees_new.status', "Paid"],
+                        ['class_student.status', 1]
+                    ])
+                    ->groupBy('classes.nama')
+                    ->orderBy('classes.nama')
+                    ->get();
+                
+            } else {
+                $data = DB::table('students')
+                ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
+                ->where([
+                    ['class_organization.organization_id', $oid],
+                    ['fees_new.category', "Kategory B"],
+                    ['student_fees_new.status', "Debt"],
+                    ['class_student.status', 1]
+                ])
+                    ->groupBy('classes.nama')
+                    ->orderBy('classes.nama')
+                    ->get();
+                
+            }
+            
+
+            // dd($first);
+            $table = Datatables::of($data);
+
+            $table->addColumn('total', function ($row) {
+                $first = DB::table('students')
+                ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                ->select('classes.nama', DB::raw('COUNT(students.id) as totalallstudent'))
+                ->where([
+                    ['class_organization.organization_id', $row->oid],
+                    ['fees_new.category', "Kategory B"],
+                    ['class_student.status', 1],
+                    ['classes.id', $row->id]
+                ])
+                ->groupBy('classes.nama')
+                ->orderBy('classes.nama')
+                ->first();
+
+                $btn = '<div class="d-flex justify-content-center">';
+                $btn = $btn . $row->totalstudent . '/' . $first->totalallstudent . '</div>';
+                return $btn;
+            });
+
+            $table->addColumn('action', function ($row) {
+                $token = csrf_token();
+                $btn = '<div class="d-flex justify-content-center">';
+                $btn = $btn . '<a href="' . route('fees.reportByClass', ['type' => $row->fees_status, 'class_id' => $row->id]) . '"" class="btn btn-primary m-1">Butiran</a></div>';
+                // $btn = $btn . '<a href="' . route('fees.edit', $row->feeid) . '" class="btn btn-primary m-1">Edit</a>';
+                // $btn = $btn . '<button id="' . $row->feeid . '" data-token="' . $token . '" class="btn btn-danger m-1">Details</button></div>';
+                return $btn;
+            });
+
+            $table->rawColumns(['total', 'action']);
+            return $table->make(true);
+        }
+    }
+
+    public function getCategoryCDatatable(Request $request)
+    {
+        // dd($request->oid);
+        if (request()->ajax()) {
+            $type = $request->type;
+            $oid = $request->oid;
+            // dd($type);
+            $userId = Auth::id();
+
+            // $type = explode('#', $type);
+            if ($type == 'Selesai') {
+            
+                $data = DB::table('students')
+                    ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                    ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+                    ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+                    ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                    ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                    ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
+                    ->where([
+                        ['class_organization.organization_id', $oid],
+                        ['fees_new.category', "Kategory C"],
+                        ['student_fees_new.status', "Paid"],
+                        ['class_student.status', 1]
+                    ])
+                    ->groupBy('classes.nama')
+                    ->orderBy('classes.nama')
+                    ->get();
+                
+            } else {
+                $data = DB::table('students')
+                ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
+                ->where([
+                    ['class_organization.organization_id', $oid],
+                    ['fees_new.category', "Kategory C"],
+                    ['student_fees_new.status', "Debt"],
+                    ['class_student.status', 1]
+                ])
+                    ->groupBy('classes.nama')
+                    ->orderBy('classes.nama')
+                    ->get();
+                
+            }
+            
+
+            // dd($first);
+            $table = Datatables::of($data);
+
+            $table->addColumn('total', function ($row) {
+                $first = DB::table('students')
+                ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                ->select('classes.nama', DB::raw('COUNT(students.id) as totalallstudent'))
+                ->where([
+                    ['class_organization.organization_id', $row->oid],
+                    ['fees_new.category', "Kategory C"],
+                    ['class_student.status', 1],
+                    ['classes.id', $row->id]
+                ])
+                ->groupBy('classes.nama')
+                ->orderBy('classes.nama')
+                ->first();
+
+                $btn = '<div class="d-flex justify-content-center">';
+                $btn = $btn . $row->totalstudent . '/' . $first->totalallstudent . '</div>';
+                return $btn;
+            });
+
+            $table->addColumn('action', function ($row) {
+                $token = csrf_token();
+                $btn = '<div class="d-flex justify-content-center">';
+                $btn = $btn . '<a href="' . route('fees.reportByClass', ['type' => $row->fees_status, 'class_id' => $row->id]) . '"" class="btn btn-primary m-1">Butiran</a></div>';
+                // $btn = $btn . '<a href="' . route('fees.edit', $row->feeid) . '" class="btn btn-primary m-1">Edit</a>';
+                // $btn = $btn . '<button id="' . $row->feeid . '" data-token="' . $token . '" class="btn btn-danger m-1">Details</button></div>';
+                return $btn;
+            });
+
+            $table->rawColumns(['total', 'action']);
+            return $table->make(true);
+        }
+    }
+
+    public function getCategoryDDatatable(Request $request)
+    {
+        // dd($request->oid);
+        if (request()->ajax()) {
+            $type = $request->type;
+            $oid = $request->oid;
+            // dd($type);
+            $userId = Auth::id();
+
+            // $type = explode('#', $type);
+            if ($type == 'Selesai') {
+            
+                $data = DB::table('students')
+                    ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                    ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+                    ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+                    ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                    ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                    ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
+                    ->where([
+                        ['class_organization.organization_id', $oid],
+                        ['fees_new.category', "Kategory D"],
+                        ['student_fees_new.status', "Paid"],
+                        ['class_student.status', 1]
+                    ])
+                    ->groupBy('classes.nama')
+                    ->orderBy('classes.nama')
+                    ->get();
+                
+            } else {
+                $data = DB::table('students')
+                ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
+                ->where([
+                    ['class_organization.organization_id', $oid],
+                    ['fees_new.category', "Kategory D"],
+                    ['student_fees_new.status', "Debt"],
+                    ['class_student.status', 1]
+                ])
+                    ->groupBy('classes.nama')
+                    ->orderBy('classes.nama')
+                    ->get();
+                
+            }
+            
+
+            // dd($first);
+            $table = Datatables::of($data);
+
+            $table->addColumn('total', function ($row) {
+                $first = DB::table('students')
+                ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                ->select('classes.nama', DB::raw('COUNT(students.id) as totalallstudent'))
+                ->where([
+                    ['class_organization.organization_id', $row->oid],
+                    ['fees_new.category', "Kategory D"],
+                    ['class_student.status', 1],
+                    ['classes.id', $row->id]
+                ])
+                ->groupBy('classes.nama')
+                ->orderBy('classes.nama')
+                ->first();
+
+                $btn = '<div class="d-flex justify-content-center">';
+                $btn = $btn . $row->totalstudent . '/' . $first->totalallstudent . '</div>';
+                return $btn;
+            });
+
+            $table->addColumn('action', function ($row) {
+                $token = csrf_token();
+                $btn = '<div class="d-flex justify-content-center">';
+                $btn = $btn . '<a href="' . route('fees.reportByClass', ['type' => $row->fees_status, 'class_id' => $row->id]) . '"" class="btn btn-primary m-1">Butiran</a></div>';
+                // $btn = $btn . '<a href="' . route('fees.edit', $row->feeid) . '" class="btn btn-primary m-1">Edit</a>';
+                // $btn = $btn . '<button id="' . $row->feeid . '" data-token="' . $token . '" class="btn btn-danger m-1">Details</button></div>';
+                return $btn;
+            });
+
+            $table->rawColumns(['total', 'action']);
+            return $table->make(true);
+        }
+    }
+
     public function getParentDatatable(Request $request)
     {
         // dd($request->oid);
@@ -1805,7 +2075,11 @@ class FeesController extends AppBaseController
             ->orderBy('fees_new.name')
             ->where('fees_new.status', 1)
             ->where('student_fees_new.status', 'Debt')
+            // ->where('fees_new.category', 'Kategory C')
+            // ->where('fees_new.organization_id', 4)
             ->get();
+
+        // dd($getfees_bystudent);
 
         // ************************* get fees category A  *******************************
 
