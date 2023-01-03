@@ -61,17 +61,17 @@
                         <div class="form-check">
                             <div>
                                 <input type="radio"  id="is_recurring_annual" name="recurring_type" class="form-check-input" value="annually" >
-                                <label class="form-check-label">Setiap Tahun</label>
+                                <label for="is_recurring_annual" class="form-check-label">Setiap Tahun</label>
                             </div>
 
                             <div>
                                 <input type="radio"  id="is_recurring_semester" name="recurring_type" class="form-check-input"  value="semester">
-                                <label class="form-check-label">Setiap Semester</label>
+                                <label for="is_recurring_semester" class="form-check-label">Setiap Semester</label>
                             </div>
 
                             <div>
                                 <input type="radio" id="is_recurring_month" name="recurring_type" class="form-check-input"  value="monthly">
-                                <label class="form-check-label">Setiap Bulan</label>
+                                <label for="is_recurring_month" class="form-check-label">Setiap Bulan</label>
                             </div>
                         </div>
                 </div>
@@ -95,13 +95,12 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Tempoh Berakhir Berkesan</label>
+                    <label >Tempoh Berakhir Berkesan</label>
                     <input type="date" name="end_date" class="form-control" min="{{ $start }}">
                 </div>
 
                 <div class="form-group mb-0">
                     <div>
-                        <input type="button" class="checkBtn" value="check">  
                         <button type="submit" class="btn btn-primary waves-effect waves-light mr-1">
                             Simpan
                         </button>

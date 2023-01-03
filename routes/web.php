@@ -101,6 +101,10 @@ Route::group(['prefix' => 'student'], function () {
 Route::resource('recurring_fees','ExpensesController');
 Route::get('/getExpensesDatatable','ExpensesController@getExpensesDatatable')->name('recurring_fees.getExpensesDatatable');
 Route::get('/related_fees', 'ExpensesController@related_fees')->name('related_fees');
+Route::get('/reportExpenses', 'ExpensesController@reportExpenses')->name('recurring_fees.reportExpenses');
+Route::get('/payStatusExpenses/{id}', 'ExpensesController@payStatusExpenses')->name('recurring_fees.payStatusExpenses');
+
+
 
 // Route::group(['prefix'=>'recurring_fees'],function(){
 //     Route::get('/getExpensesDatatable','ExpensesController@getExpensesDatatable')->name('recurring_fees.getExpensesDatatable');

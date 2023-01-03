@@ -406,7 +406,6 @@
                 <ul class="sub-menu mm-collapse" aria-expanded="false">
                     @role('Superadmin|Penjaga')
                     <li>
-                        <!-- wrong route -->
                         <a href="{{ route('related_fees') }}" class=" waves-effect">
                             <i class="far fa-credit-card"></i>
                             <span>Bayar</span>
@@ -415,10 +414,15 @@
                     @endrole
                     @role('Superadmin|Pentadbir|Admin')
                      <li>
-                        <!-- wrong route -->
                         <a href="{{ route('recurring_fees.index') }}" class=" waves-effect">
                         <i class="fas fa-child"></i>
                         <span>Butiran Perbelanjaan</span>
+                        </a>
+                    </li> 
+                    <li>
+                        <a href="{{ route('recurring_fees.reportExpenses') }}" class=" waves-effect">
+                        <i class="fas fa-child"></i>
+                        <span>Laporan Perbelanjaan</span>
                         </a>
                     </li> 
                     @endrole

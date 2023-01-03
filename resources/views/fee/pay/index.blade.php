@@ -93,12 +93,13 @@
                     <div class="card">
 
                         <div class="inputGroup">
+                            
                             <input id="option-{{ $organizations->id }}" name="nameSchool"
                                 value="{{ $organizations->id }}" type="checkbox" data-toggle="collapse"
                                 data-target="#collapse{{ $organizations->id }}" aria-expanded="false"
                                 aria-controls="collapse{{ $organizations->id }}"
                                 class="d-block position-relative text-dark collapsible-link py-2"
-                                onchange="checkOrganization(this)" />
+                                onchange="checkOrganization(this)" /> 
 
                             <label for="option-{{ $organizations->id }}">
                                 <span style="font-size: 18px">{{ $organizations->nama }}</span>
@@ -196,7 +197,6 @@
                                                 data-parent="#accordionExample{{ $row->oid }}-{{ $row->studentid }}"
                                                 class="collapse">
                                                 <div class="card-body pl-0 pr-0">
-
                                                     @foreach($getfees->where('studentid', $row->studentid) as $data)
                                                     <div class="col-md-12">
                                                         <div id="accordionExample{{ $data->studentid }}-{{ $data->organization_id }}"

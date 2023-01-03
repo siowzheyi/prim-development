@@ -9,12 +9,12 @@
 <div class="row align-items-center">
     <div class="col-sm-6">
         <div class="page-title-box">
-            <h4 class="font-size-18">Perbelanjaan Sekolah</h4>
+            <h4 class="font-size-18">Status Penjaga Pembayaran Perbelanjaan Sekolah</h4>
         </div>
     </div>
 </div>
 <div class="row">
-    <div class="col-md-12">
+    {{-- <div class="col-md-12">
         <div class="card card-primary">
 
             {{csrf_field()}}
@@ -49,16 +49,17 @@
             </div>
 
         </div>
-    </div>
+    </div> --}}
 
     <div class="col-md-12">
         <div class="card">
-            <div class="card-header">Senarai Perbelanjaan</div>
+            <div class="card-header">Senarai Penjaga Pembayaran {{ $expenses->name }}</div>
             <div>
                 <!-- need to add print pdf function -->
-                {{-- <a style="margin: 19px;" href="#" class="btn btn-primary" data-toggle="modal" data-target="#modelId"> <i class="fas fa-plus"></i> Import</a> --}}
+                <a style="margin: 19px;" href="#" class="btn btn-primary allBtn"> <i class="far fa-id-badge"></i> Semua</a>
+                <a style="margin: 19px;" href="#"  class="btn btn-primary paidBtn"> <i class="far fa-id-badge"></i> Bayar</a>
+                <a style="margin: 19px;" href="#"  class="btn btn-primary unpaidBtn"> <i class="far fa-id-badge"></i> Belum Bayar</a>
                 <a style="margin: 19px; float: right;" href="#" class="btn btn-success" data-toggle="modal" data-target="#modelId1"> <i class="fas fa-plus"></i> Export</a>
-                <a style="margin: 19px; float: right;" href="{{ route('recurring_fees.create') }}" class="btn btn-primary"> <i class="fas fa-plus"></i> Tambah Perbelanjaan</a>
             </div>
 
             <div class="card-body">
@@ -86,17 +87,15 @@
                 <div class="flash-message"></div>
 
                 <div class="table-responsive">
-                    <table id="expensesTable" class="table table-bordered table-striped dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                    <table id="parentsTable" class="table table-bordered table-striped dt-responsive nowrap" style="border-collapse: collapse; border-spacing: 0; width: 100%;">
                         <thead>
                             <tr style="text-align:center">
                                 <th> No. </th>
-                                <th>Nama Perbelanjaan</th>
-                                <th>Diskripsi</th>
-                                <th>Amaun</th>
-                                <th>Tarikh Bermula</th>
-                                <th>Tarikh Berakhir</th>
-                                <th>Status Berulangan</th>
-                                <th>Action</th>
+                                <th>Nama Penjaga</th>
+                                <th>Nombor Telefon penjaga</th>
+                                <th>Nama Pelajar</th>
+                                <th>Nama Kelas</th>
+                                <th>Status Pembayaran</th>
                             </tr>
                         </thead>
                     </table>
@@ -104,31 +103,12 @@
             </div>
         </div>
 
-        {{-- confirmation delete modal --}}
-        <div id="deleteConfirmationModal" class="modal fade" role="dialog">
-            <div class="modal-dialog">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h4 class="modal-title">Padam Perbelanjaan</h4>
-                    </div>
-                    <div class="modal-body">
-                        Adakah anda pasti?
-                    </div>
-                    <div class="modal-footer">
-                        <button type="button" data-dismiss="modal" class="btn btn-primary" id="delete" name="delete">Padam</button>
-                        <button type="button" data-dismiss="modal" class="btn">Batal</button>
-                    </div>
-                </div>
-            </div>
-        </div>
-        {{-- end confirmation delete modal --}}
-
         <!-- export dorm modal-->
         <div class="modal fade" id="modelId1" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
             <div class="modal-dialog" role="document">
                 <div class="modal-content">
                     <div class="modal-header">
-                        <h5 class="modal-title">Export Perbelanjaan Sekolah</h5>
+                        <h5 class="modal-title">Export Senarai Penjaga Pembayaran Perbelanjaan {{ $expenses->name }} Sekolah</h5>
                         <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                             <span aria-hidden="true">&times;</span>
                         </button>
@@ -175,27 +155,41 @@
 <script>
     $(document).ready(function() {
 
-        var expensesTable;
+        var parentsTable;
+        var payStatus="all";
+        expensesId = $(this).attr('id');
 
-        if ($("#organization").val() != "") {
-            $("#organization").prop("selectedIndex", 1).trigger('change');
-            fetch_data($("#organization").val());
-        }
+        $(document).on('click', '.allBtn', function() {
+            $('#parentsTable').DataTable().destroy();
+            payStatus = "all";
+            
+            fetch_data(expensesId);
+        });
 
-        function fetch_data(oid = '') {
-            expensesTable = $('#expensesTable').DataTable({
+        $(document).on('click', '.paidBtn', function() {
+            $('#parentsTable').DataTable().destroy();
+            payStatus = "paid";
+            
+            fetch_data(expensesId);
+        });
+
+        $(document).on('click', '.unpaidBtn', function() {
+            $('#parentsTable').DataTable().destroy();
+            payStatus = "unpaid";
+            
+            fetch_data(expensesId);
+        });
+
+        function fetch_data(expensesId = '') {
+            parentsTable = $('#parentsTable').DataTable({
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route('recurring_fees.getExpensesDatatable') }}",
+                    url: "{{ route('recurring_fees.getpayStatusDatatable') }}",
 
                     data: {
-                        oid: oid,
-                        hasOrganization: true,
-                        recurring_type: $("#recurring_type option:selected").val(),
-                        fromTime: $('#fromTime').val(),
-                        untilTime: $('#untilTime').val(),
-                        payStatus: null
+                        expensesId: expensesId,
+                        payStatus: payStatus
                     },
                     type: 'GET',
                    
@@ -206,11 +200,11 @@
                     "className": "text-center",
                     "width": "2%"
                 }, {
-                    "targets": [1,4], 
+                    "targets": [1,3], 
                     "className": "text-center",
                     "width": "15%"
                 }, {
-                    "targets": [ 2,3,5,6,7],
+                    "targets": [ 2,4,5],
                     "className": "text-center",
                 }, ],
                 order: [
@@ -224,115 +218,36 @@
                         return meta.row + meta.settings._iDisplayStart + 1;
                     }
                 }, {
-                    data: "name",
-                    name: 'name',
+                    data: "parentName",
+                    name: 'parentName'
                 }, {
-                    data: "description",
-                    name: 'description',
-                    searchable: false,
+                    data: "parentTel",
+                    name: 'parentTel',
                     orderable: false,
 
                 }, {
-                    data: "amount",
-                    name: 'amount',
-                    searchable: false
+                    data: "studentName",
+                    name: 'studentName',
                 }, {
-                    data: "start_date",
-                    name: 'start_date',
-                    searchable: false
+                    data: "className",
+                    name: 'className'
                 }, {
-                    data: "end_date",
-                    name: 'end_date',
-                    searchable: false
-                }, {
-                    data: "status_recurring",
-                    name: 'status_recurring',
+                    data: "payStatus",
+                    name: 'payStatus',
                     searchable: false,
                     orderable: false
-                }, {
-                    data: 'action',
-                    name: 'action',
-                    orderable: false,
-                    searchable: false
-                }, ]
+                }]
             });
 
         }
 
-        $('#organization').change(function() {
-            var organizationid = $("#organization option:selected").val();
-            $('#expensesTable').DataTable().destroy();
-            fetch_data(organizationid);
-        });
-
-        $('#recurring_type').change(function() {
-            var organizationid = $("#organization option:selected").val();
-
-            $('#expensesTable').DataTable().destroy();
-
-            fetch_data(organizationid);
-        });
-
-        $('#fromTime').change(function() {
-            var organizationid = $("#organization option:selected").val();
-
-            $('#expensesTable').DataTable().destroy();
-
-            fetch_data(organizationid);
-        });
-
-        $('#untilTime').change(function() {
-            var organizationid = $("#organization option:selected").val();
-
-            $('#expensesTable').DataTable().destroy();
-
-            fetch_data(organizationid);
-        });
-
+       
         // csrf token for ajax
         $.ajaxSetup({
             headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
-
-        var expenses_id;
-
-        $(document).on('click', '.destroyExpenses', function() {
-            expenses_id = $(this).attr('id');
-            $('#deleteConfirmationModal').modal('show');
-        });
-
-       
-
-        $('#delete').click(function() {
-            $.ajax({
-                type: 'POST',
-                dataType: 'html',
-                data: {
-                    "_token": "{{ csrf_token() }}",
-                    _method: 'DELETE'
-                },
-                url: "/recurring_fees/" + expenses_id,
-                success: function(data) {
-                    setTimeout(function() {
-                        $('#confirmModal').modal('hide');
-                    }, 2000);
-                    console.log('it works');
-
-                    $('div.flash-message').html(data);
-
-                    expensesTable.ajax.reload();
-                },
-                error: function(data) {
-                    $('div.flash-message').html(data);
-                    console.log("it doesn't Works");
-
-                }
-            })
-        });
-
-        
 
         $('.alert').delay(3000).fadeOut();
 

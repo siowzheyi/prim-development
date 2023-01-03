@@ -1045,6 +1045,7 @@ class FeesController extends AppBaseController
             ->orderBy('organizations.id')
             ->orderBy('classes.nama')
             ->get();
+            
 
         // ************************* get list organization by parent  *******************************
 

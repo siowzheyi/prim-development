@@ -9,7 +9,7 @@
 <div class="row align-items-center">
     <div class="col-sm-6">
         <div class="page-title-box">
-            <h4 class="font-size-18">Perbelanjaan Sekolah</h4>
+            <h4 class="font-size-18">Laporan Perbelanjaan Sekolah</h4>
         </div>
     </div>
 </div>
@@ -56,9 +56,10 @@
             <div class="card-header">Senarai Perbelanjaan</div>
             <div>
                 <!-- need to add print pdf function -->
-                {{-- <a style="margin: 19px;" href="#" class="btn btn-primary" data-toggle="modal" data-target="#modelId"> <i class="fas fa-plus"></i> Import</a> --}}
+                <a style="margin: 19px;" href="#" class="btn btn-primary allBtn"> <i class="far fa-id-badge"></i> Semua</a>
+                <a style="margin: 19px;" href="#"  class="btn btn-primary paidBtn"> <i class="far fa-id-badge"></i> Bayar</a>
+                <a style="margin: 19px;" href="#"  class="btn btn-primary unpaidBtn"> <i class="far fa-id-badge"></i> Belum Bayar</a>
                 <a style="margin: 19px; float: right;" href="#" class="btn btn-success" data-toggle="modal" data-target="#modelId1"> <i class="fas fa-plus"></i> Export</a>
-                <a style="margin: 19px; float: right;" href="{{ route('recurring_fees.create') }}" class="btn btn-primary"> <i class="fas fa-plus"></i> Tambah Perbelanjaan</a>
             </div>
 
             <div class="card-body">
@@ -96,7 +97,7 @@
                                 <th>Tarikh Bermula</th>
                                 <th>Tarikh Berakhir</th>
                                 <th>Status Berulangan</th>
-                                <th>Action</th>
+                                <th>Bilangan Pembayar</th>
                             </tr>
                         </thead>
                     </table>
@@ -176,11 +177,41 @@
     $(document).ready(function() {
 
         var expensesTable;
+        var payStatus="all";
 
         if ($("#organization").val() != "") {
             $("#organization").prop("selectedIndex", 1).trigger('change');
             fetch_data($("#organization").val());
         }
+
+        $(document).on('click', '.allBtn', function() {
+            var organizationid = $("#organization option:selected").val();
+            $('#expensesTable').DataTable().destroy();
+            payStatus = "all";
+            
+            fetch_data(organizationid);
+           
+        });
+
+        $(document).on('click', '.paidBtn', function() {
+            var organizationid = $("#organization option:selected").val();
+            $('#expensesTable').DataTable().destroy();
+            payStatus = "paid";
+            
+            fetch_data(organizationid);
+           
+
+        });
+
+        $(document).on('click', '.unpaidBtn', function() {
+            var organizationid = $("#organization option:selected").val();
+            $('#expensesTable').DataTable().destroy();
+            payStatus = "unpaid";
+            
+            fetch_data(organizationid);
+            
+
+        });
 
         function fetch_data(oid = '') {
             expensesTable = $('#expensesTable').DataTable({
@@ -195,7 +226,7 @@
                         recurring_type: $("#recurring_type option:selected").val(),
                         fromTime: $('#fromTime').val(),
                         untilTime: $('#untilTime').val(),
-                        payStatus: null
+                        payStatus: payStatus
                     },
                     type: 'GET',
                    
@@ -226,6 +257,10 @@
                 }, {
                     data: "name",
                     name: 'name',
+                    render: function(data, type, row, meta) {
+                        return '<a href = "payStatusExpenses/' + row.id + '">' + data + '</a>';
+                    }
+
                 }, {
                     data: "description",
                     name: 'description',
@@ -249,12 +284,12 @@
                     name: 'status_recurring',
                     searchable: false,
                     orderable: false
-                }, {
-                    data: 'action',
-                    name: 'action',
-                    orderable: false,
-                    searchable: false
-                }, ]
+                },{
+                    data: "payStatus",
+                    name: 'payStatus',
+                    searchable: false,
+                    orderable: false
+                }]
             });
 
         }

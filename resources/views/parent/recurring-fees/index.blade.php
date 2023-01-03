@@ -44,7 +44,7 @@
 <div class="row align-items-center">
     <div class="col-sm-6">
         <div class="page-title-box">
-            <h4 class="font-size-18">Bayar Yuran</h4>
+            <h4 class="font-size-18">Bayar Perbelanjaan</h4>
             <!-- <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item active">Welcome to Veltrix Dashboard</li>
             </ol> -->
@@ -55,7 +55,7 @@
 <div class="card p-4">
     <div class="row">
         <div class="col-md-12 pb-3">
-            <h3>Sila Pilih Sekolah Berkaitan Untuk Bayaran Yuran</h3>
+            <h3>Sila Pilih Sekolah Berkaitan Untuk Bayaran Perbelanjaan</h3>
         </div>
         {{-- <div class="col-md-12 pb-3">
             <ol class="breadcrumb mb-0">
@@ -85,13 +85,13 @@
 <div class="col-md-12">
     <div class="row">
         <div class="container-wrapper-scroll p-2 mb-3">
+            
 
             @foreach ($organization as $organizations)
             <div class="col-md-12">
                 <div id="accordionExample{{ $organizations->id }}" class="accordion shadow">
                     <!-- Accordion item 1 -->
                     <div class="card">
-
                         <div class="inputGroup">
                             <input id="option-{{ $organizations->id }}" name="nameSchool"
                                 value="{{ $organizations->id }}" type="checkbox" data-toggle="collapse"
@@ -106,11 +106,14 @@
                             </label>
                         </div>
 
+                        <!-- Below is to let parent to choose wanna pay for which and how many expenses item -->
+
                         <div id="collapse{{ $organizations->id }}" aria-labelledby="heading{{ $organizations->id }}"
                             data-parent="#accordionExample{{ $organizations->id }}" class="collapse">
                             <div class="card-body pl-0 pr-0">
 
-                                @foreach($getfees_category_A->where('organization_id', $organizations->id) as $data)
+                                @foreach($recurring_type as $data)
+                                
                                 <div class="col-md-12">
                                     <div id="accordionExample{{ $organizations->id }}-{{ $organizations->user_id }}"
                                         class="accordion shadow">
@@ -123,18 +126,19 @@
                                                         aria-expanded="true"
                                                         aria-controls="collapse{{ $organizations->id }}-{{ $organizations->user_id }}"
                                                         class="d-block position-relative text-dark text-uppercase collapsible-link py-2">
-                                                        {{ $data->category }}</a></h6>
+                                                        {{ $data }}</a></h6>
 
                                                 <div id="collapse{{ $organizations->id }}-{{ $organizations->user_id }}"
                                                     aria-labelledby="heading{{ $organizations->id }}-{{ $organizations->user_id }}"
                                                     data-parent="#accordionExample{{ $organizations->id }}-{{ $organizations->user_id }}"
                                                     class="collapse show">
+
                                                     <div class="card-body pl-0 pr-0">
-                                                        @foreach($getfees_category_A_byparent->where('organization_id', $organizations->id) as $item)
+                                                        @foreach($getfees_by_parent->where('organization_id', $organizations->id)->where('recurring_name',$data) as $item)
                                                         <div class="inputGroup">
                                                             <input
                                                                 id="option-{{ $item->id }}-{{ $organizations->user_id }}"
-                                                                name="billcheck" value="{{ $item->totalAmount }}"
+                                                                name="billcheck" value="{{ $item->amount }}"
                                                                 onchange="checkD2(this)" type="checkbox" />
 
                                                             <label
@@ -142,9 +146,8 @@
                                                                 <span style="font-size: 18px">{{ $item->name }}</span>
                                                                 <br>
                                                                 <span
-                                                                    style="font-size: 14px;font-weight:100;">RM{{  number_format((float)$item->totalAmount, 2, '.', '') }}
-                                                                    ({{ $item->quantity }}
-                                                                    kuantiti)</span>
+                                                                    style="font-size: 14px;font-weight:100;">RM{{  number_format((float)$item->amount, 2, '.', '') }}
+                                                                    </span>
                                                             </label>
 
                                                             {{-- hidden input checkbox second --}}
@@ -164,11 +167,12 @@
                                 </div>
                                 @endforeach
 
+                                <!-- Below is to let parent to choose wanna pay for which and how many children -->
                                 @foreach($list->where('oid', $organizations->id) as $row)
                                 <div class="col-md-12">
                                     <div id="accordionExample{{ $row->oid }}-{{ $row->studentid }}"
                                         class="accordion shadow">
-                                        <!-- Accordion item 1 -->
+                                        <!-- Accordion children -->
                                         <div class="card">
 
                                             <div class="inputGroup">
@@ -195,62 +199,7 @@
                                                 aria-labelledby="heading{{ $row->oid }}-{{ $row->studentid }}"
                                                 data-parent="#accordionExample{{ $row->oid }}-{{ $row->studentid }}"
                                                 class="collapse">
-                                                <div class="card-body pl-0 pr-0">
-
-                                                    @foreach($getfees->where('studentid', $row->studentid) as $data)
-                                                    <div class="col-md-12">
-                                                        <div id="accordionExample{{ $data->studentid }}-{{ $data->organization_id }}"
-                                                            class="accordion shadow">
-                                                            <!-- Accordion item 1 -->
-                                                            <div class="card">
-                                                                <div id="heading{{ $data->studentid }}-{{ $data->organization_id  }}"
-                                                                    class="card-header bg-white shadow-sm border-0">
-                                                                    <h6 class="mb-0 font-weight-bold"><a href="#"
-                                                                            data-toggle="collapse"
-                                                                            data-target="#collapse{{ $data->studentid }}-{{ $data->organization_id }}"
-                                                                            aria-expanded="true"
-                                                                            aria-controls="collapse{{ $data->studentid }}-{{ $data->organization_id  }}"
-                                                                            class="d-block position-relative text-dark text-uppercase collapsible-link py-2">
-                                                                            {{ $data->category }}</a></h6>
-
-                                                                    <div id="collapse{{ $data->studentid }}-{{ $data->organization_id  }}"
-                                                                        aria-labelledby="heading{{ $data->studentid }}-{{ $data->organization_id  }}"
-                                                                        data-parent="#accordionExample{{ $data->studentid }}-{{ $data->organization_id  }}"
-                                                                        class="collapse show">
-                                                                        <div class="card-body pl-0 pr-0">
-                                                                            @foreach($getfees_bystudent->where('studentid', $data->studentid)->where('category',$data->category) as $item)
-                                                                            <div class="inputGroup">
-                                                                                <input
-                                                                                    id="option-{{ $item->id }}-{{ $data->studentid }}"
-                                                                                    name="billcheck"
-                                                                                    value="{{ $item->totalAmount }}"
-                                                                                    onchange="checkD(this)"
-                                                                                    type="checkbox" />
-
-                                                                                <label for="option-{{ $item->id }}-{{ $data->studentid }}">
-                                                                                    <span style="font-size: 18px">{{ $item->name }}</span>
-                                                                                    <br>
-                                                                                    <span style="font-size: 14px;font-weight:100;">RM{{  number_format((float)$item->totalAmount, 2, '.', '') }} ({{ $item->quantity }} kuantiti)</span>
-                                                                                </label>
-
-                                                                                {{-- hidden input checkbox second --}}
-                                                                                <input
-                                                                                    id="option-{{ $item->id }}-{{ $data->studentid }}-2"
-                                                                                    style="opacity: 0.0; position: absolute; left: -9999px"
-                                                                                    checked="checked" name="billcheck2"
-                                                                                    value="{{$data->studentid}}-{{ $item->id }}"
-                                                                                    type="checkbox" />
-                                                                            </div>
-                                                                            @endforeach
-                                                                        </div>
-                                                                    </div>
-                                                                </div>
-                                                            </div>
-                                                        </div>
-                                                    </div>
-                                                    @endforeach
-
-                                                </div>
+                                                
                                             </div>
                                         </div>
                                     </div>
