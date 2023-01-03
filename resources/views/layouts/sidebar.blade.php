@@ -406,7 +406,7 @@
                 <ul class="sub-menu mm-collapse" aria-expanded="false">
                     @role('Superadmin|Penjaga')
                     <li>
-                        <a href="{{ route('related_fees') }}" class=" waves-effect">
+                        <a href="{{ route('recurring_fees.related_fees') }}" class=" waves-effect">
                             <i class="far fa-credit-card"></i>
                             <span>Bayar</span>
                         </a>

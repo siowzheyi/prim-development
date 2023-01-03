@@ -6,7 +6,10 @@ use Illuminate\Http\Request;
 use App\Models\Organization;
 use App\Models\Recurring;
 use Yajra\DataTables\DataTables;
-
+use Maatwebsite\Excel\Facades\Excel;
+use App\Exports\ParentPayStatusExport;
+use App\Exports\ExpensesPayStatusExport;
+use PDF;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Session;
@@ -64,7 +67,7 @@ class ExpensesController extends Controller
         $getType = Recurring::where('name','=',$request->get('recurring_type'))
                     ->where('start_date','=',$request->get('start_date_recurring'))
                     ->where('end_date','=',$request->get('end_date_recurring'))
-                    ->value('id');
+                    ->first();
 
         //if recurring existed got record
         if ($getType != null) {
@@ -72,7 +75,7 @@ class ExpensesController extends Controller
                 $recurring_id = $getType;
         }  
         else{
-            $recurring_created =Recurring::create([
+            $recurring_id =Recurring::create([
                     'name'          => $request->get('recurring_type'),
                     'start_date'    => $request->get('start_date'),
                     'end_date'      => $request->get('end_date')
@@ -85,7 +88,7 @@ class ExpensesController extends Controller
             'amount'        =>  $request->get('amount'),
             'start_date'    =>  $request->get('start_date'),
             'end_date'      =>  $request->get('end_date'),
-            'recurring_id'  =>  $recurring_created->id,
+            'recurring_id'  =>  $recurring_id->id,
             'organization_id'=> $request->get('organization')
 
         ]);
@@ -99,6 +102,7 @@ class ExpensesController extends Controller
                             ->select('cs.id')
                             ->get();
             $i=0;
+            $result=0;
 
             // dd($expenses->id);
             foreach($related_student as $row)
@@ -108,13 +112,13 @@ class ExpensesController extends Controller
                 ->insert([
                     'status'             => 'unpaid',
                     'expenses_id'        => $expenses->id, 
-                    'class_student_id'   => $related_student[$i++]->id           
+                    'class_student_id'   => $row->id           
                 ]);
                 
             }
 
             //if successfully updated expenses link with students
-            if($result)
+            if($result!=0)
                 return redirect('/recurring_fees')->with('success', 'Perbelanjaan telah ditambahkan');
             else
                 return redirect('/recurring_fees')->with('fail','Perbelanjaan tidak ditambahkan kerana tiada pelajar dalam sekolah ini');
@@ -179,7 +183,7 @@ class ExpensesController extends Controller
             $getType = Recurring::where('name','=',$request->get('recurring_type'))
                         ->where('start_date','=',$request->get('start_date'))
                         ->where('end_date','=',$request->get('end_date'))
-                        ->value('id');
+                        ->first();
 
             //if recurring existed got record
             if ($getType != null) {
@@ -187,7 +191,7 @@ class ExpensesController extends Controller
                     $recurring_id = $getType;
             }  
             else{
-                    $recurring_created = Recurring::create([
+                    $recurring_id = Recurring::create([
                         'name'          => $request->get('recurring_type'),
                         'start_date'    => $request->get('start_date'),
                         'end_date'      => $request->get('end_date')
@@ -200,7 +204,7 @@ class ExpensesController extends Controller
                 'description'   =>  $request->get('description'),
                 'start_date'    =>  $request->get('start_date'),
                 'end_date'      =>  $request->get('end_date'),
-                'recurring_id'  =>  $recurring_created->id,
+                'recurring_id'  =>  $recurring_id->id,
                 'organization_id'=> $request->get('organization')
 
             ]);
@@ -265,12 +269,7 @@ class ExpensesController extends Controller
             $untilTime = $request->untilTime;
             //assume that recurring type we get "annually","semester","monthly"
             $recurringType = $request->recurring_type;
-            $hasOrganizaton = $request->hasOrganization;
-            $payStatus = $request->payStatus;            
-
-            // create recurring data that only contain data which have recurring id
-           
-
+            $payStatus = $request->payStatus;           
             $data = DB::table('expenses')
                 ->join('recurrings','recurrings.id','=','expenses.recurring_id')
                 ->join('student_expenses','student_expenses.expenses_id','=','expenses.id')
@@ -282,7 +281,6 @@ class ExpensesController extends Controller
                 ->orderBy('expenses.start_date')
                 ->groupBy('expenses.id');
                 // ->get();
-
             // $data = DB::table('expenses')
             //         ->where('organization_id',$oid)
             //         ->where('status','active')
@@ -290,7 +288,7 @@ class ExpensesController extends Controller
 
             //['name', 'description', 'amount','start_date','end_date','status_recurring','action'];
 
-            if ($oid != '' && !is_null($hasOrganizaton)) {
+            if ($oid != '' ) {
                   // if user select any time period AND select non recurring type
                   if ($fromTime == '' || $untilTime == '') {
                     $data = $data;
@@ -332,7 +330,6 @@ class ExpensesController extends Controller
                     if ($row->recurrings_name == 'monthly') {
                         $btn = '<div class="d-flex justify-content-center">';
                         $btn = $btn . '<span class="badge badge-success"> Setiap Bulan </span></div>';
-                                    //
                         return $btn;
                     // else the expenses is not recurring
                     } elseif ($row->recurrings_name == 'semester') {
@@ -368,9 +365,6 @@ class ExpensesController extends Controller
             $table->rawColumns($rawColumn);
             return $table->make(true);
             }
-
-            
-           
         }
     }
 
@@ -451,9 +445,6 @@ class ExpensesController extends Controller
 
         $recurring_type = ['Semua', 'Setiap Bulan','Setiap Tahun','Setiap Semester'];
 
-    
-       
-
         return view('pentadbir.recurring-fees.report.index', compact('recurring_type', 'minDate','maxDate', 'organization'));
     }
 
@@ -479,122 +470,182 @@ class ExpensesController extends Controller
     }
 
     //get datatable for pay status
-    public function getpayStatusDatatable(Request $request)
+    public function getPayStatusDatatable(Request $request)
     {
-        if (request()->ajax()) {
-            $oid = $request->oid;
-            $fromTime = $request->fromTime;
-            $untilTime = $request->untilTime;
-            //assume that recurring type we get "annually","semester","monthly"
-            $recurringType = $request->recurring_type;
-            $hasOrganizaton = $request->hasOrganization;
-            $payStatus = $request->payStatus;            
+    if (request()->ajax()) {
+        $expensesId = $request->expensesId;
+        // all, paid unpaid
+        $payStatus = $request->payStatus;
 
-            // create recurring data that only contain data which have recurring id
-           
+        // create recurring data that only contain data which have recurring id
 
-            $data = DB::table('expenses')
-                ->join('recurrings','recurrings.id','=','expenses.recurring_id')
-                ->join('student_expenses','student_expenses.expenses_id','=','expenses.id')
-                ->select('expenses.*','recurrings.id as recurrings_id',
-                            'recurrings.name as recurrings_name',
-                             DB::raw("count(student_expenses.status) AS payStatus"))
-                ->where('expenses.organization_id','=',$oid)
-                ->where('expenses.status','active')
-                ->orderBy('expenses.start_date')
-                ->groupBy('expenses.id');
-                // ->get();
 
-            // $data = DB::table('expenses')
-            //         ->where('organization_id',$oid)
-            //         ->where('status','active')
-            //         ->orderBy('start_date');
+        $data = DB::table('student_expenses')
+        ->join('class_student', 'class_student.id', '=', 'student_expenses.class_student_id')
+        ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+        ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+        ->join('students', 'students.id', '=', 'class_student.student_id')
+        ->join('organization_user_student', 'organization_user_student.student_id', '=', 'students.id')
+        ->join('organization_user', 'organization_user.id', '=', 'organization_user_student.organization_user_id')
+        ->join('users', 'users.id', '=', 'organization_user.user_id')
+        ->select('users.name as parentName', 'students.nama as studentName', 'classes.nama as className', 'students.parent_tel as parentTel', 'student_expenses.status')
+        ->where('student_expenses.expenses_id', $expensesId)
+        ->orderBy('users.name');
 
-            //['name', 'description', 'amount','start_date','end_date','status_recurring','action'];
+        if ($payStatus == 'paid') {
+            $data = $data->where('student_expenses.status', '=', 'paid')
+                        ->get();
+        } elseif ($payStatus == 'unpaid') {
+            $data = $data->where('student_expenses.status', '=', 'unpaid')
+                    ->get();
+        } else {
+            $data = $data->get();
+        }
+        $table = Datatables::of($data);
 
-            if ($oid != '' && !is_null($hasOrganizaton)) {
-                  // if user select any time period AND select non recurring type
-                  if ($fromTime == '' || $untilTime == '') {
-                    $data = $data;
-                }
-                // if user select time period AND select non recurring type
-                elseif ($fromTime != '' && $untilTime != '') {
-                    $data = $data
-                    ->where('expenses.start_date', '>=', $fromTime)
-                    ->where('expenses.end_date', '<=', $untilTime);
-                }
-            
-                if($payStatus == 'paid' || $payStatus == 'unpaid')
-                {
-                    $data = $data
-                    ->where('student_expenses.status',$payStatus);
-                }
-
-                // $recurring_type = ['Semua','Tidak Berulang','Setiap Bulan','Setiap Tahun','Setiap Semester'];
-
-                if ($recurringType == 'Setiap Bulan') {
-                    $data = $data
-                            ->where('recurrings.name', '=', 'monthly')
-                            ->get();
-                } elseif ($recurringType == 'Setiap Tahun') {
-                    $data = $data
-                            ->where('recurrings.name', '=', 'annually')
-                            ->get();
-                } elseif ($recurringType == 'Setiap Semester') {
-                    $data = $data
-                            ->where('recurrings.name', '=', 'semester')
-                            ->get();
-                } else {
-                    $data = $data->get();
-                }
-                $table = Datatables::of($data);
-
-                $table->addColumn('status_recurring', function ($row) {
-                    // if the expenses is recurring
-                    if ($row->recurrings_name == 'monthly') {
-                        $btn = '<div class="d-flex justify-content-center">';
-                        $btn = $btn . '<span class="badge badge-success"> Setiap Bulan </span></div>';
-                                    //
-                        return $btn;
-                    // else the expenses is not recurring
-                    } elseif ($row->recurrings_name == 'semester') {
-                        $btn = '<div class="d-flex justify-content-center">';
-                        $btn = $btn . '<span class="badge badge-success"> Setiap Semester </span></div>';
-
-                        return $btn;
-                    }
-                    elseif ($row->recurrings_name == 'annually') {
-                        $btn = '<div class="d-flex justify-content-center">';
-                        $btn = $btn . '<span class="badge badge-success"> Setiap Tahun </span></div>';
-
-                        return $btn;
-                    }
-                });
-
-                $rawColumn = ['status_recurring'];
-             
-                if($payStatus == '')
-                {
-                    $table->addColumn('action', function ($row) {
-                        $token = csrf_token();
-                        $btn = '<div class="d-flex justify-content-center">';
-                        $btn = $btn . '<a href="' . route('recurring_fees.edit', $row->id) . '" class="btn btn-primary m-1">Ubah</a>';
-                        $btn = $btn . '<button id="' . $row->id . '" data-token="' . $token . '" class="btn btn-danger m-1 destroyExpenses">Buang</button></div>';
-                        return $btn;
-
-                        // $table->rawColumns(['status_recurring','action']);    
-                    });
-                    $rawColumn = ['status_recurring','action'];
-                }
-                
-            $table->rawColumns($rawColumn);
-            return $table->make(true);
+        $table->addColumn('payStatus', function ($row) {
+            // if the expenses is recurring
+            $btn = '<div class="d-flex justify-content-center">';
+            if($row->status == 'unpaid')
+            {
+                $btn = $btn . '<span class="badge badge-danger"> '.$row->status.' </span></div>';
             }
+            else{
+                $btn = $btn . '<span class="badge badge-success"> '.$row->status.' </span></div>';
+            }
+            return $btn;
+        });
 
-            
-           
+        $table->rawColumns(['payStatus']);
+        return $table->make(true);
         }
     }
 
+    public function exportParentPayStatusReport(Request $request)
+    {
+        $this->validate($request, [
+            'payStatus'      =>  'required',
+            'expensesId'    =>  'required'
+        ]);
 
+        $filename = DB::table('expenses')
+            ->where('expenses.id', $request->expensesId)
+            ->value('expenses.name');
+
+        // dd($filename);
+
+        return Excel::download(new ParentPayStatusExport($request->payStatus, $request->expensesId), $filename . '.xlsx');
+    }
+
+    public function exportExpensesPayStatusReport(Request $request)
+    {
+        $this->validate($request, [
+            'payStatus'      =>  'required',
+            'organ'    =>  'required'
+        ]);
+
+        $filename = DB::table('expenses')
+            ->join('organizations','organizations.id','=','expenses.organization_id')
+            ->where('expenses.organization_id', $request->organ)
+            ->value('organizations.nama');
+
+        // dd($filename);
+
+        return Excel::download(new ExpensesPayStatusExport($request->payStatus, $request->organ), 'Perbelanjaan '.$filename . '.xlsx');
+    }
+
+    public function printExpensesPayStatusReport(Request $request)
+    {
+        // $student_id = $request->student_id;
+
+        $this->validate($request, [
+            'organ'      =>  'required',
+            'payStatus'      =>  'required',
+        ]);
+
+        $details = DB::table('organizations')
+                    ->select('organizations.nama as schoolName',
+                            'organizations.address as schoolAddress',
+                            'organizations.postcode as schoolPostcode',
+                            'organizations.state as schoolState')
+                    ->where('id',$request->organ)
+                    ->first();
+
+        $list = DB::table('expenses')
+                ->join('recurrings','recurrings.id','=','expenses.recurring_id')
+                ->join('student_expenses','student_expenses.expenses_id','=','expenses.id')
+                ->select('expenses.name as expenses_name','expenses.description','expenses.amount',
+                            'recurrings.name as recurrings_name',
+                            DB::raw("count(student_expenses.status) AS payStatus")
+                            )
+                ->where('expenses.organization_id','=',$request->organ)
+                ->where('expenses.status','active')
+                ->orderBy('expenses.start_date')
+                ->groupBy('expenses.id');
+
+        if($request->payStatus == 'all')
+        {
+            $list = $list->get();
+        }
+        elseif($request->payStatus == 'paid')
+        {
+            $list = $list->where('student_expenses.status','=','paid')->get();
+        }
+        elseif($request->payStatus == 'unpaid')
+        {
+            $list = $list->where('student_expenses.status','=','unpaid')->get();
+        }
+
+        $pdf = PDF::loadView('pentadbir.recurring-fees.report.reportExpensesPayStatusPdfTemplate', compact('list','details'));
+
+        return $pdf->download('Report.pdf');
+    }
+
+    public function printParentPayStatusReport(Request $request)
+    {
+        // $student_id = $request->student_id;
+
+        $this->validate($request, [
+            'expensesId'      =>  'required',
+            'payStatus'      =>  'required',
+        ]);
+
+        $details = DB::table('organizations')
+                    ->join('expenses','expenses.organization_id','=','organizations.id')
+                    ->select('organizations.nama as schoolName',
+                            'organizations.address as schoolAddress',
+                            'organizations.postcode as schoolPostcode',
+                            'organizations.state as schoolState',
+                            'expenses.name as expensesName')
+                    ->where('expenses.id',$request->expensesId)
+                    ->first();
+
+        $list = DB::table('student_expenses')
+                    ->join('class_student','class_student.id','=','student_expenses.class_student_id')
+                    ->join('class_organization','class_organization.id','=','class_student.organclass_id')
+                    ->join('classes','classes.id','=','class_organization.class_id')
+                    ->join('students','students.id','=','class_student.student_id')
+                    ->join('organization_user_student','organization_user_student.student_id','=','students.id')
+                    ->join('organization_user','organization_user.id','=','organization_user_student.organization_user_id')
+                    ->join('users','users.id','=','organization_user.user_id')
+                    ->where('student_expenses.expenses_id',$request->expensesId)
+                    ->select('users.name as parentName','students.parent_tel as parentTel','students.nama as studentName','classes.nama as className','student_expenses.status as payStatus');
+                    
+        if($request->payStatus == 'all')
+        {
+            $list = $list->get();
+        }
+        elseif($request->payStatus == 'paid')
+        {
+            $list = $list->where('student_expenses.status','=','paid')->get();
+        }
+        elseif($request->payStatus == 'unpaid')
+        {
+            $list = $list->where('student_expenses.status','=','unpaid')->get();
+        }
+
+        $pdf = PDF::loadView('pentadbir.recurring-fees.report.reportParentPayStatusPdfTemplate', compact('list','details'));
+
+        return $pdf->download('Report '.$details->expensesName.'.pdf');
+    }
 }

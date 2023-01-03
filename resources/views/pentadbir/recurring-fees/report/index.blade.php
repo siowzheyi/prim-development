@@ -60,6 +60,8 @@
                 <a style="margin: 19px;" href="#"  class="btn btn-primary paidBtn"> <i class="far fa-id-badge"></i> Bayar</a>
                 <a style="margin: 19px;" href="#"  class="btn btn-primary unpaidBtn"> <i class="far fa-id-badge"></i> Belum Bayar</a>
                 <a style="margin: 19px; float: right;" href="#" class="btn btn-success" data-toggle="modal" data-target="#modelId1"> <i class="fas fa-plus"></i> Export</a>
+                <a style="margin: 19px; float: right;" href="#" class="btn btn-success " data-toggle="modal" data-target="#modelId2"> <i class="fa fa-print"></i> Print</a>
+
             </div>
 
             <div class="card-body">
@@ -94,8 +96,6 @@
                                 <th>Nama Perbelanjaan</th>
                                 <th>Diskripsi</th>
                                 <th>Amaun</th>
-                                <th>Tarikh Bermula</th>
-                                <th>Tarikh Berakhir</th>
                                 <th>Status Berulangan</th>
                                 <th>Bilangan Pembayar</th>
                             </tr>
@@ -135,17 +135,27 @@
                         </button>
                     </div>
                     <!--exportfees-->
-                    <form action="" method="post">
+                    <form action="{{ route('recurring_fees.exportExpensesPayStatusReport') }}" method="post">
                         <div class="modal-body">
                             {{ csrf_field() }}
                             <div class="form-group">
                                 <label>Organisasi</label>
-                                <select name="organ" id="organ" class="form-control">
-                                    @foreach($organization as $row)
-                                    <option value="{{ $row->id }}" selected>{{ $row->nama }}</option>
-                                    @endforeach
+                                    <select name="organ" id="organ" class="form-control">
+                                        <option value="" selected disabled>Pilih Organisasi</option>
+                                        @foreach($organization as $row)
+                                        <option value="{{ $row->id }}">{{ $row->nama }}</option>
+                                        @endforeach
+                                    </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Status Pembayaran</label>
+                                <select name="payStatus" id="payStatus" class="form-control">
+                                    <option value="all">Semua</option>
+                                    <option value="paid">Telah bayar</option>
+                                    <option value="unpaid" >Belum bayar</option>
                                 </select>
                             </div>
+                            
                             <div class="modal-footer">
                                 <button id="buttonExport" type="submit" class="btn btn-primary">Export</button>
                             </div>
@@ -154,7 +164,45 @@
                 </div>
             </div>
         </div>
+        <!-- print -->
+        <div class="modal fade" id="modelId2" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cetak Laporan</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
 
+                    <form action="{{ route('recurring_fees.printExpensesPayStatusReport') }}" method="post">
+                        <div class="modal-body">
+                            {{ csrf_field() }}
+                            <div class="form-group">
+                                <label>Organisasi</label>
+                                    <select name="organ" id="organ" class="form-control">
+                                        <option value="" selected disabled>Pilih Organisasi</option>
+                                        @foreach($organization as $row)
+                                        <option value="{{ $row->id }}">{{ $row->nama }}</option>
+                                        @endforeach
+                                    </select>
+                            </div>
+                            <div class="form-group">
+                                <label>Status Pembayaran</label>
+                                <select name="payStatus" id="payStatus" class="form-control">
+                                    <option value="all">Semua</option>
+                                    <option value="paid">Telah bayar</option>
+                                    <option value="unpaid" >Belum bayar</option>
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button id="buttonPrint" type="submit" class="btn btn-primary">Print</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
       
       
     </div>
@@ -222,14 +270,13 @@
 
                     data: {
                         oid: oid,
-                        hasOrganization: true,
                         recurring_type: $("#recurring_type option:selected").val(),
                         fromTime: $('#fromTime').val(),
                         untilTime: $('#untilTime').val(),
                         payStatus: payStatus
                     },
                     type: 'GET',
-                   
+                    
                 },
                 
                 'columnDefs': [{
@@ -241,7 +288,7 @@
                     "className": "text-center",
                     "width": "15%"
                 }, {
-                    "targets": [ 2,3,5,6,7],
+                    "targets": [ 2,3,5],
                     "className": "text-center",
                 }, ],
                 order: [
@@ -270,14 +317,6 @@
                 }, {
                     data: "amount",
                     name: 'amount',
-                    searchable: false
-                }, {
-                    data: "start_date",
-                    name: 'start_date',
-                    searchable: false
-                }, {
-                    data: "end_date",
-                    name: 'end_date',
                     searchable: false
                 }, {
                     data: "status_recurring",

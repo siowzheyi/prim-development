@@ -55,11 +55,13 @@
         <div class="card">
             <div class="card-header">Senarai Penjaga Pembayaran {{ $expenses->name }}</div>
             <div>
-                <!-- need to add print pdf function -->
+                <input type="text" value="{{ $id }}" id="getId" hidden>
                 <a style="margin: 19px;" href="#" class="btn btn-primary allBtn"> <i class="far fa-id-badge"></i> Semua</a>
                 <a style="margin: 19px;" href="#"  class="btn btn-primary paidBtn"> <i class="far fa-id-badge"></i> Bayar</a>
                 <a style="margin: 19px;" href="#"  class="btn btn-primary unpaidBtn"> <i class="far fa-id-badge"></i> Belum Bayar</a>
                 <a style="margin: 19px; float: right;" href="#" class="btn btn-success" data-toggle="modal" data-target="#modelId1"> <i class="fas fa-plus"></i> Export</a>
+                <a style="margin: 19px; float: right;" href="#" class="btn btn-success " data-toggle="modal" data-target="#modelId2"> <i class="fa fa-print"></i> Print</a>
+
             </div>
 
             <div class="card-body">
@@ -114,15 +116,16 @@
                         </button>
                     </div>
                     <!--exportfees-->
-                    <form action="" method="post">
+                    <form action="{{ route('recurring_fees.exportParentPayStatusReport') }}" method="post">
                         <div class="modal-body">
                             {{ csrf_field() }}
                             <div class="form-group">
-                                <label>Organisasi</label>
-                                <select name="organ" id="organ" class="form-control">
-                                    @foreach($organization as $row)
-                                    <option value="{{ $row->id }}" selected>{{ $row->nama }}</option>
-                                    @endforeach
+                                <label>Perbelanjaan {{ $expenses->name }}</label>
+                                <input type="text" name="expensesId" value="{{ $expenses->id }}" hidden>
+                                <select name="payStatus" id="payStatus" class="form-control">
+                                    <option value="all">Semua</option>
+                                    <option value="paid">Telah bayar</option>
+                                    <option value="unpaid" >Belum bayar</option>
                                 </select>
                             </div>
                             <div class="modal-footer">
@@ -133,7 +136,37 @@
                 </div>
             </div>
         </div>
+        <!-- print -->
+        <div class="modal fade" id="modelId2" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+            <div class="modal-dialog" role="document">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h5 class="modal-title">Cetak Laporan</h5>
+                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                            <span aria-hidden="true">&times;</span>
+                        </button>
+                    </div>
 
+                    <form action="{{ route('recurring_fees.printParentPayStatusReport') }}" method="post">
+                        <div class="modal-body">
+                            {{ csrf_field() }}
+                            <div class="form-group">
+                                <label>Perbelanjaan {{ $expenses->name }}</label>
+                                <input type="text" name="expensesId" value="{{ $expenses->id }}" hidden>
+                                <select name="payStatus" id="payStatus" class="form-control">
+                                    <option value="all">Semua</option>
+                                    <option value="paid">Telah bayar</option>
+                                    <option value="unpaid" >Belum bayar</option>
+                                </select>
+                            </div>
+                            <div class="modal-footer">
+                                <button id="buttonPrint" type="submit" class="btn btn-primary">Print</button>
+                            </div>
+                        </div>
+                    </form>
+                </div>
+            </div>
+        </div>
       
       
     </div>
@@ -157,7 +190,8 @@
 
         var parentsTable;
         var payStatus="all";
-        expensesId = $(this).attr('id');
+        expensesId = $("#getId").val();
+        fetch_data(expensesId);
 
         $(document).on('click', '.allBtn', function() {
             $('#parentsTable').DataTable().destroy();
@@ -185,14 +219,12 @@
                 processing: true,
                 serverSide: true,
                 ajax: {
-                    url: "{{ route('recurring_fees.getpayStatusDatatable') }}",
-
+                    url: "{{ route('recurring_fees.getPayStatusDatatable') }}",
                     data: {
                         expensesId: expensesId,
                         payStatus: payStatus
                     },
                     type: 'GET',
-                   
                 },
                 
                 'columnDefs': [{
@@ -224,7 +256,6 @@
                     data: "parentTel",
                     name: 'parentTel',
                     orderable: false,
-
                 }, {
                     data: "studentName",
                     name: 'studentName',

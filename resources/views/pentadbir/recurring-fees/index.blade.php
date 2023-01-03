@@ -55,9 +55,6 @@
         <div class="card">
             <div class="card-header">Senarai Perbelanjaan</div>
             <div>
-                <!-- need to add print pdf function -->
-                {{-- <a style="margin: 19px;" href="#" class="btn btn-primary" data-toggle="modal" data-target="#modelId"> <i class="fas fa-plus"></i> Import</a> --}}
-                <a style="margin: 19px; float: right;" href="#" class="btn btn-success" data-toggle="modal" data-target="#modelId1"> <i class="fas fa-plus"></i> Export</a>
                 <a style="margin: 19px; float: right;" href="{{ route('recurring_fees.create') }}" class="btn btn-primary"> <i class="fas fa-plus"></i> Tambah Perbelanjaan</a>
             </div>
 
@@ -122,40 +119,6 @@
             </div>
         </div>
         {{-- end confirmation delete modal --}}
-
-        <!-- export dorm modal-->
-        <div class="modal fade" id="modelId1" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
-            <div class="modal-dialog" role="document">
-                <div class="modal-content">
-                    <div class="modal-header">
-                        <h5 class="modal-title">Export Perbelanjaan Sekolah</h5>
-                        <button type="button" class="close" data-dismiss="modal" aria-label="Close">
-                            <span aria-hidden="true">&times;</span>
-                        </button>
-                    </div>
-                    <!--exportfees-->
-                    <form action="" method="post">
-                        <div class="modal-body">
-                            {{ csrf_field() }}
-                            <div class="form-group">
-                                <label>Organisasi</label>
-                                <select name="organ" id="organ" class="form-control">
-                                    @foreach($organization as $row)
-                                    <option value="{{ $row->id }}" selected>{{ $row->nama }}</option>
-                                    @endforeach
-                                </select>
-                            </div>
-                            <div class="modal-footer">
-                                <button id="buttonExport" type="submit" class="btn btn-primary">Export</button>
-                            </div>
-                        </div>
-                    </form>
-                </div>
-            </div>
-        </div>
-
-      
-      
     </div>
 </div>
 
@@ -186,19 +149,17 @@
             expensesTable = $('#expensesTable').DataTable({
                 processing: true,
                 serverSide: true,
+
                 ajax: {
                     url: "{{ route('recurring_fees.getExpensesDatatable') }}",
-
                     data: {
                         oid: oid,
-                        hasOrganization: true,
                         recurring_type: $("#recurring_type option:selected").val(),
                         fromTime: $('#fromTime').val(),
                         untilTime: $('#untilTime').val(),
-                        payStatus: null
+                        payStatus: null,
                     },
                     type: 'GET',
-                   
                 },
                 
                 'columnDefs': [{
