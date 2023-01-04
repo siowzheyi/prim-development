@@ -989,111 +989,117 @@ class PayController extends AppBaseController
                 ->where('id', $transaction_id)
                 ->select('user_id as id')
                 ->first();
+
         
-        $userid = $userid->id;
-        
-        $id = $transaction_id;
+            
+            $userid = $userid->id;
+            
+            $id = $transaction_id;
 
-        // details parents
-        $getparent = DB::table('users')
-            ->where('id', $userid)
-            ->first();
-
-        // details transaction
-        $get_transaction = Transaction::where('id', $id)->first();
-
-        // details students by transactions 
-        $get_student = DB::table('students')
-            ->join('class_student', 'class_student.student_id', '=', 'students.id')
-            ->join('class_organization', 'class_organization.id', 'class_student.organclass_id')
-            ->join('classes', 'classes.id', 'class_organization.class_id')
-            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-            ->join('fees_transactions_new', 'fees_transactions_new.student_fees_id', '=', 'student_fees_new.id')
-            ->select('students.*', 'classes.nama as classname')
-            ->distinct()
-            ->orderBy('students.id')
-            ->orderBy('fees_new.category')
-            ->where('fees_transactions_new.transactions_id', $id)
-            ->where('student_fees_new.status', 'Paid')
-            ->get();
-
-        // get category fees by transactions
-        $get_category = DB::table('fees_new')
-            ->join('student_fees_new', 'student_fees_new.fees_id', '=', 'fees_new.id')
-            ->join('fees_transactions_new', 'fees_transactions_new.student_fees_id', '=', 'student_fees_new.id')
-            ->join('class_student', 'class_student.id', '=', 'student_fees_new.class_student_id')
-            ->join('students', 'students.id', '=', 'class_student.student_id')
-            ->select('fees_new.category', 'students.id as studentid')
-            ->distinct()
-            ->orderBy('students.id')
-            ->orderBy('fees_new.category')
-            ->where('fees_transactions_new.transactions_id', $id)
-            ->where('student_fees_new.status', 'Paid')
-            ->get();
-
-        // dd($get_category);
-
-        // get fees
-        $get_fees = DB::table('fees_new')
-            ->join('student_fees_new', 'student_fees_new.fees_id', '=', 'fees_new.id')
-            ->join('fees_transactions_new', 'fees_transactions_new.student_fees_id', '=', 'student_fees_new.id')
-            ->join('class_student', 'class_student.id', '=', 'student_fees_new.class_student_id')
-            ->join('students', 'students.id', '=', 'class_student.student_id')
-            ->select('fees_new.*', 'students.id as studentid')
-            ->orderBy('students.id')
-            ->orderBy('fees_new.category')
-            ->where('fees_transactions_new.transactions_id', $id)
-            ->where('student_fees_new.status', 'Paid')
-            ->get();
-
-        // get transaction for fees category A
-        $getfees_categoryA  = DB::table('fees_new')
-            ->join('fees_new_organization_user', 'fees_new_organization_user.fees_new_id', '=', 'fees_new.id')
-            ->join('organization_user', 'organization_user.id', '=', 'fees_new_organization_user.organization_user_id')
-            ->select('fees_new.*')
-            ->orderBy('fees_new.name')
-            ->where('organization_user.user_id', $userid)
-            ->where('organization_user.role_id', 6)
-            ->where('organization_user.status', 1)
-            ->where('fees_new_organization_user.status', 'Paid')
-            ->where('fees_new_organization_user.transaction_id', $id)
-            ->get();
-
-        // $getfees_categoryA ? $getfees_categoryA = 1 : $getfees_categoryA = "";
-        // dd(count($getfees_categoryA));
-        if (count($get_category) != 0) {
-            $oid = DB::table('fees_new')
-                ->join('student_fees_new', 'student_fees_new.fees_id', '=', 'fees_new.id')
-                ->join('fees_transactions_new', 'fees_transactions_new.student_fees_id', '=', 'student_fees_new.id')
-                ->select('fees_new.organization_id')
-                ->distinct()
-                ->where('fees_transactions_new.transactions_id', $id)
-                ->where('student_fees_new.status', 'Paid')
+            // details parents
+            $getparent = DB::table('users')
+                ->where('id', $userid)
                 ->first();
 
-            $get_organization = DB::table('organizations')->where('id', $oid->organization_id)->first();
-        }
+            // details transaction
+            $get_transaction = Transaction::where('id', $id)->first();
 
-        if (count($getfees_categoryA) != 0) {
-            // dd($getfees_categoryA);
-            $oid = DB::table('fees_new')
+            // details students by transactions 
+            $get_student = DB::table('students')
+                ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                ->join('class_organization', 'class_organization.id', 'class_student.organclass_id')
+                ->join('classes', 'classes.id', 'class_organization.class_id')
+                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                ->join('fees_transactions_new', 'fees_transactions_new.student_fees_id', '=', 'student_fees_new.id')
+                ->select('students.*', 'classes.nama as classname')
+                ->distinct()
+                ->orderBy('students.id')
+                ->orderBy('fees_new.category')
+                ->where('fees_transactions_new.transactions_id', $id)
+                ->where('student_fees_new.status', 'Paid')
+                ->get();
+
+            // get category fees by transactions
+            $get_category = DB::table('fees_new')
+                ->join('student_fees_new', 'student_fees_new.fees_id', '=', 'fees_new.id')
+                ->join('fees_transactions_new', 'fees_transactions_new.student_fees_id', '=', 'student_fees_new.id')
+                ->join('class_student', 'class_student.id', '=', 'student_fees_new.class_student_id')
+                ->join('students', 'students.id', '=', 'class_student.student_id')
+                ->select('fees_new.category', 'students.id as studentid')
+                ->distinct()
+                ->orderBy('students.id')
+                ->orderBy('fees_new.category')
+                ->where('fees_transactions_new.transactions_id', $id)
+                ->where('student_fees_new.status', 'Paid')
+                ->get();
+
+            // dd($get_category);
+
+            // get fees
+            $get_fees = DB::table('fees_new')
+                ->join('student_fees_new', 'student_fees_new.fees_id', '=', 'fees_new.id')
+                ->join('fees_transactions_new', 'fees_transactions_new.student_fees_id', '=', 'student_fees_new.id')
+                ->join('class_student', 'class_student.id', '=', 'student_fees_new.class_student_id')
+                ->join('students', 'students.id', '=', 'class_student.student_id')
+                ->select('fees_new.*', 'students.id as studentid')
+                ->orderBy('students.id')
+                ->orderBy('fees_new.category')
+                ->where('fees_transactions_new.transactions_id', $id)
+                ->where('student_fees_new.status', 'Paid')
+                ->get();
+
+            // get transaction for fees category A
+            $getfees_categoryA  = DB::table('fees_new')
                 ->join('fees_new_organization_user', 'fees_new_organization_user.fees_new_id', '=', 'fees_new.id')
                 ->join('organization_user', 'organization_user.id', '=', 'fees_new_organization_user.organization_user_id')
-                ->select('fees_new.organization_id')
-                ->distinct()
+                ->select('fees_new.*')
+                ->orderBy('fees_new.name')
                 ->where('organization_user.user_id', $userid)
                 ->where('organization_user.role_id', 6)
                 ->where('organization_user.status', 1)
                 ->where('fees_new_organization_user.status', 'Paid')
                 ->where('fees_new_organization_user.transaction_id', $id)
-                ->first();
+                ->get();
 
-            $get_organization = DB::table('organizations')->where('id', $oid->organization_id)->first();
-        }
-        // dd($get_fees);
+            // $getfees_categoryA ? $getfees_categoryA = 1 : $getfees_categoryA = "";
+            // dd(count($getfees_categoryA));
+            if (count($get_category) != 0) {
+                $oid = DB::table('fees_new')
+                    ->join('student_fees_new', 'student_fees_new.fees_id', '=', 'fees_new.id')
+                    ->join('fees_transactions_new', 'fees_transactions_new.student_fees_id', '=', 'student_fees_new.id')
+                    ->select('fees_new.organization_id')
+                    ->distinct()
+                    ->where('fees_transactions_new.transactions_id', $id)
+                    ->where('student_fees_new.status', 'Paid')
+                    ->first();
 
-        return view('fee.pay.view-receipt', compact('getparent', 'get_transaction', 'get_student', 'get_category', 'get_fees', 'getfees_categoryA', 'get_organization'));
+                $get_organization = DB::table('organizations')->where('id', $oid->organization_id)->first();
+            }
+
+            if (count($getfees_categoryA) != 0) {
+                // dd($getfees_categoryA);
+                $oid = DB::table('fees_new')
+                    ->join('fees_new_organization_user', 'fees_new_organization_user.fees_new_id', '=', 'fees_new.id')
+                    ->join('organization_user', 'organization_user.id', '=', 'fees_new_organization_user.organization_user_id')
+                    ->select('fees_new.organization_id')
+                    ->distinct()
+                    ->where('organization_user.user_id', $userid)
+                    ->where('organization_user.role_id', 6)
+                    ->where('organization_user.status', 1)
+                    ->where('fees_new_organization_user.status', 'Paid')
+                    ->where('fees_new_organization_user.transaction_id', $id)
+                    ->first();
+
+                $get_organization = DB::table('organizations')->where('id', $oid->organization_id)->first();
+            }
+            // dd($get_fees);
+
+            return view('fee.pay.view-receipt', compact('getparent', 'get_transaction', 'get_student', 'get_category', 'get_fees', 'getfees_categoryA', 'get_organization'));
+        // }
+        // else{
+        //     return view("errors.500");
+        // } 
     }
 
     public function getDetailReceipt($id)
@@ -1112,73 +1118,294 @@ class PayController extends AppBaseController
 
         // get fee and organization name
         $get_fee_organization = DB::table('transactions')
-            ->join('fees_transactions', 'fees_transactions.transactions_id', '=', 'transactions.id')
-            ->join('student_fees', 'student_fees.id', '=', 'fees_transactions.student_fees_id')
-            ->join('fees_details', 'fees_details.id', '=', 'student_fees.fees_details_id')
-            ->join('fees', 'fees.id', '=', 'fees_details.fees_id')
-            ->join('class_fees', 'class_fees.fees_id', '=', 'fees.id')
-            ->join('class_organization', 'class_organization.id', '=', 'class_fees.class_organization_id')
-            ->join('organizations', 'organizations.id', '=', 'class_organization.organization_id')
+            ->join('fees_transactions_new', 'fees_transactions_new.transactions_id', '=', 'transactions.id')
+            ->join('student_fees_new', 'student_fees_new.id', '=', 'fees_transactions_new.student_fees_id')
+            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+            ->join('organizations', 'organizations.id', '=', 'fees_new.organization_id')
             ->select('organizations.id as oid', 'organizations.nama as oname', 'organizations.fixed_charges')
             ->where('transactions.id', $id)
             ->first();
+
+            dd($get_fee_organization);
 
 
         // list student by transaction
         $getstudent = DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
-            ->join('student_fees', 'student_fees.class_student_id', '=', 'class_student.id')
-            ->join('fees_details', 'fees_details.id', '=', 'student_fees.fees_details_id')
-            ->join('details', 'details.id', '=', 'fees_details.details_id')
-            ->join('fees', 'fees.id', '=', 'fees_details.fees_id')
-            ->join('fees_transactions', 'fees_transactions.student_fees_id', '=', 'student_fees.id')
-            ->join('transactions', 'transactions.id', '=', 'fees_transactions.transactions_id')
-            ->select('students.id as studentid', 'students.nama as studentnama', 'fees.id as feeid', 'fees.nama as feename')
+            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+            ->join('fees_transactions_new', 'fees_transactions_new.student_fees_id', '=', 'student_fees_new.id')
+            ->join('transactions', 'transactions.id', '=', 'fees_transactions_new.transactions_id')
+            ->select('students.id as studentid', 'students.nama as studentnama', 'fees_new.id as feeid', 'fees_new.name as feename')
             ->distinct()
             ->where('class_student.status', '1')
             ->where('transactions.id', $id)
-            ->where('student_fees.status', 'Paid')
-            ->orderBy('fees.nama')
+            ->where('student_fees_new.status', 'Paid')
+            ->orderBy('fees_new.name')
             ->get();
 
         // list category by fees
-        $getcategory = DB::table('categories')
-            ->join('details', 'details.category_id', '=', 'categories.id')
-            ->join('fees_details', 'fees_details.details_id', '=', 'details.id')
-            ->join('fees', 'fees.id', '=', 'fees_details.fees_id')
-            ->join('student_fees', 'student_fees.fees_details_id', '=', 'fees_details.id')
-            ->join('fees_transactions', 'fees_transactions.student_fees_id', '=', 'student_fees.id')
-            ->join('transactions', 'transactions.id', '=', 'fees_transactions.transactions_id')
-            ->select('categories.id as catid', 'categories.nama as catname')
-            ->distinct()
-            ->where('transactions.id', $id)
-            ->orderBy('categories.nama')
-            ->get();
+        // $getcategory = DB::table('categories')
+        //     ->join('details', 'details.category_id', '=', 'categories.id')
+        //     ->join('fees_details', 'fees_details.details_id', '=', 'details.id')
+        //     ->join('fees', 'fees.id', '=', 'fees_details.fees_id')
+        //     ->join('student_fees', 'student_fees.fees_details_id', '=', 'fees_details.id')
+        //     ->join('fees_transactions', 'fees_transactions.student_fees_id', '=', 'student_fees.id')
+        //     ->join('transactions', 'transactions.id', '=', 'fees_transactions.transactions_id')
+        //     ->select('categories.id as catid', 'categories.nama as catname')
+        //     ->distinct()
+        //     ->where('transactions.id', $id)
+        //     ->orderBy('categories.nama')
+        //     ->get();
 
-        // get detail item by transaction
-        $getdetail = DB::table('students')
-            ->join('class_student', 'class_student.student_id', '=', 'students.id')
-            ->join('student_fees', 'student_fees.class_student_id', '=', 'class_student.id')
-            ->join('fees_transactions', 'fees_transactions.student_fees_id', '=', 'student_fees.id')
-            ->join('transactions', 'transactions.id', '=', 'fees_transactions.transactions_id')
-            ->join('fees_details', 'fees_details.id', '=', 'student_fees.fees_details_id')
-            ->join('details', 'details.id', '=', 'fees_details.details_id')
-            ->join('fees', 'fees.id', '=', 'fees_details.fees_id')
-            ->join('categories', 'categories.id', '=', 'details.category_id')
-            ->select('students.id as studentid', 'students.nama as studentnama', 'details.nama as detailsname', 'details.price as detailsprice', 'details.quantity as quantity', 'details.totalamount as totalamount', 'categories.id as catid')
-            ->where('class_student.status', '1')
-            ->where('transactions.id', $id)
-            ->where('student_fees.status', 'Paid')
-            ->orderBy('details.nama')
-            ->get();
+        // // get detail item by transaction
+        // $getdetail = DB::table('students')
+        //     ->join('class_student', 'class_student.student_id', '=', 'students.id')
+        //     ->join('student_fees', 'student_fees.class_student_id', '=', 'class_student.id')
+        //     ->join('fees_transactions', 'fees_transactions.student_fees_id', '=', 'student_fees.id')
+        //     ->join('transactions', 'transactions.id', '=', 'fees_transactions.transactions_id')
+        //     ->join('fees_details', 'fees_details.id', '=', 'student_fees.fees_details_id')
+        //     ->join('details', 'details.id', '=', 'fees_details.details_id')
+        //     ->join('fees', 'fees.id', '=', 'fees_details.fees_id')
+        //     ->join('categories', 'categories.id', '=', 'details.category_id')
+        //     ->select('students.id as studentid', 'students.nama as studentnama', 'details.nama as detailsname', 'details.price as detailsprice', 'details.quantity as quantity', 'details.totalamount as totalamount', 'categories.id as catid')
+        //     ->where('class_student.status', '1')
+        //     ->where('transactions.id', $id)
+        //     ->where('student_fees.status', 'Paid')
+        //     ->orderBy('details.nama')
+        //     ->get();
 
 
 
-        return view('parent.fee.receipt', compact('getparent', 'get_transaction', 'get_fee_organization', 'getcategory', 'getstudent', 'getdetail'));
+    return view('parent.fee.receipt', compact('getparent', 'get_transaction', 'get_fee_organization', 'getstudent'));
     }
 
     public function viewReceipt()
     {
         return view('parent.fee.receipt');
+    }
+
+    public function payment(Request $request){
+        //  insert transaction, fees_transactions_new, nama = type_yearmonthdayhourminuteseconduserid
+        $getstudentfees = ($request->student_fees_id) ? $request->student_fees_id : "";
+        $getparentfees  = ($request->parent_fees_id) ? $request->parent_fees_id : "";
+        
+        if ($request->desc == 'Donation') {
+            $user = User::find(Auth::id());
+            $organization = $this->organization->getOrganizationByDonationId($request->d_id);
+
+            if(isset($request->email))
+            {
+                $fpx_buyerEmail = $request->email;
+                $telno = "+6" . $request->telno;
+                $fpx_buyerName = $request->name;
+            }
+            else
+            {
+                $fpx_buyerEmail =  NULL;
+                $telno = NULL;
+                $fpx_buyerName = "Penderma Tanpa Nama";
+            }
+            
+            $fpx_sellerExOrderNo = $request->desc . "_" . $request->d_code . "_" . date('YmdHis') . "_" . $organization->id;
+
+            $fpx_sellerOrderNo  = "PRIM" . str_pad($request->d_id, 3, "0", STR_PAD_LEFT)  . "_" . date('YmdHis') . str_pad(rand(0, 999999), 6, '0', STR_PAD_LEFT);
+
+            $fpx_sellerExId     = "EX00012323";
+
+            $fpx_sellerId       = "SE00013841";
+
+            // $fpx_buyerIban      = $request->name . "/" . $telno . "/" . $request->email;
+        } 
+        else if ($request->desc == 'School_Fees')
+        {
+            $user = User::find(Auth::id());
+            $organization = Organization::find($request->o_id);
+            
+            $fpx_buyerEmail      = $user->email;
+            $telno               = $user->telno;
+            $fpx_buyerName       = User::where('id', '=', Auth::id())->pluck('name')->first();
+            $fpx_sellerExOrderNo = $request->desc . "_" . date('YmdHis');
+            $fpx_sellerOrderNo  = "YSPRIM" . date('YmdHis') . rand(10000, 99999);
+
+            $fpx_sellerExId     = "EX00012323";
+            $fpx_sellerId       = "SE00013841";
+        }
+
+        $fpx_msgType        = "AR";
+        $fpx_msgToken       = "01";
+        $fpx_sellerTxnTime  = date('YmdHis');
+        $fpx_sellerBankCode = "01";
+        $fpx_txnCurrency    = "MYR";
+        $fpx_buyerIban      = "";
+        $fpx_txnAmount      = $request->amount;
+        $fpx_checkSum       = "";
+        $fpx_buyerBankId    = $request->bankid;
+        $fpx_buyerBankBranch = "";
+        $fpx_buyerAccNo     = "";
+        $fpx_buyerId        = "";
+        $fpx_makerName      = "";
+        $fpx_productDesc    = $request->desc;
+        $fpx_version        = "6.0";
+
+        /* Generating signing String */
+        $data = $fpx_buyerAccNo . "|" . $fpx_buyerBankBranch . "|" . $fpx_buyerBankId . "|" . $fpx_buyerEmail . "|" . $fpx_buyerIban . "|" . $fpx_buyerId . "|" . $fpx_buyerName . "|" . $fpx_makerName . "|" . $fpx_msgToken . "|" . $fpx_msgType . "|" . $fpx_productDesc . "|" . $fpx_sellerBankCode . "|" . $fpx_sellerExId . "|" . $fpx_sellerExOrderNo . "|" . $fpx_sellerId . "|" . $fpx_sellerOrderNo . "|" . $fpx_sellerTxnTime . "|" . $fpx_txnAmount . "|" . $fpx_txnCurrency . "|" . $fpx_version;
+
+        /* Reading key */
+        // dd(getenv('FPX_KEY'));
+        // $priv_key = getenv('FPX_KEY');
+        // // $priv_key = file_get_contents('C:\\pki-keys\\DevExchange\\EX00012323.key');
+        // $pkeyid = openssl_get_privatekey($priv_key, null);
+        // openssl_sign($data, $binary_signature, $pkeyid, OPENSSL_ALGO_SHA1);
+        // $fpx_checkSum = strtoupper(bin2hex($binary_signature));
+
+        $transaction = new Transaction();
+        $transaction->nama          = $fpx_sellerExOrderNo;
+        $transaction->description   = $fpx_sellerOrderNo;
+        $transaction->transac_no    = NULL;
+        $transaction->datetime_created = now();
+        $transaction->amount        = $fpx_txnAmount;
+        $transaction->status        = 'Pending';
+        $transaction->email         = $fpx_buyerEmail;
+        $transaction->telno         = $telno;
+        $transaction->user_id       = $user ? $user->id : null;
+        $transaction->username      = strtoupper($fpx_buyerName);
+        $transaction->fpx_checksum  = NULL;
+
+        $list_student_fees_id   = $getstudentfees;
+        $list_parent_fees_id    = $getparentfees;
+
+        $id = explode("_", $fpx_sellerOrderNo);
+        $id = (int) str_replace("PRIM", "", $id[0]);
+
+        if ($transaction->save()) {
+
+            // ******* save bridge transaction *********
+            // type = S for school fees and D for donation
+
+            if (substr($fpx_sellerExOrderNo, 0, 1) == 'S') {
+                // ********* student fee id
+
+                if ($list_student_fees_id) {
+                    for ($i = 0; $i < count($list_student_fees_id); $i++) {
+                        $array[] = array(
+                            'student_fees_id' => $list_student_fees_id[$i],
+                            'payment_type_id' => 1,
+                            'transactions_id' => $transaction->id,
+                        );
+                    }
+
+                    DB::table('fees_transactions_new')->insert($array);
+                }
+                if ($list_parent_fees_id) {
+                    
+                    for ($i = 0; $i < count($list_parent_fees_id); $i++) {
+                        $result = DB::table('fees_new_organization_user')
+                            ->where('id', $list_parent_fees_id[$i])
+                            ->update([
+                                'transaction_id' => $transaction->id
+                            ]);
+                    }
+                    
+                }
+            } 
+            else if (substr($fpx_sellerExOrderNo, 0, 1) == 'F')
+            {
+                $result = DB::table('orders')
+                ->where('id', $request->order_id)
+                ->update([
+                    'transaction_id' => $transaction->id
+                ]);
+            }
+            else if (substr($fpx_sellerExOrderNo, 0, 1) == 'M')
+            {
+                $result = DB::table('pgng_orders')
+                ->where('id', $gng_order_id)
+                ->update([
+                    'status' => 'Paid',
+                    'transaction_id' => $transaction->id
+                ]);
+            }
+            else {
+                $transaction->donation()->attach($id, ['payment_type_id' => 1]);
+            }
+        }
+        else
+        {
+            return view('errors.500');
+        }
+
+        return view('fpx.newindex', compact(
+            'transaction',
+            'fpx_msgType',
+            'fpx_msgToken',
+            'fpx_sellerExId',
+            'fpx_sellerExOrderNo',
+            'fpx_sellerTxnTime',
+            'fpx_sellerOrderNo',
+            'fpx_sellerId',
+            'fpx_sellerBankCode',
+            'fpx_txnCurrency',
+            'fpx_txnAmount',
+            'fpx_buyerEmail',
+            'fpx_checkSum',
+            'fpx_buyerName',
+            'fpx_buyerBankId',
+            'fpx_buyerBankBranch',
+            'fpx_buyerAccNo',
+            'fpx_buyerId',
+            'fpx_makerName',
+            'fpx_buyerIban',
+            'fpx_productDesc',
+            'fpx_version',
+            'telno',
+            'data',
+            'getstudentfees',
+            'getparentfees',
+            'organization'
+        ));
+    }
+
+    public function paymentSuccess(Request $request){
+        $transaction_id = $request->get('transac_id');
+        $transaction_no = $request->get('transac_no');
+
+        $result = DB::table('transactions')
+        ->where('id', $transaction_id)
+        ->update([
+            'transac_no' => $transaction_no,
+            'status'     => "Success"
+        ]);
+
+        if($result){
+            // search in parent debt table
+            $updateParentDebt = DB::table('fees_new_organization_user')
+            ->join('organization_user', 'organization_user.id', '=', 'fees_new_organization_user.organization_user_id')
+            ->where('transaction_id', $transaction_id)
+            ->update([
+                'fees_new_organization_user.status' => 'Paid',
+                'organization_user.fees_status'     => 'Completed'
+            ]);
+
+            $updateStudentDebt = DB::table('student_fees_new as sfn')
+            ->join('fees_transactions_new as ftn', 'ftn.student_fees_id', '=', 'sfn.id')
+            ->where('ftn.transactions_id', $transaction_id)
+            ->update([
+                'sfn.status' => 'Paid'
+            ]);
+
+            return $this->ReceiptFees($transaction_id);
+        }
+        else{
+
+            DB::table('transactions')
+            ->where('id', $transaction_id)
+            ->update([
+                'transac_no' => $transaction_no,
+                'status'     => "Failed"
+            ]);
+            
+            return view('errors.500');
+        } 
     }
 }

@@ -57,235 +57,236 @@
         <div class="col-md-12 pb-3">
             <h3>Sila Pilih Sekolah Berkaitan Untuk Bayaran Yuran</h3>
         </div>
+
         {{-- <div class="col-md-12 pb-3">
             <ol class="breadcrumb mb-0">
                 <li class="breadcrumb-item active">Sila Pilih Sekolah</li>
             </ol>
         </div> --}}
 
-        {{-- <div class="col-md-12">
-            <div class="card card-primary">
-
-                {{csrf_field()}}
-        <div class="card-body">
-
-            <div class="form-group">
-                <label>Nama Organisasi</label>
-                <select name="organization" id="organization" class="form-control">
-                    <option value="" selected disabled>Pilih Organisasi</option>
-                    @foreach($organization as $row)
-                    <option value="{{ $row->id }}">{{ $row->nama }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-    </div>
-</div> --}}
-
-<div class="col-md-12">
-    <div class="row">
-        <div class="container-wrapper-scroll p-2 mb-3">
-
-            @foreach ($organization as $organizations)
-            <div class="col-md-12">
-                <div id="accordionExample{{ $organizations->id }}" class="accordion shadow">
-                    <!-- Accordion item 1 -->
-                    <div class="card">
-
-                        <div class="inputGroup">
-                            <input id="option-{{ $organizations->id }}" name="nameSchool"
-                                value="{{ $organizations->id }}" type="checkbox" data-toggle="collapse"
-                                data-target="#collapse{{ $organizations->id }}" aria-expanded="false"
-                                aria-controls="collapse{{ $organizations->id }}"
-                                class="d-block position-relative text-dark collapsible-link py-2"
-                                onchange="checkOrganization(this)" />
-
-                            <label for="option-{{ $organizations->id }}">
-                                <span style="font-size: 18px">{{ $organizations->nama }}</span>
-                                <br>
-                            </label>
-                        </div>
-
-                        <div id="collapse{{ $organizations->id }}" aria-labelledby="heading{{ $organizations->id }}"
-                            data-parent="#accordionExample{{ $organizations->id }}" class="collapse">
-                            <div class="card-body pl-0 pr-0">
-
-                                @foreach($getfees_category_A->where('organization_id', $organizations->id) as $data)
-                                <div class="col-md-12">
-                                    <div id="accordionExample{{ $organizations->id }}-{{ $organizations->user_id }}"
-                                        class="accordion shadow">
-                                        <!-- Accordion item 1 -->
-                                        <div class="card">
-                                            <div id="heading{{ $organizations->id }}-{{ $organizations->user_id }}"
-                                                class="card-header bg-white shadow-sm border-0">
-                                                <h6 class="mb-0 font-weight-bold"><a href="#" data-toggle="collapse"
-                                                        data-target="#collapse{{ $organizations->id }}-{{ $organizations->user_id }}"
-                                                        aria-expanded="true"
-                                                        aria-controls="collapse{{ $organizations->id }}-{{ $organizations->user_id }}"
-                                                        class="d-block position-relative text-dark text-uppercase collapsible-link py-2">
-                                                        {{ $data->category }}</a></h6>
-
-                                                <div id="collapse{{ $organizations->id }}-{{ $organizations->user_id }}"
-                                                    aria-labelledby="heading{{ $organizations->id }}-{{ $organizations->user_id }}"
-                                                    data-parent="#accordionExample{{ $organizations->id }}-{{ $organizations->user_id }}"
-                                                    class="collapse show">
-                                                    <div class="card-body pl-0 pr-0">
-                                                        @foreach($getfees_category_A_byparent->where('organization_id', $organizations->id) as $item)
-                                                        <div class="inputGroup">
-                                                            <input
-                                                                id="option-{{ $item->id }}-{{ $organizations->user_id }}"
-                                                                name="billcheck" value="{{ $item->totalAmount }}"
-                                                                onchange="checkD2(this)" type="checkbox" />
-
-                                                            <label
-                                                                for="option-{{ $item->id }}-{{ $organizations->user_id }}">
-                                                                <span style="font-size: 18px">{{ $item->name }}</span>
-                                                                <br>
-                                                                <span
-                                                                    style="font-size: 14px;font-weight:100;">RM{{  number_format((float)$item->totalAmount, 2, '.', '') }}
-                                                                    ({{ $item->quantity }}
-                                                                    kuantiti)</span>
-                                                            </label>
-
-                                                            {{-- hidden input checkbox second --}}
-                                                            <input
-                                                                id="option-{{ $item->id }}-{{ $organizations->user_id }}-2"
-                                                                style="opacity: 0.0; position: absolute; left: -9999px"
-                                                                checked="checked" name="billcheck2"
-                                                                value="{{ $organizations->user_id }}-{{ $item->id }}"
-                                                                type="checkbox" />
-                                                        </div>
-                                                        @endforeach
-                                                    </div>
-                                                </div>
-                                            </div>
-                                        </div>
-                                    </div>
-                                </div>
+            <!-- <div class="col-md-12">
+                <div class="card-primary">
+                    {{csrf_field()}}
+                    <div class="card-body">
+                        <div class="form-group">
+                            <label>Nama Organisasi</label>
+                            <select name="organization" id="organization" class="form-control">
+                                <option value="" selected disabled>Pilih Organisasi</option>
+                                @foreach($organization as $row)
+                                <option value="{{ $row->id }}">{{ $row->nama }}</option>
                                 @endforeach
+                            </select>
+                        </div>
+                    </div>
+                </div>
+            </div>   -->
 
-                                @foreach($list->where('oid', $organizations->id) as $row)
-                                <div class="col-md-12">
-                                    <div id="accordionExample{{ $row->oid }}-{{ $row->studentid }}"
-                                        class="accordion shadow">
-                                        <!-- Accordion item 1 -->
-                                        <div class="card">
+        <div class="col-md-12 hide">
+            <div class="row">
+                <div class="container-wrapper-scroll p-2 mb-3">
 
-                                            <div class="inputGroup">
-                                                <input id="option-{{ $row->oid }}-{{ $row->studentid }}"
-                                                    name="nameSchool" value="{{ $row->oid }}" type="checkbox"
-                                                    data-toggle="collapse"
-                                                    data-target="#collapse{{ $row->oid }}-{{ $row->studentid }}"
-                                                    aria-expanded="false"
-                                                    aria-controls="collapse{{ $row->oid }}-{{ $row->studentid }}"
-                                                    class="d-block position-relative text-dark collapsible-link py-2" />
+                    @foreach ($organization as $organizations)
+                    
+                        <div class="col-md-12">
+                            <div id="accordionExample{{ $organizations->id }}" class="accordion shadow">
+                                <!-- Accordion item 1 -->
+                                <div class="card">
 
-                                                <label for="option-{{ $row->oid }}-{{ $row->studentid }}">
-                                                    <span style="font-size: 18px">{{ $loop->iteration }}.
-                                                        {{ $row->studentname  }}</span>
-                                                    <span> ( {{ $row->classname }} )</span>
+                                    <div class="inputGroup">
+                                        <input id="option-{{ $organizations->id }}" name="nameSchool"
+                                            value="{{ $organizations->id }}" type="checkbox" data-toggle="collapse"
+                                            data-target="#collapse{{ $organizations->id }}" aria-expanded="false"
+                                            aria-controls="collapse{{ $organizations->id }}"
+                                            class="d-block position-relative text-dark collapsible-link py-2"
+                                            onchange="checkOrganization(this)" />
 
-                                                    <br>
-                                                    <span> {{ $row->nschool }} </span>
-                                                </label>
-                                            </div>
+                                        <label for="option-{{ $organizations->id }}">
+                                            <span style="font-size: 18px">{{ $organizations->nama }}</span>
+                                            <br>
+                                        </label>
+                                    </div>
 
+                                    <div id="collapse{{ $organizations->id }}" aria-labelledby="heading{{ $organizations->id }}"
+                                        data-parent="#accordionExample{{ $organizations->id }}" class="collapse">
+                                        <div class="card-body pl-0 pr-0">
 
-                                            <div id="collapse{{ $row->oid }}-{{ $row->studentid }}"
-                                                aria-labelledby="heading{{ $row->oid }}-{{ $row->studentid }}"
-                                                data-parent="#accordionExample{{ $row->oid }}-{{ $row->studentid }}"
-                                                class="collapse">
-                                                <div class="card-body pl-0 pr-0">
+                                            @foreach($getfees_category_A->where('organization_id', $organizations->id) as $data)
+                                            <div class="col-md-12">
+                                                <div id="accordionExample{{ $organizations->id }}-{{ $organizations->user_id }}"
+                                                    class="accordion shadow">
+                                                    <!-- Accordion item 1 -->
+                                                    <div class="card">
+                                                        <div id="heading{{ $organizations->id }}-{{ $organizations->user_id }}"
+                                                            class="card-header bg-white shadow-sm border-0">
+                                                            <h6 class="mb-0 font-weight-bold"><a href="#" data-toggle="collapse"
+                                                                    data-target="#collapse{{ $organizations->id }}-{{ $organizations->user_id }}"
+                                                                    aria-expanded="true"
+                                                                    aria-controls="collapse{{ $organizations->id }}-{{ $organizations->user_id }}"
+                                                                    class="d-block position-relative text-dark text-uppercase collapsible-link py-2">
+                                                                    {{ $data->category }}</a></h6>
 
-                                                    @foreach($getfees->where('studentid', $row->studentid) as $data)
-                                                    <div class="col-md-12">
-                                                        <div id="accordionExample{{ $data->studentid }}-{{ $data->organization_id }}"
-                                                            class="accordion shadow">
-                                                            <!-- Accordion item 1 -->
-                                                            <div class="card">
-                                                                <div id="heading{{ $data->studentid }}-{{ $data->organization_id  }}"
-                                                                    class="card-header bg-white shadow-sm border-0">
-                                                                    <h6 class="mb-0 font-weight-bold"><a href="#"
-                                                                            data-toggle="collapse"
-                                                                            data-target="#collapse{{ $data->studentid }}-{{ $data->organization_id }}"
-                                                                            aria-expanded="true"
-                                                                            aria-controls="collapse{{ $data->studentid }}-{{ $data->organization_id  }}"
-                                                                            class="d-block position-relative text-dark text-uppercase collapsible-link py-2">
-                                                                            {{ $data->category }}</a></h6>
+                                                            <div id="collapse{{ $organizations->id }}-{{ $organizations->user_id }}"
+                                                                aria-labelledby="heading{{ $organizations->id }}-{{ $organizations->user_id }}"
+                                                                data-parent="#accordionExample{{ $organizations->id }}-{{ $organizations->user_id }}"
+                                                                class="collapse show">
+                                                                <div class="card-body pl-0 pr-0">
+                                                                    @foreach($getfees_category_A_byparent->where('organization_id', $organizations->id) as $item)
+                                                                    <div class="inputGroup">
+                                                                        <input
+                                                                            id="option-{{ $item->id }}-{{ $organizations->user_id }}"
+                                                                            name="billcheck" value="{{ $item->totalAmount }}"
+                                                                            onchange="checkD2(this)" type="checkbox" />
 
-                                                                    <div id="collapse{{ $data->studentid }}-{{ $data->organization_id  }}"
-                                                                        aria-labelledby="heading{{ $data->studentid }}-{{ $data->organization_id  }}"
-                                                                        data-parent="#accordionExample{{ $data->studentid }}-{{ $data->organization_id  }}"
-                                                                        class="collapse show">
-                                                                        <div class="card-body pl-0 pr-0">
-                                                                            @foreach($getfees_bystudent->where('studentid', $data->studentid)->where('category',$data->category) as $item)
-                                                                            <div class="inputGroup">
-                                                                                <input
-                                                                                    id="option-{{ $item->id }}-{{ $data->studentid }}"
-                                                                                    name="billcheck"
-                                                                                    value="{{ $item->totalAmount }}"
-                                                                                    onchange="checkD(this)"
-                                                                                    type="checkbox" />
+                                                                        <label
+                                                                            for="option-{{ $item->id }}-{{ $organizations->user_id }}">
+                                                                            <span style="font-size: 18px">{{ $item->name }}</span>
+                                                                            <br>
+                                                                            <span
+                                                                                style="font-size: 14px;font-weight:100;">RM{{  number_format((float)$item->totalAmount, 2, '.', '') }}
+                                                                                ({{ $item->quantity }}
+                                                                                kuantiti)</span>
+                                                                        </label>
 
-                                                                                <label for="option-{{ $item->id }}-{{ $data->studentid }}">
-                                                                                    <span style="font-size: 18px">{{ $item->name }}</span>
-                                                                                    <br>
-                                                                                    <span style="font-size: 14px;font-weight:100;">RM{{  number_format((float)$item->totalAmount, 2, '.', '') }} ({{ $item->quantity }} kuantiti)</span>
-                                                                                </label>
-
-                                                                                {{-- hidden input checkbox second --}}
-                                                                                <input
-                                                                                    id="option-{{ $item->id }}-{{ $data->studentid }}-2"
-                                                                                    style="opacity: 0.0; position: absolute; left: -9999px"
-                                                                                    checked="checked" name="billcheck2"
-                                                                                    value="{{$data->studentid}}-{{ $item->id }}"
-                                                                                    type="checkbox" />
-                                                                            </div>
-                                                                            @endforeach
-                                                                        </div>
+                                                                        {{-- hidden input checkbox second --}}
+                                                                        <input
+                                                                            id="option-{{ $item->id }}-{{ $organizations->user_id }}-2"
+                                                                            style="opacity: 0.0; position: absolute; left: -9999px"
+                                                                            checked="checked" name="billcheck2"
+                                                                            value="{{ $organizations->user_id }}-{{ $item->id }}"
+                                                                            type="checkbox" />
                                                                     </div>
+                                                                    @endforeach
                                                                 </div>
                                                             </div>
                                                         </div>
                                                     </div>
-                                                    @endforeach
-
                                                 </div>
                                             </div>
+                                            @endforeach
+
+                                            @foreach($list->where('oid', $organizations->id) as $row)
+                                            <div class="col-md-12">
+                                                <div id="accordionExample{{ $row->oid }}-{{ $row->studentid }}"
+                                                    class="accordion shadow">
+                                                    <!-- Accordion item 1 -->
+                                                    <div class="card">
+
+                                                        <div class="inputGroup">
+                                                            <input id="option-{{ $row->oid }}-{{ $row->studentid }}"
+                                                                name="nameSchool" value="{{ $row->oid }}" type="checkbox"
+                                                                data-toggle="collapse"
+                                                                data-target="#collapse{{ $row->oid }}-{{ $row->studentid }}"
+                                                                aria-expanded="false"
+                                                                aria-controls="collapse{{ $row->oid }}-{{ $row->studentid }}"
+                                                                class="d-block position-relative text-dark collapsible-link py-2" />
+
+                                                            <label for="option-{{ $row->oid }}-{{ $row->studentid }}">
+                                                                <span style="font-size: 18px">{{ $loop->iteration }}.
+                                                                    {{ $row->studentname  }}</span>
+                                                                <span> ( {{ $row->classname }} )</span>
+
+                                                                <br>
+                                                                <span> {{ $row->nschool }} </span>
+                                                            </label>
+                                                        </div>
+
+
+                                                        <div id="collapse{{ $row->oid }}-{{ $row->studentid }}"
+                                                            aria-labelledby="heading{{ $row->oid }}-{{ $row->studentid }}"
+                                                            data-parent="#accordionExample{{ $row->oid }}-{{ $row->studentid }}"
+                                                            class="collapse">
+                                                            <div class="card-body pl-0 pr-0">
+
+                                                                @foreach($getfees->where('studentid', $row->studentid) as $data)
+                                                                <div class="col-md-12">
+                                                                    <div id="accordionExample{{ $data->studentid }}-{{ $data->organization_id }}"
+                                                                        class="accordion shadow">
+                                                                        <!-- Accordion item 1 -->
+                                                                        <div class="card">
+                                                                            <div id="heading{{ $data->studentid }}-{{ $data->organization_id  }}"
+                                                                                class="card-header bg-white shadow-sm border-0">
+                                                                                <h6 class="mb-0 font-weight-bold"><a href="#"
+                                                                                        data-toggle="collapse"
+                                                                                        data-target="#collapse{{ $data->studentid }}-{{ $data->organization_id }}"
+                                                                                        aria-expanded="true"
+                                                                                        aria-controls="collapse{{ $data->studentid }}-{{ $data->organization_id  }}"
+                                                                                        class="d-block position-relative text-dark text-uppercase collapsible-link py-2">
+                                                                                        {{ $data->category }}</a></h6>
+
+                                                                                <div id="collapse{{ $data->studentid }}-{{ $data->organization_id  }}"
+                                                                                    aria-labelledby="heading{{ $data->studentid }}-{{ $data->organization_id  }}"
+                                                                                    data-parent="#accordionExample{{ $data->studentid }}-{{ $data->organization_id  }}"
+                                                                                    class="collapse show">
+                                                                                    <div class="card-body pl-0 pr-0">
+                                                                                        @foreach($getfees_bystudent->where('studentid', $data->studentid)->where('category',$data->category) as $item)
+                                                                                        <div class="inputGroup">
+                                                                                            <input
+                                                                                                id="option-{{ $item->id }}-{{ $data->studentid }}"
+                                                                                                name="billcheck"
+                                                                                                value="{{ $item->totalAmount }}"
+                                                                                                onchange="checkD(this)"
+                                                                                                type="checkbox" />
+
+                                                                                            <label for="option-{{ $item->id }}-{{ $data->studentid }}">
+                                                                                                <span style="font-size: 18px">{{ $item->name }}</span>
+                                                                                                <br>
+                                                                                                <span style="font-size: 14px;font-weight:100;">RM{{  number_format((float)$item->totalAmount, 2, '.', '') }} ({{ $item->quantity }} kuantiti)</span>
+                                                                                            </label>
+
+                                                                                            {{-- hidden input checkbox second --}}
+                                                                                            <input
+                                                                                                id="option-{{ $item->id }}-{{ $data->studentid }}-2"
+                                                                                                style="opacity: 0.0; position: absolute; left: -9999px"
+                                                                                                checked="checked" name="billcheck2"
+                                                                                                value="{{$data->studentid}}-{{ $item->id }}"
+                                                                                                type="checkbox" />
+                                                                                        </div>
+                                                                                        @endforeach
+                                                                                    </div>
+                                                                                </div>
+                                                                            </div>
+                                                                        </div>
+                                                                    </div>
+                                                                </div>
+                                                                @endforeach
+
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+
+
+                                            @endforeach
                                         </div>
                                     </div>
                                 </div>
-
-
-                                @endforeach
                             </div>
                         </div>
-                    </div>
+                    @endforeach
+
+
                 </div>
+                <div class="col-md-8 p-3">
+                    <h4>Jumlah Yang Perlu Dibayar : RM<span id="pay"></span> </h4>
+
+                    {{-- <form method="POST" action="{{ route('fpxIndex') }}" enctype="multipart/form-data"> --}}
+
+                </div>
+                <div class="col-md-4 p-2">
+
+                    <button id="btn-byr"  class="btn btn-success float-right" type="submit">Proses
+                        Pembayaran</button>
+                    {{-- </form> --}}
+                </div>
+
+                {{-- <input type="hidden" name="bname" id="bname" value="{{ $getfees->nama  ?? '' }}"> --}}
+                <input type="hidden" name="ttlpay" id="ttlpay" value="0.00">
+                <input type="hidden" value="{{ route('payment') }}" id="routepay">
+
             </div>
-            @endforeach
-
-
         </div>
-        <div class="col-md-8 p-3">
-            <h4>Jumlah Yang Perlu Dibayar : RM<span id="pay"></span> </h4>
-
-            {{-- <form method="POST" action="{{ route('fpxIndex') }}" enctype="multipart/form-data"> --}}
-
-        </div>
-        <div class="col-md-4 p-2">
-
-            <button id="btn-byr"  class="btn btn-success float-right" type="submit">Proses
-                Pembayaran</button>
-            {{-- </form> --}}
-        </div>
-
-        {{-- <input type="hidden" name="bname" id="bname" value="{{ $getfees->nama  ?? '' }}"> --}}
-        <input type="hidden" name="ttlpay" id="ttlpay" value="0.00">
-        <input type="hidden" value="{{ route('payment') }}" id="routepay">
-
     </div>
-</div>
 </div>
 <hr>
 

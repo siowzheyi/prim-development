@@ -147,11 +147,39 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('fpxIndex') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('payment') }}" enctype="multipart/form-data">
+                <!-- <div class="form-group">
+                    <label for="sel1">Sila Pilih Bank:</label>
+                    <select name="bankid" id="bankid" class="form-control" data-parsley-required-message="Sila pilih bank" required>
+                        <option value="">Pilih bank</option>
+                    </select>
+                </div> -->
+
                 <div class="form-group">
                     <label for="sel1">Sila Pilih Bank:</label>
                     <select name="bankid" id="bankid" class="form-control" data-parsley-required-message="Sila pilih bank" required>
                         <option value="">Pilih bank</option>
+                        <option value="ABB0233">Affin Bank</option>
+                        <option value='ABMB0212'>Alliance Bank (Personal)</option>
+                        <option value='AGRO01'>AGRONet</option>
+                        <option value='AMBB0209'>AmBank</option>
+                        <option value='BIMB0340'>Bank Islam</option>
+                        <option value='BMMB0341'>Bank Muamalat</option>
+                        <option value='BKRM0602'>Bank Rakyat</option>
+                        <option value='BSN0601'>BSN</option>
+                        <option value='BCBB0235'>CIMB Clicks</option>
+                        <option value='HLB0224'>Hong Leong Bank</option>
+                        <option value='HSBC0223'>HSBC Bank</option>
+                        <option value='KFH0346'>KFH</option>
+                        <option value='MBB0228'>Maybank2E</option>
+                        <option value='MB2U0227'>Maybank2U</option>
+                        <option value='OCBC0229'>OCBC Bank</option>
+                        <option value='PBB0233'>Public Bank</option>
+                        <option value='RHB0218'>RHB Bank</option>
+                        <option value='SCB0216'>Standard Chartered</option>
+                        <option value='UOB0226'>UOB Bank</option>
+                        <option value='BOCM01'>Bank Of China</option>
+
                     </select>
                 </div>
 

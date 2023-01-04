@@ -287,6 +287,10 @@ Route::post('trn', 'PayController@transaction')->name('trn');
 Route::post('trn-dev', 'PayController@transactionDev')->name('trn-dev');
 Route::post('payment', 'PayController@paymentProcess')->name('payment');
 Route::post('fpxIndex', 'PayController@fpxIndex')->name('fpxIndex');
+
+Route::post('payment', 'PayController@payment')->name('payment');
+Route::post('paymentSuccess', 'PayController@paymentSuccess')->name('paymentSuccess');
+
 Route::post('paymentStatus', 'PayController@paymentStatus')->name('paymentStatus');
 Route::post('transactionReceipt', 'PayController@transactionReceipt')->name('transactionReceipt');
 Route::get('successpay', 'PayController@successPay')->name('successpay');
@@ -344,6 +348,8 @@ Route::post('send-message', 'MessageController@sendMessage')->name('send-message
 Route::post('/exportAllYuranStatus', 'FeesController@ExportAllYuranStatus')->name('exportAllYuranStatus');
 Route::post('/printAllYuranStatus', 'FeesController@PrintAllYuranStatus')->name('printAllYuranStatus');
 
+Route::post('/exportStudentStatus', 'FeesController@ExportStudentStatus')->name('exportStudentStatus');
+Route::post('/printStudentStatus', 'FeesController@PrintStudentStatus')->name('printStudentStatus');
 
 Route::group(['prefix' => 'notification'], function () {
     Route::get('/', 'HomeController@showNotification')->name('index.notification');

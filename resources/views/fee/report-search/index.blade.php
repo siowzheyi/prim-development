@@ -34,17 +34,17 @@
 
                     <div id="dkelas" class="form-group">
                         <label> Kelas</label>
-                        <select name="classes" id="classes" class="form-control">
+                        <select name="classes" id="classes" class="form-control classes">
                             <option value="" disabled selected>Pilih Kelas</option>
 
                         </select>
                     </div>
                 </div>
 
-                <div>
+                <!-- <div>
                     <a style="margin: 19px;" class="btn btn-success"  data-toggle="modal" data-target="#modalByKelas"><i class="fas fa-plus"></i> Export</a>
                     <a style="margin: 1px;" id="btn-download" class="btn btn-success" data-toggle="modal" data-target="#modalByKelas2"><i class="fas fa-download"></i> Muat Turun PDF</a>
-                </div>
+                </div> -->
 
                 @if(count($errors) > 0)
                 <div class="alert alert-danger">
@@ -104,8 +104,8 @@
                         </select>
                     </div>
                     <div class="form-group">
-                        <label>Name Yuran</label>
-                        <select name="yuranExport" id="yuranExport" class="form-control">
+                        <label>Kelas</label>
+                        <select name="kelasExport" id="kelasExport" class="form-control classes">
 
                         </select>
                     </div>
@@ -119,17 +119,17 @@
 </div>
 
 {{-- modal print yuran --}}
-<div class="modal fade" id="modalByYuran2" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+<div class="modal fade" id="modalByKelas2" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Print Yuran</h5>
+                <h5 class="modal-title">Export Yuran</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
 
-            <form action="{{ route('printAllYuranStatus') }}" method="post">
+            <form action="{{ route('printStudentStatus') }}" method="post">
                 <div class="modal-body">
                     {{ csrf_field() }}
                     <div class="form-group">
@@ -142,22 +142,25 @@
                         </select>
                     </div>
 
-                    <!-- <div class="form-group">
-                        <label>Kelas</label>
-                        <select name="kelasPDF" id="kelasPDF" class="form-control">
-
-                        </select>
-                    </div> -->
-
                     <div class="form-group">
-                        <label>Name Yuran</label>
-                        <select name="yuranPDF" id="yuranPDF" class="form-control">
+                        <label>Kelas</label>
+                        <select name="kelasPDF" id="kelasPDF" class="form-control classes">
 
                         </select>
                     </div>
 
+                    <div class="form-group">
+                        <label>Status</label>
+                        <select name="statusPDF" id="statusPDF" class="form-control">
+                            <option value="" disabled selected>Pilih Organisasi</option>
+                            <option value="all">Semua</option>
+                            <option value="debt">Belum Selesai</option>
+                            <option value="paid">Selesai</option>
+                        </select>
+                    </div>
+
                     <div class="modal-footer">
-                        <button id="buttonPrint" type="submit" class="btn btn-primary">Print</button>
+                        <button id="buttonPrint" type="submit" class="btn btn-primary">Export</button>
                     </div>
                 </div>
             </form>
@@ -187,120 +190,117 @@
             fetchClass($("#organization").val());
         }
 
+        $('#organExport').change(function() {
+            var organizationid    = $("#organExport").val();
+            var _token            = $('input[name="_token"]').val();
+            fetchClass(organizationid);
+        });
+
+        $('#organPDF').change(function() {
+            var organizationid    = $("#organPDF").val();
+            var _token            = $('input[name="_token"]').val();
+            fetchClass(organizationid);
+        });
+
         
         // fetch_data();
         // alert($("#organization").val());
 
-            function fetch_data(cid = '') {
-                studentTable = $('#studentTable').DataTable({
-                        processing: true,
-                        serverSide: true,
-                        ajax: {
-                            url: "{{ route('fees.getStudentDatatableFees') }}",
-                            data: {
-                                classid: cid,
-                                hasOrganization: true
-                            },
-                            type: 'GET',
-
-                        },
-                        'columnDefs': [{
-                            "targets": [0], // your case first column
-                            "className": "text-center",
-                            "width": "2%"
-                        },{
-                            "targets": [2,3], // your case first column
-                            "className": "text-center",
-                        },],
-                        order: [
-                            [1, 'asc']
-                        ],
-                        columns: [{
-                            "data": null,
-                            searchable: false,
-                            "sortable": false,
-                            render: function (data, type, row, meta) {
-                                return meta.row + meta.settings._iDisplayStart + 1;
-                            }
-                        }, {
-                            data: "nama",
-                            name: 'nama'
-                        }, {
-                            data: "gender",
-                            name: 'gender'
-                        }, {
-                            data: 'status',
-                            name: 'status',
-                            orderable: false,
-                            searchable: false
-                        },]
-                });
-            }
-
-            $('#organization').change(function() {
-               
-                var organizationid    = $("#organization").val();
-                var _token            = $('input[name="_token"]').val();
-
-                fetchClass(organizationid);
-                
-            });
-
-            function fetchClass(organizationid = ''){
-                var _token            = $('input[name="_token"]').val();
-                $.ajax({
-                    url:"{{ route('student.fetchClass') }}",
-                    method:"POST",
-                    data:{ oid:organizationid,
-                            _token:_token },
-                    success:function(result)
-                    {
-                        $('#classes').empty();
-                        $("#classes").append("<option value='' disabled selected> Pilih Kelas</option>");
-                        jQuery.each(result.success, function(key, value){
-                            // $('select[name="kelas"]').append('<option value="'+ key +'">'+value+'</option>');
-                            $("#classes").append("<option value='"+ value.cid +"'>" + value.cname + "</option>");
-                        });
-                    }
-                })
-            }
-
-            function downloadPDF(cid = ''){
-                $.ajax({
-                    url:"{{ route('fees.generatePDFByClass') }}",
-                    method:"GET",
-                    data:{ 
-                        class_id:cid,
+        function fetch_data(cid = '') {
+            studentTable = $('#studentTable').DataTable({
+                processing: true,
+                serverSide: true,
+                ajax: {
+                    url: "{{ route('fees.getStudentDatatableFees') }}",
+                    data: {
+                        classid: cid,
+                        hasOrganization: true
                     },
-                    success:function(result)
-                    {
-                        
+                    type: 'GET',
+
+                },
+                'columnDefs': [{
+                    "targets": [0], // your case first column
+                    "className": "text-center",
+                    "width": "2%"
+                },{
+                    "targets": [2,3], // your case first column
+                    "className": "text-center",
+                },],
+                order: [
+                    [1, 'asc']
+                ],
+                columns: [{
+                    "data": null,
+                    searchable: false,
+                    "sortable": false,
+                    render: function (data, type, row, meta) {
+                        return meta.row + meta.settings._iDisplayStart + 1;
                     }
-                })
-            }
-
-            $('#classes').change(function() {
-                var organizationid    = $("#organization option:selected").val();
-
-                var classid    = $("#classes option:selected").val();
-                if(classid){
-                    $('#studentTable').DataTable().destroy();
-                    fetch_data( classid);
-                    downloadPDF(classid);
-                }
-                // console.log(organizationid);
+                }, {
+                    data: "nama",
+                    name: 'nama'
+                }, {
+                    data: "gender",
+                    name: 'gender'
+                }, {
+                    data: 'status',
+                    name: 'status',
+                    orderable: false,
+                    searchable: false
+                },]
             });
+        }
 
-            // csrf token for ajax
-            $.ajaxSetup({
-                    headers: {
-                    'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
-                }
-            });
+        $('#organization').change(function() {
+            
+            var organizationid    = $("#organization").val();
+            var _token            = $('input[name="_token"]').val();
 
-                $('.alert').delay(3000).fadeOut();
-
+            fetchClass(organizationid);
+            
         });
+
+        function fetchClass(organizationid = ''){
+            var _token            = $('input[name="_token"]').val();
+            $.ajax({
+                url:"{{ route('student.fetchClass') }}",
+                method:"POST",
+                data:{ oid:organizationid,
+                        _token:_token },
+                success:function(result)
+                {
+                    $('.classes').empty();
+                    $(".classes").append("<option value='' disabled selected> Pilih Kelas</option>");
+                    jQuery.each(result.success, function(key, value){
+                        // $('select[name="kelas"]').append('<option value="'+ key +'">'+value+'</option>');
+                        $(".classes").append("<option value='"+ value.cid +"'>" + value.cname + "</option>");
+                    });
+                }
+            })
+        }
+
+        $('#classes').change(function() {
+            var organizationid    = $("#organization option:selected").val();
+
+            var classid    = $("#classes option:selected").val();
+            if(classid){
+                $('#studentTable').DataTable().destroy();
+                fetch_data( classid);
+            }
+            // console.log(organizationid);
+        });
+
+        // csrf token for ajax
+        $.ajaxSetup({
+                headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
+
+            $('.alert').delay(3000).fadeOut();
+
+    });
         
         
 </script>
