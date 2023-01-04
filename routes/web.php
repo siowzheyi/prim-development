@@ -276,6 +276,7 @@ Route::group(['middleware' => ['auth']], function () {
         'activity'           => 'ActivityController',
         'session'            => 'SessionController',
         'profile'            => 'ProfileController',
+        'dorm'               => 'DormController',
         'koperasi'           => 'Cooperative\User\UserCooperativeController',
     ]);
 });
@@ -341,6 +342,7 @@ Route::get('get-file/{filename}', 'MessageController@getFile')->name('get-file')
 Route::post('send-message', 'MessageController@sendMessage')->name('send-message');
 
 Route::post('/exportAllYuranStatus', 'FeesController@ExportAllYuranStatus')->name('exportAllYuranStatus');
+Route::post('/printAllYuranStatus', 'FeesController@PrintAllYuranStatus')->name('printAllYuranStatus');
 
 
 Route::group(['prefix' => 'notification'], function () {

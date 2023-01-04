@@ -18,11 +18,6 @@
     <div class="col-md-12">
         <div class="card">
             {{-- <div class="card-header">List Of Applications</div> --}}
-            {{-- <div>
-                <a style="margin: 19px; float: right;" id="btn-download" class="btn btn-primary"> <i
-                        class="fas fa-download"></i> Muat Turun PDF</a>
-            </div> --}}
-
             <div class="card-body">
                 {{csrf_field()}}
                 <div class="card-body">
@@ -45,6 +40,12 @@
                         </select>
                     </div>
                 </div>
+
+                <div>
+                    <a style="margin: 19px;" class="btn btn-success"  data-toggle="modal" data-target="#modalByKelas"><i class="fas fa-plus"></i> Export</a>
+                    <a style="margin: 1px;" id="btn-download" class="btn btn-success" data-toggle="modal" data-target="#modalByKelas2"><i class="fas fa-download"></i> Muat Turun PDF</a>
+                </div>
+
                 @if(count($errors) > 0)
                 <div class="alert alert-danger">
                     <ul>
@@ -78,6 +79,92 @@
 
     </div>
 </div>
+
+{{-- modal export yuran --}}
+<div class="modal fade" id="modalByKelas" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Export Yuran</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form action="{{ route('exportStudentStatus') }}" method="post">
+                <div class="modal-body">
+                    {{ csrf_field() }}
+                    <div class="form-group">
+                        <label>Organisasi</label>
+                        <select name="organExport" id="organExport" class="form-control">
+                            <option value="" disabled selected>Pilih Organisasi</option>
+                            @foreach($organization as $row)
+                                <option value="{{ $row->id }}">{{ $row->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+                    <div class="form-group">
+                        <label>Name Yuran</label>
+                        <select name="yuranExport" id="yuranExport" class="form-control">
+
+                        </select>
+                    </div>
+                    <div class="modal-footer">
+                        <button id="buttonExport" type="submit" class="btn btn-primary">Export</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- modal print yuran --}}
+<div class="modal fade" id="modalByYuran2" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Print Yuran</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form action="{{ route('printAllYuranStatus') }}" method="post">
+                <div class="modal-body">
+                    {{ csrf_field() }}
+                    <div class="form-group">
+                        <label>Organisasi</label>
+                        <select name="organPDF" id="organPDF" class="form-control">
+                            <option value="" disabled selected>Pilih Organisasi</option>
+                            @foreach($organization as $row)
+                                <option value="{{ $row->id }}">{{ $row->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- <div class="form-group">
+                        <label>Kelas</label>
+                        <select name="kelasPDF" id="kelasPDF" class="form-control">
+
+                        </select>
+                    </div> -->
+
+                    <div class="form-group">
+                        <label>Name Yuran</label>
+                        <select name="yuranPDF" id="yuranPDF" class="form-control">
+
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button id="buttonPrint" type="submit" class="btn btn-primary">Print</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 

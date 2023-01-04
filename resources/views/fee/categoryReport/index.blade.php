@@ -65,7 +65,8 @@
             </div>
 
             <div class="col-md-12">
-                <a style="float: right; margin: 0px 0px 10px 10px" class="btn btn-success"  data-toggle="modal" data-target="#modalByYuran"><i class="fas fa-plus"></i> Export Yuran</a>
+                <a style="margin: 19px;" class="btn btn-success"  data-toggle="modal" data-target="#modalByYuran"><i class="fas fa-plus"></i> Export</a>
+                <a style="margin: 1px;" href="#" class="btn btn-success " data-toggle="modal" data-target="#modalByYuran2"> <i class="fa fa-download"></i> Muat Turan PDF</a>
             </div>
 
             <div class="col-md-12">
@@ -127,6 +128,53 @@
     </div>
 </div>
 
+{{-- modal print yuran --}}
+<div class="modal fade" id="modalByYuran2" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Print Yuran</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form action="{{ route('printAllYuranStatus') }}" method="post">
+                <div class="modal-body">
+                    {{ csrf_field() }}
+                    <div class="form-group">
+                        <label>Organisasi</label>
+                        <select name="organPDF" id="organPDF" class="form-control">
+                            <option value="" disabled selected>Pilih Organisasi</option>
+                            @foreach($organization as $row)
+                                <option value="{{ $row->id }}">{{ $row->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <!-- <div class="form-group">
+                        <label>Kelas</label>
+                        <select name="kelasPDF" id="kelasPDF" class="form-control">
+
+                        </select>
+                    </div> -->
+
+                    <div class="form-group">
+                        <label>Name Yuran</label>
+                        <select name="yuranPDF" id="yuranPDF" class="form-control">
+
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button id="buttonPrint" type="submit" class="btn btn-primary">Print</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
 @endsection
 
 
@@ -164,6 +212,12 @@
             var organizationid    = $("#organExport").val();
             var _token            = $('input[name="_token"]').val();
             fetchClass(organizationid, '#yuranExport');
+        });
+
+        $('#organPDF').change(function() {
+            var organizationid    = $("#organPDF").val();
+            var _token            = $('input[name="_token"]').val();
+            fetchClass(organizationid, '#yuranPDF');
         });
         
         if($("#organization").val() == ""){

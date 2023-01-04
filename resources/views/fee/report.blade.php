@@ -38,11 +38,24 @@
                         @endforeach
                     </select>
                 </div>
+
+                <div class="form-group">
+                    <label>Kategori</label>
+                    <select name="category" id="category" class="form-control">
+                        <option value="" disabled>Pilih Kategori</option>
+                        <option value="ALL" selected>Umum</option>
+                        <option value="A">Kategori A</option>
+                        <option value="B">Kategori B</option>
+                        <option value="C">Kategori C</option>
+                        <option value="D">Kategori D</option>
+                    </select>
+                </div>
                 
                 <br>
-                <div class="row">
+                <!-- <div class="row"> -->
+                <center>
 
-                    <div class="col-sm-6">
+                    <div class="col-sm-6 cat-all">
                         <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> murid mengikut
                             pecahan kelas </h4>
 
@@ -68,8 +81,8 @@
                             </div>
                         </div>
                     </div>
-                    
-                    <div class="col-sm-6">
+
+                    <div class="col-sm-6 cat-a">
                         <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori A
                             mengikut keluarga </h4>
 
@@ -95,8 +108,8 @@
                             </div>
                         </div>
                     </div>
-                
-                    <div class="col-sm-6">
+                    
+                    <div class="col-sm-6 cat-b">
                         <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori B mengikut
                             pecahan kelas </h4>
 
@@ -122,8 +135,8 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-sm-6">
+                    
+                    <div class="col-sm-6 cat-c">
                         <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori C mengikut
                             pecahan kelas </h4>
 
@@ -149,8 +162,8 @@
                             </div>
                         </div>
                     </div>
-
-                    <div class="col-sm-6">
+                    
+                    <div class="col-sm-6 cat-d">
                         <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori D mengikut
                             pecahan asrama </h4>
 
@@ -178,7 +191,7 @@
                         </div>
                     </div>
 
-                </div>
+                </center>
             </div>
 
         </div>
@@ -280,7 +293,7 @@
 
 <script>
     $(document).ready(function() {
-  
+        
         var reportClass;
         var colors = ["#E0E0E0", '#02a499'];
 
@@ -305,6 +318,45 @@
         $('#reportClass').hide();
         $('#table-parent').hide();
         $('#type-name').hide();
+
+        $('.cat-b').hide();
+        $('.cat-c').hide();
+        $('.cat-d').hide();
+
+        $("#category").change(function(){
+            if($("#category").val() == 'B')
+            {    
+                $('.cat-b').show();
+                $('.cat-c').hide();
+                $('.cat-d').hide();
+                $('.cat-a').hide();
+                $('.cat-all').hide();
+            }
+            else if($("#category").val() == 'C')
+            {
+                $('.cat-c').show();
+                $('.cat-b').hide();
+                $('.cat-d').hide();
+                $('.cat-a').hide();
+                $('.cat-all').hide();
+            }
+            else if($("#category").val() == 'D')
+            {
+                $('.cat-d').show();
+                $('.cat-c').hide();
+                $('.cat-b').hide();
+                $('.cat-a').hide();
+                $('.cat-all').hide();
+            }
+            else if($("#category").val() == 'A')
+            {
+                $('.cat-a').show();
+                $('.cat-c').hide();
+                $('.cat-d').hide();
+                $('.cat-b').hide();
+                $('.cat-all').hide();
+            }
+        });
 
         function data_pie(oid) {
 
