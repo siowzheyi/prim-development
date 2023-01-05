@@ -1369,6 +1369,7 @@ class PayController extends AppBaseController
     public function paymentSuccess(Request $request){
         $transaction_id = $request->get('transac_id');
         $transaction_no = $request->get('transac_no');
+        $organization = $request->get('organ_id');
 
         $result = DB::table('transactions')
         ->where('id', $transaction_id)
