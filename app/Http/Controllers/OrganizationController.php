@@ -71,20 +71,20 @@ class OrganizationController extends Controller
 
     public function store(OrganizationRequest $request)
     {
+
         $link = explode(" ", $request->nama);
         $str = implode("-", $link);
         // dd($request->organization_picture);
-        
         $file_name = '';
 
         if($this->orgIsExist($request->type_org, $request->nama)) {
             return back()->withInput()->with('error', 'Nama Organisasi Telah Diambil');
         }
-
         if (!is_null($request->organization_picture)) {
             $extension = $request->organization_picture->extension();
             $storagePath  = $request->organization_picture->storeAs('/public/organization-picture', $str . '.' . $extension);
             $file_name = basename($storagePath);
+
         }
         else
         {

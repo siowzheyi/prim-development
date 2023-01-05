@@ -110,6 +110,8 @@ Route::resource('recurring_fees','ExpensesController');
     Route::post('/exportExpensesPayStatusReport','ExpensesController@exportExpensesPayStatusReport')->name('recurring_fees.exportExpensesPayStatusReport');
     Route::post('/printExpensesPayStatusReport','ExpensesController@printExpensesPayStatusReport')->name('recurring_fees.printExpensesPayStatusReport');
     Route::post('/printParentPayStatusReport','ExpensesController@printParentPayStatusReport')->name('recurring_fees.printParentPayStatusReport');
+    Route::post('/printReceipt','ExpensesController@printReceipt')->name('recurring_fees.printReceipt');
+    Route::get('/paymentFake','ExpensesController@paymentFake')->name('recurring_fees.paymentFake');
 
 // });
 
@@ -285,8 +287,9 @@ Route::group(['middleware' => ['auth']], function () {
         'activity'           => 'ActivityController',
         'session'            => 'SessionController',
         'profile'            => 'ProfileController',
-        'koperasi'           => 'Cooperative\User\UserCooperativeController',,
-        'dorm'               => 'DormController'
+        'koperasi'           => 'Cooperative\User\UserCooperativeController',
+        'dorm'               => 'DormController',
+        'recurring_fees'     => 'ExpensesController'
     ]);
 });
 

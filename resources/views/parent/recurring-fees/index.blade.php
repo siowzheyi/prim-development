@@ -57,35 +57,10 @@
         <div class="col-md-12 pb-3">
             <h3>Sila Pilih Sekolah Berkaitan Untuk Bayaran Perbelanjaan</h3>
         </div>
-        {{-- <div class="col-md-12 pb-3">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item active">Sila Pilih Sekolah</li>
-            </ol>
-        </div> --}}
-
-        {{-- <div class="col-md-12">
-            <div class="card card-primary">
-
-                {{csrf_field()}}
-        <div class="card-body">
-
-            <div class="form-group">
-                <label>Nama Organisasi</label>
-                <select name="organization" id="organization" class="form-control">
-                    <option value="" selected disabled>Pilih Organisasi</option>
-                    @foreach($organization as $row)
-                    <option value="{{ $row->id }}">{{ $row->nama }}</option>
-                    @endforeach
-                </select>
-            </div>
-        </div>
-    </div>
-</div> --}}
 
 <div class="col-md-12">
     <div class="row">
         <div class="container-wrapper-scroll p-2 mb-3">
-            
 
             @foreach ($organization as $organizations)
             <div class="col-md-12">
@@ -139,7 +114,7 @@
                                                             <input
                                                                 id="option-{{ $item->id }}-{{ $organizations->user_id }}"
                                                                 name="billcheck" value="{{ $item->amount }}"
-                                                                onchange="checkD2(this)" type="checkbox" />
+                                                                onchange="checkD(this)" type="checkbox" />
 
                                                             <label
                                                                 for="option-{{ $item->id }}-{{ $organizations->user_id }}">
@@ -178,6 +153,7 @@
                                             <div class="inputGroup">
                                                 <input id="option-{{ $row->oid }}-{{ $row->studentid }}"
                                                     name="nameSchool" value="{{ $row->oid }}" type="checkbox"
+                                                    onchange="checkStudent(this)"
                                                     data-toggle="collapse"
                                                     data-target="#collapse{{ $row->oid }}-{{ $row->studentid }}"
                                                     aria-expanded="false"
@@ -188,24 +164,27 @@
                                                     <span style="font-size: 18px">{{ $loop->iteration }}.
                                                         {{ $row->studentname  }}</span>
                                                     <span> ( {{ $row->classname }} )</span>
-
                                                     <br>
                                                     <span> {{ $row->nschool }} </span>
                                                 </label>
+
+                                                 {{-- hidden input checkbox second --}}
+                                                 <input
+                                                    id="option-{{ $row->oid }}-{{ $row->studentid }}-2"
+                                                    style="opacity: 0.0; position: absolute; left: -9999px"
+                                                    checked="checked" name="billcheck2"
+                                                    value="{{ $row->oid }}-{{ $row->studentid }}"
+                                                    type="checkbox" />
+
                                             </div>
-
-
                                             <div id="collapse{{ $row->oid }}-{{ $row->studentid }}"
                                                 aria-labelledby="heading{{ $row->oid }}-{{ $row->studentid }}"
                                                 data-parent="#accordionExample{{ $row->oid }}-{{ $row->studentid }}"
                                                 class="collapse">
-                                                
                                             </div>
                                         </div>
                                     </div>
                                 </div>
-
-
                                 @endforeach
                             </div>
                         </div>
@@ -213,9 +192,28 @@
                 </div>
             </div>
             @endforeach
-
-
         </div>
+        {{-- confirmation print modal --}}
+        <div id="printConfirmationModal" class="modal fade" role="dialog">
+            <div class="modal-dialog">
+                <div class="modal-content">
+                    <div class="modal-header">
+                        <h4 class="modal-title">Terima Kasih</h4>
+                    </div>
+                    <div class="modal-body">
+                        Sila tekan butang 'Cetak' untuk mencetak resit anda.
+                    </div>
+                    <div class="modal-footer">
+                        <form action="route('recurring_fees.printReceipt')" method="post">
+                            <button type="button" data-dismiss="modal" class="btn btn-primary" id="print" name="print">Cetak</button>
+                            <button type="button" data-dismiss="modal" class="btn">Batal</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+        {{-- end confirmation print modal --}}
+
         <div class="col-md-8 p-3">
             <h4>Jumlah Yang Perlu Dibayar : RM<span id="pay"></span> </h4>
 
@@ -229,7 +227,6 @@
             {{-- </form> --}}
         </div>
 
-        {{-- <input type="hidden" name="bname" id="bname" value="{{ $getfees->nama  ?? '' }}"> --}}
         <input type="hidden" name="ttlpay" id="ttlpay" value="0.00">
         <input type="hidden" value="{{ route('payment') }}" id="routepay">
 
@@ -265,7 +262,7 @@
     var total = 0;
     $("#pay").html("0.00");
     var myCheckboxes = new Array();
-    var myCheckboxes_categoryA = new Array();
+    var myCheckboxes_checkStudent = new Array();
     var organization_cb = new Array();
     var oid;
 
@@ -279,23 +276,34 @@
         cancelButtonColor: "#f46a6a",
       }).then(function (result) {
         if (result.value) {
-            console.log(myCheckboxes);
-            console.log(myCheckboxes_categoryA);
+           
             // console.log(myCheckboxes.length());
             // window.location.href = "{{ route('billIndex')}}";
 
+            //id = {{ $organizations->user_id }}-{{ $item->id }}
+            // item = $getFeesbyparents
+            //studentId = {{ $row->oid }}-{{ $row->studentid }}
             $.ajax({
-                url: "{{ route('pay') }}",
+                url: "{{ route('recurring_fees.paymentFake') }}",
                 data: { 
-                    id: myCheckboxes,
-                    category: myCheckboxes_categoryA
+                    user_id_and_expenses_id: myCheckboxes,
+                    oid_and_student_id: myCheckboxes_checkStudent
                 },
                 
             })
             .done(function(response){
-                document.write(response);
+                // document.write(response);
+                console.log("success");
+                console.log(response);
+                console.log("any");
+                $('#printConfirmationModal').modal('show');
+
+
             });
             
+        }
+        else{
+            console.log("denied");
         }
       });
     }); //Parameter
@@ -339,7 +347,7 @@
             $("input[name='billcheck2']:checkbox").prop('checked', false);
             $("#pay").html("0.00");
             myCheckboxes = [];
-            myCheckboxes_categoryA = [];
+            myCheckboxes_checkStudent = [];
             if(total == 0){
             document.getElementById('btn-byr').disabled = true;
             }else{
@@ -360,8 +368,7 @@
             $("#" + id2).prop('checked', true).each(function() {
                 myCheckboxes.push($(this).val());
             });
-
-            // console.log(myCheckboxes);
+           
 
         } else {
             if(amt != 0)
@@ -384,27 +391,21 @@
         }
     }
 
-    function checkD2(element) {
+    function checkStudent(element) {
         var id = element.id;
         var id2 = element.id+"-2";
         if (element.checked) {
-            amt += parseFloat($("#" + id).val());
+        
             // $("#" + id2).prop('checked', true)
 
             $("#" + id2).prop('checked', true).each(function() {
-                myCheckboxes_categoryA.push($(this).val());
+                myCheckboxes_checkStudent.push($(this).val());
+               
             });
             
         } else {
-            if(amt != 0)
-            {
-                amt -= parseFloat($("#" + id).val());
-                $("#" + id2).prop('checked', false).each(function() {
-                    myCheckboxes_categoryA = myCheckboxes_categoryA.filter(item => item !== $(this).val())
-                    // myCheckboxes.push($(this).val());
-            });
             }
-        }   
+    }   
         total = parseFloat(amt).toFixed(2);
         $("#pay").html(total);
         $("input[name='amount']").val(total);
@@ -414,7 +415,7 @@
         }else{
             document.getElementById('btn-byr').disabled = false;
         }
-    }
+        
 
     // function checkD(element) {
     //     var id = element.id;
@@ -438,10 +439,6 @@
     // }
 
     
-
-    if ($('input[name="billcheck"]').not(':checked').length == 0) {
-            $('input[name="checkall"]').prop("checked", true);
-    }
 
         // $('.getid').children().prop('disabled', true);
 
