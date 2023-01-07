@@ -1,12 +1,11 @@
 @extends('layouts.master')
-
+@include('layouts.datatable')
 @section('css')
 <link href="{{ URL::asset('assets/libs/chartist/chartist.min.css')}}" rel="stylesheet" type="text/css" />
-@include('layouts.datatable')
-
 @endsection
 
 @section('content')
+
 <div class="row align-items-center">
     <div class="col-sm-6">
         <div class="page-title-box">
@@ -14,74 +13,85 @@
         </div>
     </div>
 </div>
+
 <div class="row">
     <div class="col-md-12">
-        <div class="card">
-            {{-- <div class="card-header">List Of Applications</div> --}}
+        <div class="card card-primary">
+
+            @if(count($errors) > 0)
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach($errors->all() as $error)
+                    <li>{{$error}}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+            
+            @if(\Session::has('success'))
+            <div class="alert alert-success">
+                <p>{{ \Session::get('success') }}</p>
+            </div>
+            @endif
+            
+            <div class="flash-message"></div>
+            
             <div class="card-body">
-                {{csrf_field()}}
-                <div class="card-body">
 
-                    <div class="form-group">
-                        <label>Nama Organisasi</label>
-                        <select name="organization" id="organization" class="form-control">
-                            <option value="" selected disabled>Pilih Organisasi</option>
-                            @foreach($organization as $row)
-                            <option value="{{ $row->id }}">{{ $row->nama }}</option>
-                            @endforeach
-                        </select>
-                    </div>
-
-                    <div id="dkelas" class="form-group">
-                        <label> Kelas</label>
-                        <select name="classes" id="classes" class="form-control classes">
-                            <option value="" disabled selected>Pilih Kelas</option>
-
-                        </select>
-                    </div>
-                </div>
-
-                <!-- <div>
-                    <a style="margin: 19px;" class="btn btn-success"  data-toggle="modal" data-target="#modalByKelas"><i class="fas fa-plus"></i> Export</a>
-                    <a style="margin: 1px;" id="btn-download" class="btn btn-success" data-toggle="modal" data-target="#modalByKelas2"><i class="fas fa-download"></i> Muat Turun PDF</a>
-                </div> -->
-
-                @if(count($errors) > 0)
-                <div class="alert alert-danger">
-                    <ul>
-                        @foreach($errors->all() as $error)
-                        <li>{{$error}}</li>
+                <div class="form-group">
+                    <label>Organisasi</label>
+                    <select name="organization" id="organization" class="form-control organ">
+                        <option value="" selected>Pilih Organisasi</option>
+                        @foreach($organization as $row)
+                        <option value="{{ $row->id }}">{{ $row->nama }}</option>
                         @endforeach
-                    </ul>
+                    </select>
                 </div>
-                @endif
-                @if(\Session::has('success'))
-                <div class="alert alert-success">
-                    <p>{{ \Session::get('success') }}</p>
-                </div>
-                @endif
 
-                <div class="table-responsive">
-                    <table id="studentTable" class="table table-bordered table-striped dt-responsive nowrap"
-                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                        <thead>
-                            <tr style="text-align:center">
-                                <th> No. </th>
-                                <th>Nama Penuh</th>
-                                <th>Jantina</th>
-                                <th>Status Yuran</th>
-                            </tr>
-                        </thead>
-                    </table>
+                <div id="dkelas" class="form-group">
+                    <label> Kelas </label>
+                    <select name="classes" id="classes" class="form-control classes">
+                        <option value="0" disabled selected>Pilih Kelas</option>
+                    </select>
+                </div>
+
+                <div id="yuran" class="form-group">
+                    <label> Yuran </label>
+                    <select name="fees" id="fees" class="form-control">
+                        <option value="0" disabled selected>Pilih Yuran</option>
+                    </select>
+                </div>
+
+            </div>
+
+            <div class="col-md-12">
+                <a style="margin: 19px;" class="btn btn-success"  data-toggle="modal" data-target="#modalByYuran"><i class="fas fa-plus"></i> Export</a>
+                <a style="margin: 1px;" href="#" class="btn btn-success " data-toggle="modal" data-target="#modalByYuran2"> <i class="fa fa-download"></i> Muat Turan PDF</a>
+            </div>
+
+            <div class="col-md-12">
+                <div class="card">
+                    <div class="table-responsive">
+                        <table id="yuranTable" class="table table-bordered table-striped dt-responsive wrap"
+                            style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                            <thead>
+                                <tr style="text-align:center">
+                                    <th>No</th>
+                                    <th>Nama Murid</th>
+                                    <th>Jantina</th>
+                                    <th>Status Pembayaran</th>
+                                </tr>
+                            </thead>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>
-
     </div>
 </div>
 
 {{-- modal export yuran --}}
-<div class="modal fade" id="modalByKelas" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+<div class="modal fade" id="modalByYuran" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
@@ -91,22 +101,30 @@
                 </button>
             </div>
 
-            <form action="{{ route('exportStudentStatus') }}" method="post">
+            <form action="{{ route('exportClassYuranStatus') }}" method="post">
                 <div class="modal-body">
                     {{ csrf_field() }}
                     <div class="form-group">
                         <label>Organisasi</label>
-                        <select name="organExport" id="organExport" class="form-control">
+                        <select name="organExport" id="organExport" class="form-control organ">
                             <option value="" disabled selected>Pilih Organisasi</option>
                             @foreach($organization as $row)
                                 <option value="{{ $row->id }}">{{ $row->nama }}</option>
                             @endforeach
                         </select>
                     </div>
-                    <div class="form-group">
-                        <label>Kelas</label>
-                        <select name="kelasExport" id="kelasExport" class="form-control classes">
 
+                    <div id="dkelas1" class="form-group">
+                        <label> Kelas </label>
+                        <select name="classesExport" id="classesExport" class="form-control classes">
+                            <option value="0" disabled selected>Pilih Kelas</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Name Yuran</label>
+                        <select name="yuranExport" id="yuranExport" class="form-control">
+                            <option value="0" disabled selected>Pilih Yuran</option>
                         </select>
                     </div>
                     <div class="modal-footer">
@@ -119,22 +137,22 @@
 </div>
 
 {{-- modal print yuran --}}
-<div class="modal fade" id="modalByKelas2" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+<div class="modal fade" id="modalByYuran2" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
     <div class="modal-dialog" role="document">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Export Yuran</h5>
+                <h5 class="modal-title">Print Yuran</h5>
                 <button type="button" class="close" data-dismiss="modal" aria-label="Close">
                     <span aria-hidden="true">&times;</span>
                 </button>
             </div>
 
-            <form action="{{ route('printStudentStatus') }}" method="post">
+            <form action="{{ route('printClassYuranStatus') }}" method="post">
                 <div class="modal-body">
                     {{ csrf_field() }}
                     <div class="form-group">
                         <label>Organisasi</label>
-                        <select name="organPDF" id="organPDF" class="form-control">
+                        <select name="organPDF" id="organPDF" class="form-control organ">
                             <option value="" disabled selected>Pilih Organisasi</option>
                             @foreach($organization as $row)
                                 <option value="{{ $row->id }}">{{ $row->nama }}</option>
@@ -142,25 +160,22 @@
                         </select>
                     </div>
 
-                    <div class="form-group">
-                        <label>Kelas</label>
-                        <select name="kelasPDF" id="kelasPDF" class="form-control classes">
-
+                    <div id="dkelas2" class="form-group">
+                        <label> Kelas </label>
+                        <select name="classesPDF" id="classesPDF" class="form-control classes">
+                            <option value="0" disabled selected>Pilih Kelas</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label>Status</label>
-                        <select name="statusPDF" id="statusPDF" class="form-control">
-                            <option value="" disabled selected>Pilih Organisasi</option>
-                            <option value="all">Semua</option>
-                            <option value="debt">Belum Selesai</option>
-                            <option value="paid">Selesai</option>
+                        <label>Name Yuran</label>
+                        <select name="yuranPDF" id="yuranPDF" class="form-control">
+                            <option value="0" disabled selected>Pilih Yuran</option>
                         </select>
                     </div>
 
                     <div class="modal-footer">
-                        <button id="buttonPrint" type="submit" class="btn btn-primary">Export</button>
+                        <button id="buttonPrint" type="submit" class="btn btn-primary">Print</button>
                     </div>
                 </div>
             </form>
@@ -182,127 +197,210 @@
 
 <script>
     $(document).ready(function(){
-        
-        var studentTable;
+        $("#organPDF").prop("selectedIndex", 1).trigger('change');
+        $("#organExport").prop("selectedIndex", 1).trigger('change');
 
-        if($("#organization").val() != ""){
-            $("#organization").prop("selectedIndex", 1).trigger('change');
-            fetchClass($("#organization").val());
-        }
-
-        $('#organExport').change(function() {
-            var organizationid    = $("#organExport").val();
-            var _token            = $('input[name="_token"]').val();
-            fetchClass(organizationid);
-        });
-
-        $('#organPDF').change(function() {
-            var organizationid    = $("#organPDF").val();
-            var _token            = $('input[name="_token"]').val();
-            fetchClass(organizationid);
-        });
-
-        
-        // fetch_data();
-        // alert($("#organization").val());
-
-        function fetch_data(cid = '') {
-            studentTable = $('#studentTable').DataTable({
-                processing: true,
-                serverSide: true,
-                ajax: {
-                    url: "{{ route('fees.getStudentDatatableFees') }}",
-                    data: {
-                        classid: cid,
-                        hasOrganization: true
-                    },
-                    type: 'GET',
-
-                },
-                'columnDefs': [{
-                    "targets": [0], // your case first column
-                    "className": "text-center",
-                    "width": "2%"
-                },{
-                    "targets": [2,3], // your case first column
-                    "className": "text-center",
-                },],
-                order: [
-                    [1, 'asc']
-                ],
-                columns: [{
-                    "data": null,
-                    searchable: false,
-                    "sortable": false,
-                    render: function (data, type, row, meta) {
-                        return meta.row + meta.settings._iDisplayStart + 1;
-                    }
-                }, {
-                    data: "nama",
-                    name: 'nama'
-                }, {
-                    data: "gender",
-                    name: 'gender'
-                }, {
-                    data: 'status',
-                    name: 'status',
-                    orderable: false,
-                    searchable: false
-                },]
-            });
-        }
-
-        $('#organization').change(function() {
-            
-            var organizationid    = $("#organization").val();
-            var _token            = $('input[name="_token"]').val();
-
-            fetchClass(organizationid);
-            
-        });
-
-        function fetchClass(organizationid = ''){
-            var _token            = $('input[name="_token"]').val();
+        function fetchClass(classid = '', yuranId = ''){
+            var _token = $('input[name="_token"]').val();
             $.ajax({
-                url:"{{ route('student.fetchClass') }}",
+                url:"{{ route('fees.fetchYuranByOrganId') }}",
                 method:"POST",
-                data:{ oid:organizationid,
+                data:{ oid: $(".organ").val(),
+                        cid:classid,
                         _token:_token },
                 success:function(result)
                 {
-                    $('.classes').empty();
-                    $(".classes").append("<option value='' disabled selected> Pilih Kelas</option>");
+                    $(yuranId).empty();
+                    $(yuranId).append("<option value='' disabled selected> Pilih Kelas</option>");
                     jQuery.each(result.success, function(key, value){
-                        // $('select[name="kelas"]').append('<option value="'+ key +'">'+value+'</option>');
-                        $(".classes").append("<option value='"+ value.cid +"'>" + value.cname + "</option>");
+                        $(yuranId).append("<option value='"+ value.id +"'>" + value.name + "</option>");
                     });
                 }
             })
         }
 
-        $('#classes').change(function() {
-            var organizationid    = $("#organization option:selected").val();
-
-            var classid    = $("#classes option:selected").val();
-            if(classid){
-                $('#studentTable').DataTable().destroy();
-                fetch_data( classid);
+        $('#classesExport').change(function(){
+            if($(this).val() != '')
+            {
+                var classid   = $("#classesExport option:selected").val();
+                var _token    = $('input[name="_token"]').val();
+            
+                console.log(classid);
+                $.ajax({
+                    url:"{{ route('fees.fetchYuran') }}",
+                    method:"POST",
+                    data:{ 
+                        classid: classid,
+                        oid : $("#organExport").val(),
+                        _token: _token 
+                    },
+                    success:function(result)
+                    {
+                        $('#yuranExport').empty();
+                        $('#yuranExport').append("<option value='' disabled selected> Pilih Yuran</option>");
+                        jQuery.each(result.success, function(key, value){
+                            $('#yuranExport').append("<option value='"+ value.id +"'>" + value.name + "</option>");
+                        });
+                    }
+                })
             }
-            // console.log(organizationid);
+        });
+
+        $('#classesPDF').change(function(){
+            if($(this).val() != '')
+            {
+                var classid   = $("#classesPDF option:selected").val();
+                var _token    = $('input[name="_token"]').val();
+            
+                console.log(classid);
+                $.ajax({
+                    url:"{{ route('fees.fetchYuran') }}",
+                    method:"POST",
+                    data:{ 
+                        classid: classid,
+                        oid : $("#organPDF").val(),
+                        _token: _token 
+                    },
+                    success:function(result)
+                    {
+                        $('#yuranPDF').empty();
+                        $('#yuranPDF').append("<option value='' disabled selected> Pilih Yuran</option>");
+                        jQuery.each(result.success, function(key, value){
+                            $('#yuranPDF').append("<option value='"+ value.id +"'>" + value.name + "</option>");
+                        });
+                    }
+                })
+            }
+        });
+
+        $('#organExport').change(function() {
+            
+            var organizationid    = $("#organExport").val();
+            var _token            = $('input[name="_token"]').val();
+            fetch_data(organizationid);
+        });
+
+        $('#organPDF').change(function() {
+            var organizationid    = $("#organPDF").val();
+            var _token            = $('input[name="_token"]').val();
+            fetch_data(organizationid);
+        });
+        
+        if($("#organization").val() == ""){
+            $("#organization").prop("selectedIndex", 1).trigger('change');
+            fetch_data($("#organization").val());
+        }
+
+        function fetch_data(oid = ''){ 
+            var _token = $('input[name="_token"]').val();
+                $.ajax({
+                    url:"{{ route('fees.fetchClassForCateYuran') }}",
+                    method:"POST",
+                    data:{ oid:oid,
+                            _token:_token },
+                    success:function(result)
+                    {
+                        $('.classes').empty();
+                        $(".classes").append("<option value='0'> Pilih Kelas</option>");    
+                        jQuery.each(result.success, function(key, value){
+                            $(".classes").append("<option value='"+ value.cid +"'>" + value.cname + "</option>");
+                        });
+                    }   
+                })    
+        }
+
+        $('#classes').change(function(){
+            if($(this).val() != '')
+            {
+                var classid   = $("#classes option:selected").val();
+                var _token    = $('input[name="_token"]').val();
+            
+                console.log(classid);
+                $.ajax({
+                    url:"{{ route('fees.fetchYuran') }}",
+                    method:"POST",
+                    data:{ 
+                        classid: classid,
+                        oid : $("#organization").val(),
+                        _token: _token 
+                    },
+                    success:function(result)
+                    {
+                        $('#fees').empty();
+                        $("#fees").append("<option value='0'> Pilih Yuran</option>");
+                        
+                        jQuery.each(result.success, function(key, value){
+                            $("#fees").append("<option value='"+ value.id +"'>" + value.name + "</option>");
+                        });
+                    }
+                })
+            }
+        });
+
+        $('#organization').change(function(){
+            if($(this).val() != '')
+            {
+                fetch_data($("#organization").val());
+            }
+        });
+        
+        $('#fees').change(function(){
+            if($(this).val() != 0){
+                $('#yuranTable').DataTable().destroy();
+
+                var yuranTable = $('#yuranTable').DataTable({
+                    ordering: true,
+                    processing: true,
+                    serverSide: true,
+                        ajax: {
+                            url: "{{ route('fees.debtDatatable') }}",
+                            type: 'GET',
+                            data: {
+                                feeid: $("#fees").val(),
+                                classid: $(".classes").val()
+                            }
+                        },
+                        'columnDefs': [{
+                              "targets": [0, 1, 2, 3], // your case first column
+                              "className": "text-center",
+                              "width": "2%"
+                          }],
+                        order: [
+                            [1, 'asc']
+                        ],
+                        columns: [{
+                            "data": null,
+                            searchable: false,
+                            "sortable": false,
+                            render: function (data, type, row, meta) {
+                                return meta.row + meta.settings._iDisplayStart + 1;
+                            }
+                        }, {
+                            data: "nama",
+                            name: "nama",
+                            "width": "20%"
+                        },
+                        {
+                            data: "gender",
+                            name: "gender",
+                            "width": "10%"
+                        },{
+                            data: "status",
+                            name: "status",
+                            "width": "10%"
+                        }]
+                  });
+            }
         });
 
         // csrf token for ajax
         $.ajaxSetup({
-                headers: {
+            headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
 
-            $('.alert').delay(3000).fadeOut();
-
+        $('.alert').delay(3000).fadeOut();
     });
-        
-        
 </script>
-
 @endsection

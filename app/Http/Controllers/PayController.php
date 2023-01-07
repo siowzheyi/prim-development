@@ -26,6 +26,7 @@ use Illuminate\Support\Facades\Redirect;
 use phpDocumentor\Reflection\Types\Null_;
 use App\Http\Controllers\AppBaseController;
 use League\CommonMark\Inline\Parser\EscapableParser;
+use Toyyibpay;
 
 class PayController extends AppBaseController
 {
@@ -1409,6 +1410,13 @@ class PayController extends AppBaseController
     }
 
     // created by yuqin for toyyibpay
+    public function getBankFPX(){
+        $data = Toyyibpay::getBanks();
+        dd($data);
+    }
+
+
+
     public function createBill(){
         
         $some_data = array(

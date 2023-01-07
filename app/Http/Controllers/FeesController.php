@@ -12,6 +12,7 @@ use App\Models\Organization;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\AppBaseController;
 use App\Exports\ExportYuranStatus;
+use App\Exports\ExportClassYuranStatus;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
@@ -2112,6 +2113,26 @@ class FeesController extends AppBaseController
         return view('fee.report-search.index', compact('organization', 'listclass'));
     }
 
+    public function collectreport()
+    {
+        $organization = $this->getOrganizationByUserId();
+        $role = 0;
+        $listclass = DB::table('classes')
+            ->join('class_organization', 'class_organization.class_id', '=', 'classes.id')
+            ->select('classes.id as id', 'classes.nama', 'classes.levelid')
+            ->where([
+                ['class_organization.organization_id', $organization[0]->id]
+            ])
+            ->orderBy('classes.nama')
+            ->get();
+
+        if(Auth::user()->hasRole('Superadmin') || Auth::user()->hasRole('Pentadbir')){
+            $role = 1;
+        }
+
+        return view('fee.fee-report.index', compact('organization', 'listclass', 'role'));
+    }
+
     public function getFeesReceiptDataTable(Request $request){
 
         if(Auth::user()->hasRole('Superadmin'))
@@ -2260,37 +2281,47 @@ class FeesController extends AppBaseController
 
     public function fetchYuran(Request $request)
     {
-        $class = ClassModel::find($request->classid);
         $oid = $request->oid;
+        if($request->classid == "ALL"){
+            $lists = DB::table('fees_new')
+            ->select('fees_new.*')
+            ->where('organization_id', $oid)
+            ->groupBy('category')
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get();
+        }
+        else{
+            $class = ClassModel::find($request->classid);
 
-        $lists = DB::table('fees_new')
-        ->select('fees_new.*', DB::raw("CONCAT(fees_new.category, ' - ', fees_new.name) AS name"))
-        ->where('organization_id', $oid)
-        ->orderBy('category')
-        ->orderBy('name')
-        ->get();
+            $lists = DB::table('fees_new')
+            ->select('fees_new.*')
+            ->where('organization_id', $oid)
+            ->groupBy('category')
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get();
 
-        // dd($lists);
-
-        foreach($lists as $key=>$list)
-        {
-            $target = json_decode($list->target);
-            // dd($target->data);
-
-            if($target->data == "All_Level" || $target->data == "ALL" || $target->data == $class->levelid)
+            foreach($lists as $key=>$list)
             {
-                continue;
-            }
+                $target = json_decode($list->target);
+                // dd($target->data);
 
-            if(is_array($target->data))
-            {
-                if(in_array($class->id, $target->data))
+                if($target->data == "All_Level" || $target->data == "ALL" || $target->data == $class->levelid)
                 {
                     continue;
                 }
-            }
 
-            unset($lists[$key]);
+                if(is_array($target->data))
+                {
+                    if(in_array($class->id, $target->data))
+                    {
+                        continue;
+                    }
+                }
+
+                unset($lists[$key]);
+            }
         }
         
         return response()->json(['success' => $lists]);
@@ -2328,6 +2359,7 @@ class FeesController extends AppBaseController
                     ->select('s.*', 'fou.status')
                     ->orderBy('s.nama')
                     ->get();
+
             }
             else
             {
@@ -2365,6 +2397,168 @@ class FeesController extends AppBaseController
         }
     }
 
+    public function collectedFeeDatatable(Request $request)
+    {
+        // $fees = Fee_New::find($request->feeid);
+        if (request()->ajax()) {
+            if($request->classid == "ALL" && $request->feeid == "ALL"){
+                $data = DB::table('fees_new as fn')
+                ->leftJoin('student_fees_new as sfn', 'sfn.fees_id', '=', 'fn.id')
+                ->leftJoin('fees_new_organization_user as fnou', 'fnou.fees_new_id', '=', 'fn.id')
+                ->leftJoin('organization_user as ou', 'ou.id', '=', 'fnou.organization_user_id')
+                ->leftJoin('organization_user_student as ous', 'ous.organization_user_id', '=', 'ou.id')
+                ->leftJoin('students as s', 's.id', '=', 'ous.student_id')
+                ->where([
+                    // ['fnou.fees_new_id', $fees->id],
+                    ['fn.status', 1],
+                    ['fnou.status', 'Paid'],
+                    ['fn.organization_id', $request->oid]
+                ])
+                ->orWhere([
+                    // ['fnou.fees_new_id', $fees->id],
+                    ['fn.status', 1],
+                    ['sfn.status', 'Paid'],
+                    ['fn.organization_id', $request->oid]
+                ])
+                ->select('fn.name as fee_name', 'fn.category', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
+                ->groupBy('fn.id')
+                ->orderBy('fn.category')
+                ->orderBy('fn.name')
+                ->get();
+            }
+            elseif($request->classid == "ALL" && $request->feeid != "ALL"){
+                if($request->feeid == "Kategory A")
+                {
+                    $data = DB::table('fees_new as fn')
+                    ->leftJoin('fees_new_organization_user as fnou', 'fnou.fees_new_id', '=', 'fn.id')
+                    ->leftJoin('organization_user as ou', 'ou.id', '=', 'fnou.organization_user_id')
+                    ->leftJoin('organization_user_student as ous', 'ous.organization_user_id', '=', 'ou.id')
+                    ->leftJoin('students as s', 's.id', '=', 'ous.student_id')
+                    ->where([
+                        // ['fnou.fees_new_id', $fees->id],
+                        ['fn.category', $request->feeid],
+                        ['fn.status', 1],
+                        ['fnou.status', 'Paid']
+                    ])
+                    ->select('fn.name as fee_name', 'fn.category', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
+                    ->orderBy('fn.name')
+                    ->get();
+                }
+                else
+                {
+                    $data = DB::table('fees_new as fn')
+                    ->leftJoin('student_fees_new as sfn', 'sfn.fees_id', '=', 'fn.id')
+                    ->where([
+                        ['fn.category', $request->feeid],
+                        ['fn.status', 1],
+                        ['sfn.status', 'Paid'],
+                    ])
+                    ->select('fn.name as fee_name', 'fn.category', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
+                    ->groupBy('fn.id')
+                    ->orderBy('fn.name')
+                    ->get();
+                }
+            }
+            elseif($request->classid != "ALL" && $request->feeid == "ALL"){
+                $data = DB::table('fees_new as fn')
+                    ->leftJoin('student_fees_new as sfn', 'sfn.fees_id', '=', 'fn.id')
+                    ->leftJoin('class_student as cs', 'cs.id', '=', 'sfn.class_student_id')
+                    ->leftJoin('class_organization as co', 'co.id', '=', 'cs.organclass_id')
+                    ->leftJoin('classes as c', 'c.id', '=', 'co.class_id')
+                    ->leftJoin('organization_user_student as ous', 'ous.student_id', '=', 'cs.student_id')
+                    // ->leftJoin('fees_new_organization_user as fnou', 'fnou.organization_user_id', '=', 'ous.organization_user_id')
+                    // ->where([
+                    //     ['fn.status', 1],
+                    //     ['c.id', $request->classid],
+                    //     ['fnou.status', 'Paid']
+                    // ])
+                    // ->orWhere([
+                    //     ['fn.status', 1],
+                    //     ['c.id', $request->classid],
+                    //     ['sfn.status', 'Paid']
+                    // ])
+                    // ->orderBy('fn.name')
+                    // ->select('fn.id', 'fn.name', 'fn.category', 'sfn.id as snid', 'fnou.id as fnouid', 'cs.id as csid', 'c.nama as cnama')
+                   
+                    ->select('fn.category', 'fn.name', 'c.nama as cname', 'cs.id as csid')
+                    // ->select('fn.name as fee_name', 'fn.category', 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
+                    ->get();
+
+                    dd($data);
+            }
+            elseif($request->classid != "ALL" && $request->feeid != "ALL"){
+                if($request->feeid == "Kategory A")
+                {
+                    $data = DB::table('fees_new as fn')
+                    ->leftJoin('fees_new_organization_user as fnou', 'fnou.fees_new_id', '=', 'fn.id')
+                    ->leftJoin('organization_user as ou', 'ou.id', '=', 'fnou.organization_user_id')
+                    ->leftJoin('organization_user_student as ous', 'ous.organization_user_id', '=', 'ou.id')
+                    ->leftJoin('students as s', 's.id', '=', 'ous.student_id')
+                    ->leftJoin('class_student as cs', 'cs.student_id', '=', 's.id')
+                    ->leftJoin('class_organization as co', 'co.id', '=', 'cs.organclass_id')
+                    ->leftJoin('classes as c', 'c.id', '=', 'co.class_id')
+                    ->where([
+                        // ['fnou.fees_new_id', $fees->id],
+                        ['fn.category', $request->feeid],
+                        ['fn.status', 1],
+                        ['c.id', $request->classid],
+                        ['fnou.status', 'Paid']
+                    ])
+                    ->select('fn.name as fee_name', 'fn.category', 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
+                    ->orderBy('c.nama')
+                    ->orderBy('fn.name')
+                    ->get();
+                }
+                else
+                {
+                    $data = DB::table('fees_new as fn')
+                    ->leftJoin('student_fees_new as sfn', 'sfn.fees_id', '=', 'fn.id')
+                    ->leftJoin('class_student as cs', 'cs.id', '=', 'sfn.class_student_id')
+                    ->leftJoin('class_organization as co', 'co.id', '=', 'cs.organclass_id')
+                    ->leftJoin('classes as c', 'c.id', '=', 'co.class_id')
+                    // ->leftJoin('fees_transactions_new as ftn', 'ftn.student_fees_id', '=', 'sfn.id')
+                    // ->leftJoin('transactions as t', 't.id', '=', 'ftn.transactions_id')
+                    ->where([
+                        // ['fn.id', $fees->id],
+                        ['fn.category', $request->feeid],
+                        ['fn.status', 1],
+                        ['c.id', $request->classid],
+                        ['sfn.status', 'Paid'],
+                        // ['t.status', 'Success']
+                    ])
+                    ->select('fn.name as fee_name', 'fn.category', 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("cs.id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
+                    ->groupBy('fn.id')
+                    ->orderBy('c.nama')
+                    ->orderBy('fn.name')
+                    ->get();
+                }
+            }
+
+            // dd($data);
+
+            $table = Datatables::of($data);
+
+            $table->addColumn('sum', function ($row) {
+                $sum = $row->totalAmount * $row->total;
+                return number_format($sum, 2);
+            });
+
+            $table->addColumn('class_name', function ($row) {
+                if(isset($row->class_name)){
+                    return $row->class_name;
+                }
+                else{
+                    return "Semua Kelas";
+                }
+            });
+
+            
+            $table->rawColumns(['sum']);
+
+            return $table->make(true);
+        }
+    }
+
     public function fetchDorm(Request $request)
     {
         $oid = $request->get('oid');
@@ -2395,6 +2589,20 @@ class FeesController extends AppBaseController
             ->first();
 
         return Excel::download(new ExportYuranStatus($yuran), $yuran->name . '.xlsx');
+    }
+
+    public function ExportClassYuranStatus(Request $request)
+    {
+        $class = $request->classesExport;
+        $classname = DB::table('classes')
+            ->where('id', $class)
+            ->value('nama');
+
+        $yuran = DB::table('fees_new')
+            ->where('id', $request->yuranExport)
+            ->first();
+
+        return Excel::download(new ExportClassYuranStatus($yuran, $class), $yuran->name . ' (' . $classname . ')' . '.xlsx');
     }
 
     public function PrintAllYuranStatus(Request $request)
@@ -2449,6 +2657,67 @@ class FeesController extends AppBaseController
 
         return $pdf->download('Report ' . $yuran->name . '.pdf');
         // return view('fee.categoryReport.reportAllYuranStatusPDFTemplate', compact('yuran', 'organization', 'data'));
+    }
+
+    public function PrintClassYuranStatus(Request $request)
+    {
+        $this->validate($request, [
+            'organPDF'      =>  'required',
+            'yuranPDF'      =>  'required',
+            'classesPDF'    =>  'required'
+        ]);
+
+        $yuran = DB::table('fees_new')
+            ->where('id', $request->yuranPDF)
+            ->first();
+
+        $organization = DB::table('organizations')
+        ->where('id', $request->organPDF)
+        ->first();
+
+        if($yuran->category == "Kategory A")
+        {
+            $data = DB::table('students as s')
+                ->leftJoin('organization_user_student as ous', 'ous.student_id', 's.id')
+                ->leftJoin('organization_user as ou', 'ou.id', 'ous.organization_user_id', 'ou.id')
+                ->leftJoin('class_student as cs', 'cs.student_id', 's.id')
+                ->leftJoin('class_organization as co', 'co.id', 'cs.organclass_id')
+                ->leftJoin('classes as c', 'c.id', 'co.class_id')
+                ->leftJoin('fees_new_organization_user as fou', 'fou.organization_user_id', 'ou.id')
+                ->where([
+                    ['fou.fees_new_id', $yuran->id],
+                    ['c.id', $request->classesPDF]
+                ])
+                ->select('s.nama', 'c.nama as nama_kelas', 's.gender', 'fou.status')
+                ->orderBy('c.nama')
+                ->orderBy('s.nama')
+                ->get();
+        }
+        else
+        {
+            $data = DB::table('students as s')
+                ->leftJoin('class_student as cs', 'cs.student_id', 's.id')
+                ->leftJoin('class_organization as co', 'co.id', 'cs.organclass_id')
+                ->leftJoin('classes as c', 'c.id', 'co.class_id')
+                ->leftJoin('student_fees_new as sfn', 'sfn.class_student_id', 'cs.id')
+                ->where([
+                    ['sfn.fees_id', $yuran->id],
+                    ['c.id', $request->classesPDF]
+                ])
+                ->select('s.nama', 'c.nama as nama_kelas', 's.gender', 'sfn.status')
+                ->orderBy('c.nama')
+                ->orderBy('s.nama')
+                ->get();
+        }
+
+        foreach ($data as $key => $student) {
+            $student->status = $student->status == "Debt" ? "Masih Berhutang" : "Telah Bayar";
+        }
+
+        $pdf = PDF::loadView('fee.report-search.reportClassYuranStatusPDF', compact('yuran', 'organization', 'data'));
+
+        return $pdf->download('Report ' . $yuran->name . ' (' . $data[0]->nama_kelas . ')' . '.pdf');
+        // return view('fee.report-search.reportClassYuranStatusPDF', compact('yuran', 'organization', 'data'));
     }
 
     public function ExportStudentStatus(Request $request)

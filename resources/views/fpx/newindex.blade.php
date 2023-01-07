@@ -22,39 +22,14 @@
 </head>
 
 <body style="background-color: white">
-    <div class="container login" id="login" style="width:50%; position:relative; top:50%; transform: translateY(50%);">
+    <div class="container detail" id="detail">
         <div class="card-body shadow rounded mb-1" style="background-color:#323447">
             <center>
                 <img src="{{ URL::asset('assets/images/logo/prim.svg') }}" alt="" height="50">
             </center>
         </div>
 
-        <div class="card-body">
-            <div class="form-group">
-                <label class="control-label required">User ID</label>
-                <input type="text" name="uid" id="uid" class="form-control"
-                    data-parsley-required-message="Sila masukkan User ID" required placeholder="User ID">
-            </div>
-
-            <div class="form-group">
-                <label class="control-label required">Password</label>
-                <input type="password" name="pwd" id="pwd" class="form-control"
-                    data-parsley-required-message="Sila masukkan katalaluan" required placeholder="Password">
-            </div>
-        </div>  
-        <div class="float-right">
-            <button class="btn btn-primary" id="login" onclick="validGo()">Login</button>
-        </div>
-    </div>
-
-    <div class="container detail" id="detail" style="display: none">
-        <div class="card-body shadow rounded mb-1" style="background-color:#323447">
-            <center>
-                <img src="{{ URL::asset('assets/images/logo/prim.svg') }}" alt="" height="50">
-            </center>
-        </div>
-
-        <form method="POST" action="{{ route('createBill') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('paymentSuccess') }}" enctype="multipart/form-data">
             {{ csrf_field() }}
             <div class="card rounded-xl mt-4" style="padding: 10px">
                 <input type="hidden" id="transac_id" name="transac_id" value="{{$transaction->id}}">
@@ -132,32 +107,10 @@
     document.getElementById("dt1").innerHTML = today.toLocaleString();
 
     $(document).ready(function(){
-        $('.detail').hide();
-
-        if($('#uid').val() != "" && $('#pwd').val() != "")
-        {
-            $('.detail').show();
-            $('.login').hide();
-        }
-
-        // csrf token for ajax
         $.ajaxSetup({
                 headers: {
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
     });
-
-    function validGo() {
-        var uid = document.getElementById("uid").value;
-        var pwd = document.getElementById("pwd").value;
-
-        if(uid != "" && pwd != ""){
-            document.getElementById("detail").style.display = "inline";
-            document.getElementById("login").style.display = "none";
-        }
-        else{
-            alert('Please insert the correct user ID and password');
-        }
-    }
 </script>

@@ -24,6 +24,7 @@
         "spatie/laravel-permission": "^3.18",
         "stripe/stripe-php": "^7.67",
         "symfony/symfony": "5.4.x",
+        "tarsoft/toyyibpay": "^0.2.0",
         "yajra/laravel-datatables-oracle": "^9.15"
     },
     "require-dev": {

@@ -358,6 +358,13 @@
                         <span>Laporan Kelas</span>
                     </a>
                 </li>
+
+                <li>
+                    <a href="{{ route('fees.collectreport') }}" class=" waves-effect" aria-expanded="true">
+                        <i class="fas fa-search"></i>
+                        <span>Laporan Kutipan</span>
+                    </a>
+                </li>
                 @endrole
 
                 @role('Superadmin|Pentadbir|Guru|Penjaga')

@@ -52,34 +52,30 @@
     </div>
 </div>
 
-<div class="card p-4">
+<div class="card p-4 boxFee" >
     <div class="row">
+        <div class="col-md-12">
+
+            {{csrf_field()}}
+            <div class="card-body">
+                <div class="form-group">
+                    <label>Nama Organisasi</label>
+                    <select name="organization" id="organization" class="form-control">
+                        <option value="" selected disabled>Pilih Organisasi</option>
+                        @foreach($organization as $row)
+                        <option value="{{ $row->id }}">{{ $row->nama }}</option>
+                        @endforeach
+                    </select>
+                </div>
+            </div>
+            
+        </div>
+    </div>
+
+    <div class="row" style="display: none">
         <div class="col-md-12 pb-3">
             <h3>Sila Pilih Sekolah Berkaitan Untuk Bayaran Yuran</h3>
         </div>
-
-        {{-- <div class="col-md-12 pb-3">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item active">Sila Pilih Sekolah</li>
-            </ol>
-        </div> --}}
-
-            <!-- <div class="col-md-12">
-                <div class="card-primary">
-                    {{csrf_field()}}
-                    <div class="card-body">
-                        <div class="form-group">
-                            <label>Nama Organisasi</label>
-                            <select name="organization" id="organization" class="form-control">
-                                <option value="" selected disabled>Pilih Organisasi</option>
-                                @foreach($organization as $row)
-                                <option value="{{ $row->id }}">{{ $row->nama }}</option>
-                                @endforeach
-                            </select>
-                        </div>
-                    </div>
-                </div>
-            </div>   -->
 
         <div class="col-md-12 hide">
             <div class="row">
