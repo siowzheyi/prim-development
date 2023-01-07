@@ -49,6 +49,7 @@
         <div class="card">
             {{-- <div class="card-header">List Of Applications</div> --}}
             <div>
+                <a style="margin: 19px;" href="#" class="btn btn-success" data-toggle="modal" data-target="#modalByYuran2"> <i class="fas fa-user-cog"></i> Memperbaharui Yuran</a>
                 <a style="margin: 19px; float: right;" href="{{ route('fees.createA') }}" class="btn btn-primary"> <i
                         class="fas fa-plus"></i> Tambah Butiran</a>
             </div>

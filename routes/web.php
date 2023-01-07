@@ -354,9 +354,11 @@ Route::get('get-file/{filename}', 'MessageController@getFile')->name('get-file')
 Route::post('send-message', 'MessageController@sendMessage')->name('send-message');
 
 Route::post('/exportAllYuranStatus', 'FeesController@ExportAllYuranStatus')->name('exportAllYuranStatus');
-Route::post('/exportClassYuranStatus', 'FeesController@exportClassYuranStatus')->name('exportClassYuranStatus');
+Route::post('/exportClassYuranStatus', 'FeesController@ExportClassYuranStatus')->name('exportClassYuranStatus');
+Route::post('/exportCollectedYuran', 'FeesController@ExportCollectedYuran')->name('exportCollectedYuran');
 Route::post('/printAllYuranStatus', 'FeesController@PrintAllYuranStatus')->name('printAllYuranStatus');
-Route::post('/printClassYuranStatus', 'FeesController@printClassYuranStatus')->name('printClassYuranStatus');
+Route::post('/printClassYuranStatus', 'FeesController@PrintClassYuranStatus')->name('printClassYuranStatus');
+Route::post('/printCollectedYuran', 'FeesController@PrintCollectedYuran')->name('printCollectedYuran');
 
 Route::post('/exportStudentStatus', 'FeesController@ExportStudentStatus')->name('exportStudentStatus');
 Route::post('/printStudentStatus', 'FeesController@PrintStudentStatus')->name('printStudentStatus');

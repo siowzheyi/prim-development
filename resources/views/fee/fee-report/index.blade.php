@@ -56,9 +56,9 @@
                 </div>
 
                 <div id="yuran" class="form-group">
-                    <label> Yuran </label>
+                    <label> Kategori </label>
                     <select name="fees" id="fees" class="form-control">
-                        <option value="0" disabled selected>Pilih Yuran</option>
+                        <option value="0" disabled selected>Pilih Kategori</option>
                     </select>
                 </div>
 
@@ -79,7 +79,8 @@
                                     <th>No</th>
                                     <th>Yuran</th>
                                     <th>Kelas</th>
-                                    <th>Telah Bayar</th>
+                                    <th>Harga (RM)</th>
+                                    <th>Bilangan Telah Bayar</th>
                                     <th>Jumlah Kutipan (RM)</th>
                                 </tr>
                             </thead>
@@ -102,7 +103,7 @@
                 </button>
             </div>
 
-            <form action="{{ route('exportClassYuranStatus') }}" method="post">
+            <form action="{{ route('exportCollectedYuran') }}" method="post">
                 <div class="modal-body">
                     {{ csrf_field() }}
                     <div class="form-group">
@@ -123,9 +124,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Name Yuran</label>
+                        <label>Kategori</label>
                         <select name="yuranExport" id="yuranExport" class="form-control">
-                            <option value="0" disabled selected>Pilih Yuran</option>
+                            <option value="0" disabled selected>Pilih Kategori</option>
                         </select>
                     </div>
                     <div class="modal-footer">
@@ -148,7 +149,7 @@
                 </button>
             </div>
 
-            <form action="{{ route('printClassYuranStatus') }}" method="post">
+            <form action="{{ route('printCollectedYuran') }}" method="post">
                 <div class="modal-body">
                     {{ csrf_field() }}
                     <div class="form-group">
@@ -169,9 +170,9 @@
                     </div>
 
                     <div class="form-group">
-                        <label>Name Yuran</label>
+                        <label>Kategori</label>
                         <select name="yuranPDF" id="yuranPDF" class="form-control">
-                            <option value="0" disabled selected>Pilih Yuran</option>
+                            <option value="0" disabled selected>Pilih Kategori</option>
                         </select>
                     </div>
 
@@ -238,9 +239,11 @@
                     success:function(result)
                     {
                         $('#yuranExport').empty();
-                        $('#yuranExport').append("<option value='' disabled selected> Pilih Yuran</option>");
+                        $('#yuranExport').append("<option value='' disabled selected> Pilih Kategori</option>");
+                        if($("#classesExport option:selected").val() == "ALL")
+                            $("#yuranExport").append("<option value='ALL'> Semua Kategori</option>");
                         jQuery.each(result.success, function(key, value){
-                            $('#yuranExport').append("<option value='"+ value.id +"'>" + value.name + "</option>");
+                            $('#yuranExport').append("<option value='"+ value.category +"'>" + value.category + "</option>");
                         });
                     }
                 })
@@ -265,9 +268,11 @@
                     success:function(result)
                     {
                         $('#yuranPDF').empty();
-                        $('#yuranPDF').append("<option value='' disabled selected> Pilih Yuran</option>");
+                        $('#yuranPDF').append("<option value='' disabled selected> Pilih Kategori</option>");
+                        if($("#classesPDF option:selected").val() == "ALL")
+                            $("#yuranPDF").append("<option value='ALL'> Semua Kategori</option>");
                         jQuery.each(result.success, function(key, value){
-                            $('#yuranPDF').append("<option value='"+ value.id +"'>" + value.name + "</option>");
+                            $('#yuranPDF').append("<option value='"+ value.category +"'>" + value.category + "</option>");
                         });
                     }
                 })
@@ -318,7 +323,6 @@
                 var classid   = $("#classes option:selected").val();
                 var _token    = $('input[name="_token"]').val();
             
-                console.log(classid);
                 $.ajax({
                     url:"{{ route('fees.fetchYuran') }}",
                     method:"POST",
@@ -365,7 +369,7 @@
                         }
                     },
                     'columnDefs': [{
-                            "targets": [0, 1, 2, 3, 4], // your case first column
+                            "targets": [0, 1, 2, 3, 4, 5], // your case first column
                             "className": "text-center",
                             "width": "2%"
                         }],
@@ -387,6 +391,10 @@
                     {
                         data: "class_name",
                         name: "class_name",
+                        "width": "10%"
+                    },{
+                        data: "totalAmount",
+                        name: "isamount",
                         "width": "10%"
                     },{
                         data: "total",

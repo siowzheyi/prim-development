@@ -361,7 +361,7 @@
 
                 <li>
                     <a href="{{ route('fees.collectreport') }}" class=" waves-effect" aria-expanded="true">
-                        <i class="fas fa-search"></i>
+                    <i class="fas fa-list-ul"></i>
                         <span>Laporan Kutipan</span>
                     </a>
                 </li>
