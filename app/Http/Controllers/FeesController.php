@@ -294,7 +294,6 @@ class FeesController extends AppBaseController
             ->where('class_organization.organization_id', $oid)
             ->count();
 
-        // dd($all_student);
         $student_complete = DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
@@ -309,7 +308,7 @@ class FeesController extends AppBaseController
             ->where('class_student.fees_status', 'Not Complete')
             ->count();
 
-        $catB_student = DB::table('students')
+        $catB_student = count(DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
             ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
@@ -318,9 +317,10 @@ class FeesController extends AppBaseController
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory B'],
             ])
-            ->count();
+            ->groupBy('students.id')
+            ->get());
 
-        $catB_complete = DB::table('students')
+        $catB_complete = count(DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
             ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
@@ -328,11 +328,12 @@ class FeesController extends AppBaseController
             ->where([
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory B'],
-                ['student_fees_new.status', 'Paid']
+                ['class_student.feeB_status', 'Completed']
             ])
-            ->count();
+            ->groupBy('students.id')
+            ->get());
 
-        $catB_notcomplete = DB::table('students')
+        $catB_notcomplete = count(DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
             ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
@@ -340,11 +341,12 @@ class FeesController extends AppBaseController
             ->where([
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory B'],
-                ['student_fees_new.status', 'Debt']
+                ['class_student.feeB_status', 'Not Complete']
             ])
-            ->count();
+            ->groupBy('students.id')
+            ->get());
 
-        $catC_student = DB::table('students')
+        $catC_student = count(DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
             ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
@@ -353,9 +355,10 @@ class FeesController extends AppBaseController
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory C'],
             ])
-            ->count();
+            ->groupBy('students.id')
+            ->get());
 
-        $catC_complete = DB::table('students')
+        $catC_complete = count(DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
             ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
@@ -363,11 +366,12 @@ class FeesController extends AppBaseController
             ->where([
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory C'],
-                ['student_fees_new.status', 'Paid']
+                ['class_student.feeC_status', 'Complete']
             ])
-            ->count();
+            ->groupBy('students.id')
+            ->get());
 
-        $catC_notcomplete = DB::table('students')
+        $catC_notcomplete = count(DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
             ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
@@ -375,11 +379,12 @@ class FeesController extends AppBaseController
             ->where([
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory C'],
-                ['student_fees_new.status', 'Debt']
+                ['class_student.feeC_status', 'Not Complete']
             ])
-            ->count();
+            ->groupBy('students.id')
+            ->get());
 
-        $catD_student = DB::table('students')
+        $catD_student = count(DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
             ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
@@ -388,9 +393,10 @@ class FeesController extends AppBaseController
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory D'],
             ])
-            ->count();
+            ->groupBy('students.id')
+            ->get());
 
-        $catD_complete = DB::table('students')
+        $catD_complete = count(DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
             ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
@@ -398,11 +404,12 @@ class FeesController extends AppBaseController
             ->where([
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory D'],
-                ['student_fees_new.status', 'Paid']
+                ['class_student.feeD_status', 'Complete']
             ])
-            ->count();
+            ->groupBy('students.id')
+            ->get());
 
-        $catD_notcomplete = DB::table('students')
+        $catD_notcomplete = count(DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
             ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
@@ -410,9 +417,10 @@ class FeesController extends AppBaseController
             ->where([
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory D'],
-                ['student_fees_new.status', 'Debt']
+                ['class_student.feeD_status', 'Not Complete']
             ])
-            ->count();
+            ->groupBy('students.id')
+            ->get());
 
         $all_parent =  DB::table('organization_user')
             ->where('organization_id', $oid)
@@ -459,7 +467,7 @@ class FeesController extends AppBaseController
             // dd($type);
             $userId = Auth::id();
 
-            // $type = explode('#', $type);
+            // get student that already complete pay all fees associated
             if ($type == 'Selesai') {
                 
                 $data = DB::table('students')
@@ -473,7 +481,9 @@ class FeesController extends AppBaseController
                     ->orderBy('classes.nama')
                     ->get();
                 
-            } else {
+            } 
+            // get student that havent complete pay all fees
+            else {
                 $data = DB::table('students')
                     ->join('class_student', 'class_student.student_id', '=', 'students.id')
                     ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
@@ -502,8 +512,7 @@ class FeesController extends AppBaseController
                 ->groupBy('classes.nama')
                 ->orderBy('classes.nama')
                 ->first();
-                
-
+            
                 $btn = '<div class="d-flex justify-content-center">';
                 $btn = $btn . $row->totalstudent . '/' . $first->totalallstudent . '</div>';
                 return $btn;
@@ -513,8 +522,6 @@ class FeesController extends AppBaseController
                 $token = csrf_token();
                 $btn = '<div class="d-flex justify-content-center">';
                 $btn = $btn . '<a href="' . route('fees.reportByClass', ['type' => $row->fees_status, 'class_id' => $row->id]) . '"" class="btn btn-primary m-1">Butiran</a></div>';
-                // $btn = $btn . '<a href="' . route('fees.edit', $row->feeid) . '" class="btn btn-primary m-1">Edit</a>';
-                // $btn = $btn . '<button id="' . $row->feeid . '" data-token="' . $token . '" class="btn btn-danger m-1">Details</button></div>';
                 return $btn;
             });
 
@@ -532,7 +539,7 @@ class FeesController extends AppBaseController
             // dd($type);
             $userId = Auth::id();
 
-            // $type = explode('#', $type);
+            // get student that completed pay fees in category B
             if ($type == 'Selesai') {
             
                 $data = DB::table('students')
@@ -572,8 +579,6 @@ class FeesController extends AppBaseController
                 
             }
             
-
-            // dd($first);
             $table = Datatables::of($data);
 
             $table->addColumn('total', function ($row) {
@@ -603,8 +608,6 @@ class FeesController extends AppBaseController
                 $token = csrf_token();
                 $btn = '<div class="d-flex justify-content-center">';
                 $btn = $btn . '<a href="' . route('fees.reportByClass', ['type' => $row->fees_status, 'class_id' => $row->id]) . '"" class="btn btn-primary m-1">Butiran</a></div>';
-                // $btn = $btn . '<a href="' . route('fees.edit', $row->feeid) . '" class="btn btn-primary m-1">Edit</a>';
-                // $btn = $btn . '<button id="' . $row->feeid . '" data-token="' . $token . '" class="btn btn-danger m-1">Details</button></div>';
                 return $btn;
             });
 

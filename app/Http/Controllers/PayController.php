@@ -175,8 +175,6 @@ class PayController extends AppBaseController
                 ->first();
 
             // ************************* get fees from array fees id *******************************
-
-
             $getfees     = DB::table('students')
                 ->join('class_student', 'class_student.student_id', '=', 'students.id')
                 ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
@@ -206,8 +204,6 @@ class PayController extends AppBaseController
                 ->whereIn('student_fees_new.id', $student_fees)
                 ->get();
         }
-
-
 
         if ($cb_categoryA) {
 
@@ -294,6 +290,7 @@ class PayController extends AppBaseController
         return view('layouts.bill', $data);
     }
 
+    // create transaction row
     public function transaction(Request $request)
     {
         $user       = User::find(Auth::id());
@@ -1185,6 +1182,7 @@ class PayController extends AppBaseController
         return view('parent.fee.receipt');
     }
 
+    // created by yuqin for fake payment
     public function payment(Request $request){
         //  insert transaction, fees_transactions_new, nama = type_yearmonthdayhourminuteseconduserid
         $getstudentfees = ($request->student_fees_id) ? $request->student_fees_id : "";
@@ -1408,5 +1406,48 @@ class PayController extends AppBaseController
             
             return view('errors.500');
         } 
+    }
+
+    // created by yuqin for toyyibpay
+    public function createBill(){
+        
+        $some_data = array(
+            'userSecretKey'=>config('toyyibpay.key'),
+            'categoryCode'=>config('toyyibpay.category'),
+            'billName'=>'Car Rental WXX123',
+            'billDescription'=>'Car Rental WXX123 On Sunday',
+            'billPriceSetting'=>1,
+            'billPayorInfo'=>1,
+            'billAmount'=>1, //in cent 100 = rm1
+            'billReturnUrl'=>route('paymentStatus2'),
+            'billCallbackUrl'=>route('callback'),
+            'billExternalReferenceNo' => 'AFR341DFI',
+            'billTo'=>'Gui Yu Qin',
+            'billEmail'=>'yuqin@gmail.com',
+            'billPhone'=>'0129231224',
+            'billSplitPayment'=>0,
+            'billSplitPaymentArgs'=>'',
+            'billPaymentChannel'=>'0',
+            'billContentEmail'=>'Thank you for submitting the payment!',
+            'billChargeToCustomer'=>1,
+            'billExpiryDate'=>'7-1-2023 17:00:00',
+            'billExpiryDays'=>3
+        );
+
+        $url = 'https://toyyibpay.com/index.php/api/createBill';
+        $response = Http::asForm()->post($url, $some_data); //Http::post($url, $option);
+        // Http::asForm()->post($url, $option);
+        dd($response);
+        $billCode = $response[0]['BillCode'];
+        
+        return redirect('https://dev.toyyibpay.com/'.$billCode);
+    }
+
+    public function paymentStatus2(){
+
+    }
+
+    public function callback(){
+
     }
 }

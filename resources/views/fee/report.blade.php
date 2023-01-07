@@ -356,6 +356,13 @@
                 $('.cat-b').hide();
                 $('.cat-all').hide();
             }
+            else{
+                $('.cat-a').show();
+                $('.cat-c').hide();
+                $('.cat-d').hide();
+                $('.cat-b').hide();
+                $('.cat-all').show();
+            }
         });
 
         function data_pie(oid) {
@@ -476,7 +483,7 @@
                         $('#table').show();
                         $('#reportClass').show();
 
-                        var type = item.series.label; //+ "#" + "IS_GENERAL";
+                        var type = item.series.label;
                         
                         oid = $("#organization option:selected").val();
                         fetch_data(oid, type);

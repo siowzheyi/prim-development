@@ -54,7 +54,7 @@
             </center>
         </div>
 
-        <form method="POST" action="{{ route('paymentSuccess') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('createBill') }}" enctype="multipart/form-data">
             {{ csrf_field() }}
             <div class="card rounded-xl mt-4" style="padding: 10px">
                 <input type="hidden" id="transac_id" name="transac_id" value="{{$transaction->id}}">

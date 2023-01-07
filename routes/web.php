@@ -288,8 +288,13 @@ Route::post('trn-dev', 'PayController@transactionDev')->name('trn-dev');
 Route::post('payment', 'PayController@paymentProcess')->name('payment');
 Route::post('fpxIndex', 'PayController@fpxIndex')->name('fpxIndex');
 
+// created by yuqin for fake payment
 Route::post('payment', 'PayController@payment')->name('payment');
 Route::post('paymentSuccess', 'PayController@paymentSuccess')->name('paymentSuccess');
+// created by yuqin for toyyibpay
+Route::post('paymentStatus2', 'PayController@paymentStatus2')->name('paymentStatus2');
+Route::post('createBill', 'PayController@createBill')->name('createBill');
+Route::post('callback', 'PayController@callback')->name('callback');
 
 Route::post('paymentStatus', 'PayController@paymentStatus')->name('paymentStatus');
 Route::post('transactionReceipt', 'PayController@transactionReceipt')->name('transactionReceipt');
