@@ -893,6 +893,21 @@ class FeesController extends AppBaseController
         return view('fee.category_A.add', compact('organization'));
     }
 
+    public function renew()
+    {
+        $organization = $this->getOrganizationByUserId();
+
+        foreach($organization as $org){
+            dd($org->id);
+        }
+        $update = DB::table('fees_new')
+        ->where('fees_new.category', $category)
+        ->whereIn('fees_new.organization_id', $organization->id)
+        ->get();
+        
+        dd($update);
+    }
+
     public function editCategory($id)
     {
         $selectedFee = DB::table('fees_new')

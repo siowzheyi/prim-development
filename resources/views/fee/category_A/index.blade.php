@@ -1,6 +1,7 @@
 @extends('layouts.master')
 
 @section('css')
+<link href="{{ URL::asset('assets/css/required-asterick.css')}}" rel="stylesheet">
 <link href="{{ URL::asset('assets/libs/chartist/chartist.min.css')}}" rel="stylesheet" type="text/css" />
 @include('layouts.datatable')
 @endsection
@@ -49,7 +50,8 @@
         <div class="card">
             {{-- <div class="card-header">List Of Applications</div> --}}
             <div>
-                <a style="margin: 19px;" href="#" class="btn btn-success" data-toggle="modal" data-target="#modalByYuran2"> <i class="fas fa-user-cog"></i> Memperbaharui Yuran</a>
+                <a style="margin: 19px;" class="btn btn-success"  data-toggle="modal" data-target="#modalByYuran"><i class="fas fa-user-cog"></i> Memperbaharui Yuran</a>
+
                 <a style="margin: 19px; float: right;" href="{{ route('fees.createA') }}" class="btn btn-primary"> <i
                         class="fas fa-plus"></i> Tambah Butiran</a>
             </div>
@@ -114,6 +116,52 @@
     </div>
 </div>
 
+{{-- modal export yuran --}}
+<div class="modal fade" id="modalByYuran" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Memperbaharui Tarikh Aktif Yuran</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form action="{{ route('fees.renew') }}" method="post">
+                <div class="modal-body">
+                    {{ csrf_field() }}
+                    <div class="form-group">
+                        <label class="control-label required">Organisasi</label>
+                        <select name="organExport" id="organExport" class="form-control organ">
+                            <option value="" disabled selected>Pilih Organisasi</option>
+                            @foreach($organization as $row)
+                                <option value="{{ $row->id }}">{{ $row->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div id="dkelas1" class="form-group">
+                        <label class="control-label required"> Kelas </label>
+                        <select name="classesExport" id="classesExport" class="form-control classes">
+                            <option value="0" disabled selected>Pilih Kelas</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label required">Kategori</label>
+                        <select name="yuranExport" id="yuranExport" class="form-control">
+                            <option value="0" disabled selected>Pilih Kategori</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button id="buttonExport" type="submit" class="btn btn-primary">Kemaskini</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
 
 @endsection
 
@@ -239,6 +287,62 @@
             // console.log(organizationid);
             fetch_data(organizationid);
         });
+
+        $('#classesExport').change(function(){
+            if($(this).val() != '')
+            {
+                var classid   = $("#classesExport option:selected").val();
+                var _token    = $('input[name="_token"]').val();
+            
+                console.log(classid);
+                $.ajax({
+                    url:"{{ route('fees.fetchYuran') }}",
+                    method:"POST",
+                    data:{ 
+                        classid: classid,
+                        oid : $("#organExport").val(),
+                        _token: _token 
+                    },
+                    success:function(result)
+                    {
+                        $('#yuranExport').empty();
+                        $('#yuranExport').append("<option value='' disabled selected> Pilih Kategori</option>");
+                        if($("#classesExport option:selected").val() == "ALL")
+                            $("#yuranExport").append("<option value='ALL'> Semua Kategori</option>");
+                        jQuery.each(result.success, function(key, value){
+                            $('#yuranExport').append("<option value='"+ value.id +"'>" + value.category + ' - ' +value.name + "</option>");
+                        });
+                    }
+                })
+            }
+        });
+
+        $('#organExport').change(function() {
+            
+            var organizationid    = $("#organExport").val();
+            var _token            = $('input[name="_token"]').val();
+            fetch_data1(organizationid);
+        });
+
+        function fetch_data1(oid = ''){ 
+            var _token = $('input[name="_token"]').val();
+            $.ajax({
+                url:"{{ route('fees.fetchClassForCateYuran') }}",
+                method:"POST",
+                data:{ oid:oid,
+                        _token:_token },
+                success:function(result)
+                {
+                    $('#classesExport').empty();
+                    $("#classesExport").append("<option value='0'> Pilih Kelas</option>");    
+                    if($('#role').val() == 1)
+                        $("#classesExport").append("<option value='ALL'> Semua Kelas</option>");    
+                    jQuery.each(result.success, function(key, value){
+                        $("#classesExport").append("<option value='"+ value.cid +"'>" + value.cname + "</option>");
+                    });
+                }   
+            })    
+        }
   
         // csrf token for ajax
         $.ajaxSetup({
