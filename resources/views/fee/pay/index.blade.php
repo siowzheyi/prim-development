@@ -54,8 +54,7 @@
 
 <div class="card p-4 boxFee" >
     <div class="row">
-        <div class="col-md-12">
-
+        <!-- <div class="col-md-12">
             {{csrf_field()}}
             <div class="card-body">
                 <div class="form-group">
@@ -69,10 +68,10 @@
                 </div>
             </div>
             
-        </div>
+        </div> -->
     </div>
 
-    <div class="row" style="display: none">
+    <div class="row">
         <div class="col-md-12 pb-3">
             <h3>Sila Pilih Sekolah Berkaitan Untuk Bayaran Yuran</h3>
         </div>
@@ -82,7 +81,6 @@
                 <div class="container-wrapper-scroll p-2 mb-3">
 
                     @foreach ($organization as $organizations)
-                    
                         <div class="col-md-12">
                             <div id="accordionExample{{ $organizations->id }}" class="accordion shadow">
                                 <!-- Accordion item 1 -->

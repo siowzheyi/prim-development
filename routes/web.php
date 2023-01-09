@@ -117,7 +117,7 @@ Route::group(['prefix' => 'fees'], function () {
 
     Route::get('/edit/{id}', 'FeesController@editCategory')->name('fees.editCategory');
 
-    Route::get('/renew', 'FeesController@renew')->name('fees.renew');
+    Route::post('/renew', 'FeesController@renew')->name('fees.renew');
 
     Route::get('/A', 'FeesController@CategoryA')->name('fees.A');
     Route::get('/add/A', 'FeesController@createCategoryA')->name('fees.createA');

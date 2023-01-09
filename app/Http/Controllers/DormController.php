@@ -890,33 +890,50 @@ class DormController extends Controller
             DB::table('dorms')
             ->where('dorms.id', $newdormid)
             ->update(['student_inside_no' => $dorm[0]->student_inside_no + 1]);
+    
+            $updateResult = $this->updateStudentDebt($student[0]->id, $neworganizationid, $newdormid);
 
-            $classStu = DB::table('class_student')
-            ->where('student_id', $student[0]->id)
+            return redirect()->to('/sekolah/dorm/indexResident/' . $newdormid)->with('success', 'New student has been added successfully');
+        }
+
+        return redirect()->to('/sekolah/dorm/indexResident/' . $newdormid)->withErrors(['Failed to add student into dorm', 'Possible problem: Dorm is full  |  Student already has accommodation']);
+    }
+
+    public function updateStudentDebt($id, $neworganizationid, $newdormid){
+
+        $classStu = DB::table('class_student')
+            ->where('student_id', $id)
             ->first();
     
-            $ifExitsCateD = DB::table('fees_new')
-            ->where('category', 'Kategory D')
-            ->where('organization_id', $neworganizationid)
-            ->where('status', 1)
-            ->get();
+        $ifExitsCateD = DB::table('fees_new')
+        ->where('category', 'Kategory D')
+        ->where('organization_id', $neworganizationid)
+        ->where('status', 1)
+        ->get();
 
-            $dorms = DB::table('dorms')
-            ->where('dorms.id', $newdormid)
-            ->first();
-    
-            if (!$ifExitsCateD->isEmpty()) {
-                foreach ($ifExitsCateD as $kateD) {
+        $dorms = DB::table('dorms')
+        ->where('dorms.id', $newdormid)
+        ->first();
+
+        if (!$ifExitsCateD->isEmpty()) {
+            foreach ($ifExitsCateD as $kateD) {
+                $feesExist = DB::table('student_fees_new')
+                ->where('fees_id', $kateD->id)
+                ->where('class_student_id', $classStu->id)
+                ->get();
+
+                if($feesExist->isEmpty())
+                {
                     $target = json_decode($kateD->target);
                     if ($target->data == "ALL_TYPE" && $classStu->dorm_id != NULL) {
-                        DB::table('student_fees_new')->insert([
+                        $update = DB::table('student_fees_new')->insert([
                             'status'            => 'Debt',
                             'fees_id'           =>  $kateD->id,
                             'class_student_id'  =>  $classStu->id
                         ]);
                     } else if (is_array($target->dorm) && $classStu->dorm_id != NULL) {
                         if (in_array($dorms->id, $target->dorm)) {
-                            DB::table('student_fees_new')->insert([
+                            $update = DB::table('student_fees_new')->insert([
                                 'status'            => 'Debt',
                                 'fees_id'           =>  $kateD->id,
                                 'class_student_id'  =>  $classStu->id
@@ -924,18 +941,31 @@ class DormController extends Controller
                         }
                     }
                 }
-    
-                DB::table('class_student')
-                ->where('id', $classStu->id)
-                ->update([
-                    'fees_status' => "Not Complete"
-                ]);
+                else{
+                    $target = json_decode($kateD->target);
+                    if ($target->data == "ALL_TYPE" && $classStu->dorm_id != NULL) {
+                        $update = DB::table('student_fees_new')
+                        ->where('class_student_id', $classStu->id)
+                        ->where('fees_id', $kateD->id)
+                        ->update(['status' => 'Debt']);
+                    } else if (is_array($target->dorm) && $classStu->dorm_id != NULL) {
+                        if (in_array($dorms->id, $target->dorm)) {
+                            $update = DB::table('student_fees_new')
+                            ->where('class_student_id', $classStu->id)
+                            ->where('fees_id', $kateD->id)
+                            ->update(['status' => 'Debt']);
+                        }
+                    }
+                }
             }
 
-            return redirect()->to('/sekolah/dorm/indexResident/' . $newdormid)->with('success', 'New student has been added successfully');
+            $update2 = DB::table('class_student')
+            ->where('id', $classStu->id)
+            ->update([
+                'fees_status' => "Not Complete"
+            ]);
         }
-
-        return redirect()->to('/sekolah/dorm/indexResident/' . $newdormid)->withErrors(['Failed to add student into dorm', 'Possible problem: Dorm is full  |  Student already has accommodation']);
+        return $update;
     }
 
 
@@ -1364,6 +1394,8 @@ class DormController extends Controller
                 DB::table('dorms')
                     ->where('dorms.id', $olddormid[0]->dormid)
                     ->update(['student_inside_no' => $olddormid[0]->student_inside_no - 1]);
+        
+                $updateResult = $this->updateStudentDebt($id, $neworganizationid, $newdormid);
 
                 return redirect()->to('/sekolah/dorm/indexResident/' . $newdormid)->with('success', 'Student has been added successfully');
             }
@@ -1531,6 +1563,16 @@ class DormController extends Controller
             ->update($updateDetails1);
 
         if ($result) {
+            $fees = DB::table('student_fees_new as sfn')
+            ->join('fees_new as fn', 'fn.id', '=', 'sfn.fees_id')
+            ->join('class_student as cs', 'cs.id', '=', 'sfn.class_student_id')
+            ->where([
+                ['cs.id', $id],
+                ['cs.status', 1],
+                ['fn.category', 'Kategory D'],
+            ])
+            ->update(['sfn.status' => '0']);
+
             Session::flash('success', 'Pelajar Berjaya Dipadam');
             return View::make('layouts/flash-messages');
         } else {

@@ -50,8 +50,8 @@
                     <div class="form-group col-md-12">
                         <label class="control-label required">Harga (RM)</label>
                         <input class="form-control input-mask text-left"
-                            data-inputmask="'alias': 'numeric', 'groupSeparator': ',', 'digits': 2, 'digitsOptional': false, 'placeholder': '0'"
-                            im-insert="true" name="price">
+                        data-inputmask="'alias': 'numeric', 'groupSeparator': ',', 'digits': 2, 'digitsOptional': false, 'placeholder': '0'"
+                            im-insert="true" name="price" onchange="this.value = Math.abs(this.value);">
                     </div>
                 </div>
 
@@ -75,7 +75,7 @@
                 <div class="form-group">
                     <label for="renew" class="control-label required"> Tempoh Ulang (bulan) </label> 
                     <input type="number" name="renew" id="renew" class="form-control"
-                        data-parsley-required-message="Sila masukkan tempoh ulangan butiran" required placeholder="0" min="0">
+                        data-parsley-required-message="Sila masukkan tempoh ulangan butiran" required placeholder="0" min="0" onchange="this.value = Math.abs(this.value);">
                     <i>* 0 jika tidak berulang</i>
                 </div>
 

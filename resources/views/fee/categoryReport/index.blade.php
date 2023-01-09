@@ -17,24 +17,6 @@
 <div class="row">
     <div class="col-md-12">
         <div class="card card-primary">
-
-            @if(count($errors) > 0)
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach($errors->all() as $error)
-                    <li>{{$error}}</li>
-                    @endforeach
-                </ul>
-            </div>
-            @endif
-            
-            @if(\Session::has('success'))
-            <div class="alert alert-success">
-                <p>{{ \Session::get('success') }}</p>
-            </div>
-            @endif
-            
-            <div class="flash-message"></div>
             
             <div class="card-body">
 
@@ -62,27 +44,68 @@
                     </select>
                 </div>
 
-            </div>
+                <!-- <div class="form-row">
+                    <div class="form-group col-md-12">
+                        <label>Tempoh</label>
 
-            <div class="col-md-12">
+                        <div class="input-daterange input-group" id="date">
+                            <input type="text" class="form-control" name="date_started" placeholder="Tarikh Awal"
+                                autocomplete="off" data-parsley-required-message="Sila masukkan tarikh awal"
+                                data-parsley-errors-container=".errorMessage" required />
+                            <input type="text" class="form-control" name="date_end" placeholder="Tarikh Akhir"
+                                autocomplete="off" data-parsley-required-message="Sila masukkan tarikh akhir"
+                                data-parsley-errors-container=".errorMessage" required />
+                        </div>
+                        <div class="errorMessage"></div>
+                        <div class="errorMessage"></div>
+                    </div>
+                </div> -->
+
+            </div>
+        </div>
+    </div>
+
+    <div class="col-md-12">
+        <div class="card">
+
+            <div>
                 <a style="margin: 19px;" class="btn btn-success"  data-toggle="modal" data-target="#modalByYuran"><i class="fas fa-plus"></i> Export</a>
                 <a style="margin: 1px;" href="#" class="btn btn-success " data-toggle="modal" data-target="#modalByYuran2"> <i class="fa fa-download"></i> Muat Turan PDF</a>
+                <a style="margin: 19px;" class="btn btn-primary float-right"  data-toggle="modal" data-target="#modalByYuran3"><i class="fas fa-user-cog"></i> Memperbaharui Yuran</a>
             </div>
 
-            <div class="col-md-12">
-                <div class="card">
-                    <div class="table-responsive">
-                        <table id="yuranTable" class="table table-bordered table-striped dt-responsive wrap"
-                            style="border-collapse: collapse; border-spacing: 0; width: 100%;">
-                            <thead>
-                                <tr style="text-align:center">
-                                    <th>No</th>
-                                    <th>Nama Murid</th>
-                                    <th>Jantina</th>
-                                    <th>Status Pembayaran</th>
-                                </tr>
-                            </thead>
-                        </table>
+            <div class="card-body">
+                @if(count($errors) > 0)
+                <div class="alert alert-danger">
+                    <ul>
+                        @foreach($errors->all() as $error)
+                        <li>{{$error}}</li>
+                        @endforeach
+                    </ul>
+                </div>
+                @endif
+                @if(\Session::has('success'))
+                <div class="alert alert-success">
+                    <p>{{ \Session::get('success') }}</p>
+                </div>
+                @endif
+                <div class="flash-message"></div>
+
+                <div class="col-md-12">
+                    <div class="card">
+                        <div class="table-responsive">
+                            <table id="yuranTable" class="table table-bordered table-striped dt-responsive wrap"
+                                style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                                <thead>
+                                    <tr style="text-align:center">
+                                        <th>No</th>
+                                        <th>Nama Murid</th>
+                                        <th>Jantina</th>
+                                        <th>Status Pembayaran</th>
+                                    </tr>
+                                </thead>
+                            </table>
+                        </div>
                     </div>
                 </div>
             </div>
@@ -169,6 +192,53 @@
 
                     <div class="modal-footer">
                         <button id="buttonPrint" type="submit" class="btn btn-primary">Print</button>
+                    </div>
+                </div>
+            </form>
+        </div>
+    </div>
+</div>
+
+{{-- modal update yuran --}}
+<div class="modal fade" id="modalByYuran3" tabindex="-1" role="dialog" aria-labelledby="modelTitleId" aria-hidden="true">
+    <div class="modal-dialog" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Memperbaharui Tarikh Aktif Yuran</h5>
+                <button type="button" class="close" data-dismiss="modal" aria-label="Close">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <form action="{{ route('fees.renew') }}" method="post">
+                <div class="modal-body">
+                    {{ csrf_field() }}
+                    <div class="form-group">
+                        <label class="control-label required">Organisasi</label>
+                        <select name="organUpdate" id="organUpdate" class="form-control organ">
+                            <option value="" disabled selected>Pilih Organisasi</option>
+                            @foreach($organization as $row)
+                                <option value="{{ $row->id }}">{{ $row->nama }}</option>
+                            @endforeach
+                        </select>
+                    </div>
+
+                    <div id="dkelas1" class="form-group">
+                        <label class="control-label required"> Kelas </label>
+                        <select name="classesUpdate" id="classesUpdate" class="form-control classes">
+                            <option value="0" disabled selected>Pilih Kelas</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label required">Kategori</label>
+                        <select name="yuranUpdate" id="yuranUpdate" class="form-control">
+                            <option value="0" disabled selected>Pilih Kategori</option>
+                        </select>
+                    </div>
+
+                    <div class="modal-footer">
+                        <button id="buttonUpdate" type="submit" class="btn btn-primary">Kemaskini</button>
                     </div>
                 </div>
             </form>
@@ -327,6 +397,57 @@
                   });
             }
         });
+
+        $('#classesUpdate').change(function(){
+            if($(this).val() != '')
+            {
+                var classid   = $("#classesUpdate option:selected").val();
+                var _token    = $('input[name="_token"]').val();
+
+                $.ajax({
+                    url:"{{ route('fees.fetchYuran') }}",
+                    method:"POST",
+                    data:{ 
+                        classid: classid,
+                        oid : $("#organUpdate").val(),
+                        _token: _token 
+                    },
+                    success:function(result)
+                    {
+                        $('#yuranUpdate').empty();
+                        $('#yuranUpdate').append("<option value='' disabled selected> Pilih Kategori</option>");
+                        jQuery.each(result.success, function(key, value){
+                            $('#yuranUpdate').append("<option value='"+ value.id +"'>" + value.name + "</option>");
+                        });
+                    }
+                })
+            }
+        });
+
+        $('#organUpdate').change(function() {
+            
+            var organizationid    = $("#organUpdate").val();
+            var _token            = $('input[name="_token"]').val();
+            fetch_data1(organizationid);
+        });
+
+        function fetch_data1(oid = ''){ 
+            var _token = $('input[name="_token"]').val();
+            $.ajax({
+                url:"{{ route('fees.fetchClassForCateYuran') }}",
+                method:"POST",
+                data:{ oid:oid,
+                        _token:_token },
+                success:function(result)
+                {
+                    $('#classesUpdate').empty();
+                    $("#classesUpdate").append("<option value='0'> Pilih Kelas</option>");        
+                    jQuery.each(result.success, function(key, value){
+                        $("#classesUpdate").append("<option value='"+ value.cid +"'>" + value.cname + "</option>");
+                    });
+                }   
+            })    
+        }
 
         // csrf token for ajax
         $.ajaxSetup({

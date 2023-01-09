@@ -128,6 +128,7 @@ class StudentController extends Controller
     {
         $classid = $request->get('classes');
         $class = ClassModel::find($classid);
+        $gender = $request->get('gender');
 
         $co = DB::table('class_organization')
             ->select('id', 'organization_id as oid')
@@ -229,10 +230,6 @@ class StudentController extends Controller
             'status'          => 1,
         ]);
 
-        $classStu = DB::table('class_student')
-            ->where('student_id', $student->id)
-            ->first();
-
         DB::table('organization_user_student')->insert([
             'organization_user_id'  => $ou->id,
             'student_id'            => $student->id
@@ -247,6 +244,24 @@ class StudentController extends Controller
         DB::table('students')
             ->where('id', $student->id)
             ->update(['parent_tel' => $newparent->telno]);
+
+        $update = $this->updateFeesABC($co, $ifExits, $ou, $gender, $class, $student, "");
+
+        return redirect('/student')->with('success', 'New student has been added successfully');
+    }
+
+    public function updateFeesABC($co, $ifExits, $ou, $gender, $class, $student, $id){
+        if(isset($student->id)){
+            $id = $student->id;
+        }
+        else{
+            $id = $id;
+        }
+
+
+        $classStu = DB::table('class_student')
+            ->where('student_id', $id)
+            ->first();
 
         // check fee for new in student
         // check category A fee
@@ -264,7 +279,7 @@ class StudentController extends Controller
 
         if (!$ifExitsCateA->isEmpty() && count($ifExits) == 0) {
             foreach ($ifExitsCateA as $kateA) {
-                DB::table('fees_new_organization_user')->insert([
+                $update = DB::table('fees_new_organization_user')->insert([
                     'status'                    => 'Debt',
                     'fees_new_id'               =>  $kateA->id,
                     'organization_user_id'      =>  $ou->id,
@@ -275,31 +290,66 @@ class StudentController extends Controller
 
         if (!$ifExitsCateBC->isEmpty()) {
             foreach ($ifExitsCateBC as $kateBC) {
-                $target = json_decode($kateBC->target);
 
-                if (isset($target->gender)) {
-                    if ($target->gender != $request->get('gender')) {
-                        continue;
+                // check if the fees already exist
+                $feeBCExist = DB::table('student_fees_new')
+                ->where('fees_id', $kateBC->id)
+                ->where('class_student_id', $classStu->id)
+                ->get();
+
+                if($feeBCExist->isEmpty())
+                {
+                    $target = json_decode($kateBC->target);
+
+                    if (isset($target->gender)) {
+                        if ($target->gender != $gender) {
+                            continue;
+                        }
                     }
-                }
 
-                if ($target->data == "All_Level" || $target->data == $class->levelid) {
-                    DB::table('student_fees_new')->insert([
-                        'status'            => 'Debt',
-                        'fees_id'           =>  $kateBC->id,
-                        'class_student_id'  =>  $classStu->id
-                    ]);
-                } else if (is_array($target->data)) {
-                    if (in_array($class->id, $target->data)) {
-                        DB::table('student_fees_new')->insert([
+                    if ($target->data == "All_Level" || $target->data == $class->levelid) {
+                        $update = DB::table('student_fees_new')->insert([
                             'status'            => 'Debt',
                             'fees_id'           =>  $kateBC->id,
                             'class_student_id'  =>  $classStu->id
                         ]);
+                    } else if (is_array($target->data)) {
+                        if (in_array($class->id, $target->data)) {
+                            $update = DB::table('student_fees_new')->insert([
+                                'status'            => 'Debt',
+                                'fees_id'           =>  $kateBC->id,
+                                'class_student_id'  =>  $classStu->id
+                            ]);
+                        }
                     }
                 }
-            }
+                else
+                {
+                    $target = json_decode($kateBC->target);
 
+                    if (isset($target->gender)) {
+                        if ($target->gender != $gender) {
+                            continue;
+                        }
+                    }
+
+                    if ($target->data == "All_Level" || $target->data == $class->levelid) {
+                        $update = DB::table('student_fees_new')
+                            ->where('class_student_id', $classStu->id)
+                            ->where('fees_id', $kateBC->id)
+                            ->update(['status' => 'Debt']);
+                    } 
+                    else if (is_array($target->data)) {
+                        if (in_array($class->id, $target->data)) {
+                            $update = DB::table('student_fees_new')
+                            ->where('class_student_id', $classStu->id)
+                            ->where('fees_id', $kateBC->id)
+                            ->update(['status' => 'Debt']);
+                        }
+                    }
+
+                }
+            }
             DB::table('class_student')
             ->where('id', $classStu->id)
             ->update([
@@ -307,7 +357,7 @@ class StudentController extends Controller
             ]);
         }
 
-        return redirect('/student')->with('success', 'New student has been added successfully');
+        return $update;
     }
 
     public function show($id)
@@ -344,13 +394,38 @@ class StudentController extends Controller
     public function update(Request $request, $id)
     {
         //
-        $classid = $request->get('classes');
-
         $this->validate($request, [
             'name'          =>  'required',
             //'icno'          =>  'required',
             'classes'       =>  'required',
         ]);
+
+        $classid = $request->get('classes');
+        $class = ClassModel::find($classid);
+        $gender = $request->get('gender');
+
+        $co = DB::table('class_organization')
+            ->select('id', 'organization_id as oid')
+            ->where('class_id', $classid)
+            ->first();
+
+        $phoneno = DB::table('students')
+        ->where('id', $id)
+        ->value('parent_tel');
+
+        $query = DB::table('users as u')
+        ->leftJoin('organization_user as ou', 'u.id', '=', 'ou.user_id')
+        ->where('u.telno', '=', $phoneno)
+        ->where('ou.organization_id', $co->oid);
+
+        $ifExits = $query
+                    ->whereIn('ou.role_id', [5, 6])
+                    ->get();
+
+        $ou = $query
+                ->where('role_id', 6)
+                ->select('ou.id as id')
+                ->first();
 
         $getOrganizationClass = DB::table('class_organization')
             ->where('class_id', $classid)
@@ -374,6 +449,9 @@ class StudentController extends Controller
                     'class_student.organclass_id'    => $getOrganizationClass->id,
                 ]
             );
+        
+        $update = $this->updateFeesABC($co, $ifExits, $ou, $gender, $class, "", $id);
+        
 
         return redirect('/student')->with('success', 'The data has been updated!');
     }
@@ -397,6 +475,15 @@ class StudentController extends Controller
 
 
         if ($result) {
+            $fees = DB::table('student_fees_new as sfn')
+            ->join('fees_new as fn', 'fn.id', '=', 'sfn.fees_id')
+            ->join('class_student as cs', 'cs.id', '=', 'sfn.class_student_id')
+            ->where([
+                ['cs.id', $id],
+            ])
+            ->whereIn('fn.category', ['Kategory B', 'Kategory C'])
+            ->update(['sfn.status' => '0']);
+
             Session::flash('success', 'Murid Berjaya Dipadam');
             return View::make('layouts/flash-messages');
         } else {

@@ -79,8 +79,8 @@
 
                 <div class="form-group">
                     <label for="renew" class="control-label required"> Tempoh Ulang (bulan) </label> 
-                    <input type="number" name="renew" id="renew" class="form-control"
-                        data-parsley-required-message="Sila masukkan tempoh ulangan butiran" required value="{{ $repeat }}" placeholder="0" min="0">
+                    <input type="text" name="renew" id="renew" class="form-control"
+                        data-parsley-required-message="Sila masukkan tempoh ulangan butiran" required value="{{ $repeat }}" placeholder="0" min="0" onchange="this.value = Math.abs(this.value);">
                     <i>* 0 jika tidak berulang</i>
                 </div>
 
@@ -137,7 +137,7 @@
 
         $('.form-validation').parsley();
         $(".input-mask").inputmask();
-
+        
         var today = new Date();
 
         $('#date').datepicker({
@@ -146,7 +146,6 @@
             format: 'yyyy-mm-dd',
             orientation: 'bottom'
         });
-        
     });
 </script>
 @endsection

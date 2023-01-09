@@ -43,6 +43,23 @@
             @endforeach
           </select>
         </div>
+
+        <div class="form-row">
+          <div class="form-group col-md-12">
+              <label>Tempoh</label>
+
+              <div class="input-daterange input-group" id="date">
+                  <input type="text" class="form-control" name="date_started" id="date_started" placeholder="Tarikh Awal"
+                      autocomplete="off" data-parsley-required-message="Sila masukkan tarikh awal"
+                      data-parsley-errors-container=".errorMessage" required />
+                  <input type="text" class="form-control" name="date_end" id="date_end" placeholder="Tarikh Akhir"
+                      autocomplete="off" data-parsley-required-message="Sila masukkan tarikh akhir"
+                      data-parsley-errors-container=".errorMessage" required />
+              </div>
+              <div class="errorMessage"></div>
+              <div class="errorMessage"></div>
+          </div>
+        </div>
       </div>
 
       {{-- <div class="">
@@ -98,14 +115,37 @@
 
 
 @section('script')
+
+<!-- Plugin Js-->
+<script src="{{ URL::asset('assets/libs/dropzone/dropzone.min.js')}}"></script>
+<script src="{{ URL::asset('assets/libs/chartist/chartist.min.js')}}"></script>
+<script src="{{ URL::asset('assets/libs/parsleyjs/parsleyjs.min.js')}}"></script>
+<script src="{{ URL::asset('assets/js/pages/dashboard.init.js')}}"></script>
+<script src="{{ URL::asset('assets/libs/inputmask/inputmask.min.js')}}"></script>
+<script src="{{ URL::asset('assets/libs/bootstrap-datepicker/bootstrap-datepicker.min.js') }}" defer></script>
+
 <script>
     $( document ).ready(function() {
+
+        $('.form-validation').parsley();
+        $(".input-mask").inputmask();
+
+        var today = new Date();
+        $('.yearhide').hide();
+        $('.cbhide').hide();
+
+        $('#date').datepicker({
+            toggleActive: true,
+            todayHighlight:true,
+            format: 'dd/mm/yyyy',
+            orientation: 'bottom'
+          });
 
         fetch_data();
 
         var receiptTable;
 
-        function fetch_data(oid = '') {
+        function fetch_data(oid = '') {   
             receiptTable = $('#feesReceiptDataTable').DataTable({
                     processing: true,
                     serverSide: true,
@@ -113,6 +153,8 @@
                         url: "{{ route('fees.getFeesReceiptDataTable') }}",
                         data: {
                             oid: oid,
+                            date_started: $("#date_started").val(),
+                            date_end: $("#date_end").val()
                         },
                         type: 'GET',
 
@@ -155,11 +197,13 @@
             });
         }
 
-        $('#organization').change(function() {
-            var organizationid = $("#organization option:selected").val();
-            $('#feesReceiptDataTable').DataTable().destroy();
-            console.log(organizationid);
-            fetch_data(organizationid);
+        $('#date_end').change(function() {
+            if($("#organization option:selected").val() != "" && $("#date_started").val()){
+              var organizationid = $("#organization option:selected").val();
+              $('#feesReceiptDataTable').DataTable().destroy();
+              console.log(organizationid);
+              fetch_data(organizationid);
+            }
         });
 
         // csrf token for ajax

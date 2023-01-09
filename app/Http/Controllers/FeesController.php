@@ -159,15 +159,15 @@ class FeesController extends AppBaseController
 
     public function destroy($id)
     {
-        $result = DB::table('fees_new')
-            ->where('id', '=', $id)
-            ->delete();
+        // $result = DB::table('fees_new')
+        //     ->where('id', '=', $id)
+        //     ->delete();
         
-       /*  $result = DB::table('fees_new')
-            ->where('id', '=', $id)
+        $result = DB::table('fees_new')
+            ->where('id', $id)
             ->update([
-                'status'        =>  '0'
-            ]); */
+                'status' =>  '0'
+            ]); 
 
         if ($result) {
             Session::flash('success', 'Yuran Berjaya Dipadam');
@@ -893,19 +893,121 @@ class FeesController extends AppBaseController
         return view('fee.category_A.add', compact('organization'));
     }
 
-    public function renew()
+    public function renew(Request $request)
     {
-        $organization = $this->getOrganizationByUserId();
+        $result = 0;
+        $oid = $request->organUpdate;
+        $cid = $request->classUpdate;
+        $feeid = $request->yuranUpdate;
 
-        foreach($organization as $org){
-            dd($org->id);
+        $fees = DB::table('fees_new')
+        ->where('fees_new.id', $feeid)
+        ->where('fees_new.organization_id', $oid)
+        ->first();
+
+        $currentDate = date("Y-m-d");
+
+        if($currentDate > $fees->end_date){
+            if($fees->category == "Kategory D"){
+                $target = json_decode($fees->target)->repeat;
+                $target *= 30;
+                $target = (int)round($target);
+
+                $remainStart = date('Y-m-d', strtotime($fees->start_date. ' + '. $target.' days'));
+                $remainEnd = date('Y-m-d', strtotime($fees->end_date. ' + '. $target.' days'));
+            }
+            else{
+                $remainStart = date("Y") . '-' . date('m-d', strtotime($fees->start_date));
+                $remainEnd = date("Y") . '-' . date('m-d', strtotime($fees->end_date));
+            }
+
+            $result = DB::table('fees_new')
+                ->where('id', $feeid)
+                ->where('organization_id', $oid)
+                ->update([
+                    'start_date' => $remainStart,
+                    'end_date'   => $remainEnd,
+                    'status'     => 1
+            ]);
+
+            if($fees->category == "Kategory A"){
+                $updateResult = $this->updateParentDebt($oid, $feeid, $result);
+            }
+            else{
+                $updateResult = $this->updateStudentDebt($oid, $feeid, $result);
+            }
+
+            if($updateResult){
+                return redirect('/fees/category/report')->with('success', 'Yuran telah berjaya dikemaskini');
+            }
         }
-        $update = DB::table('fees_new')
-        ->where('fees_new.category', $category)
-        ->whereIn('fees_new.organization_id', $organization->id)
-        ->get();
-        
-        dd($update);
+        return redirect('/fees/category/report');
+    }
+
+    public function updateParentDebt($oid, $feeid, $result){
+        $parent_id = DB::table('organization_user')
+                ->where('organization_id', $oid)
+                ->where('fees_status', 'Completed')
+                ->where('role_id', 6)
+                ->where('status', 1)
+                ->get();
+
+        // to make sure one parent would recieve one only katagory fee if he or she hv more than children in school
+        for ($i = 0; $i < count($parent_id); $i++) {
+            $fees_parent = DB::table('organization_user')
+                ->where('id', $parent_id[$i]->id)
+                ->update(['fees_status' => 'Not Complete']);
+
+            $parent_debt = DB::table('fees_new_organization_user')
+                ->where('organization_user_id', $parent_id[$i]->id)
+                ->where('fees_new_id', $feeid)
+                ->update(['status' => 'Debt']);
+
+            // DB::table('fees_new_organization_user')->insert([
+            //     'status' => 'Debt',
+            //     'fees_new_id' => $feeid,
+            //     'organization_user_id' => $parent_id[$i]->id,
+            // ]);
+        }
+
+        if($fees_parent == 1 && $parent_debt == 1){
+            return TRUE;
+        }
+        else{
+            return FALSE;
+        }
+    }
+
+    public function updateStudentDebt($oid, $feeid, $result){
+
+        $list = DB::table('fees_new')
+                ->join('student_fees_new as sfn', 'sfn.fees_id', '=', 'fees_new.id')
+                ->join('class_student as cs', 'cs.id', '=', 'sfn.class_student_id')
+                ->select('cs.id as class_student_id')
+                ->where('fees_new.organization_id', $oid)
+                ->where('fees_new.id', $feeid)
+                ->where('sfn.status', 'Paid')
+                ->where('cs.status', "1")
+                ->get();
+
+        for ($i = 0; $i < count($list); $i++) {
+
+            $fees_student = DB::table('class_student')
+                ->where('id', $list[$i]->class_student_id)
+                ->update(['fees_status' => 'Not Complete']);
+            
+            $student_debt = DB::table('student_fees_new')
+                ->where('fees_id', $feeid)
+                ->where('class_student_id', $list[$i]->class_student_id)
+                ->update(['status' =>  'Debt']);
+        }
+
+        if($student_debt == 1){
+            return TRUE;
+        }
+        else{
+            return FALSE;
+        }
     }
 
     public function editCategory($id)
@@ -1065,6 +1167,13 @@ class FeesController extends AppBaseController
             $userId = Auth::id();
 
             if ($oid != '') {
+
+                $update = DB::table('fees_new')
+                ->where('organization_id', $oid)
+                ->where('end_date', '<', date("Y-m-d"))
+                ->update([
+                    'status' => 0
+                ]);
 
                 // $data = DB::table('fees')->orderBy('nama')->get();
 
@@ -1975,12 +2084,112 @@ class FeesController extends AppBaseController
         }
     }
 
+    public function dependent_fees_org(){
+        $organization = $this->getOrganizationByUserId();
+        return view('fee.pay.index', compact('organization'));
+    }
+
     public function dependent_fees()
     {
-        $userid = Auth::id();
-        // ************************* get list dependent from user id  *******************************
 
-        $list = DB::table('organizations')
+        if(Auth::user()->hasRole('Superadmin')){
+            // ************************* get list dependent from user id  *******************************
+
+            $list = DB::table('organizations')
+            ->join('organization_user', 'organization_user.organization_id', '=', 'organizations.id')
+            ->join('users', 'users.id', '=', 'organization_user.user_id')
+            ->join('organization_user_student', 'organization_user_student.organization_user_id', '=', 'organization_user.id')
+            ->join('students', 'students.id', '=', 'organization_user_student.student_id')
+            ->join('class_student', 'class_student.student_id', '=', 'students.id')
+            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+            ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+            ->select('organizations.id as oid', 'organizations.nama as nschool', 'students.id as studentid', 'students.nama as studentname', 'classes.nama as classname')
+            // ->where('organization_user.user_id', $userid)
+            ->where('organization_user.role_id', 6)
+            ->where('organization_user.status', 1)
+            ->orderBy('organizations.id')
+            ->orderBy('classes.nama')
+            ->get();
+
+            // ************************* get list organization by parent  *******************************
+
+            $organization = DB::table('organizations')
+                ->join('organization_user', 'organization_user.organization_id', '=', 'organizations.id')
+                ->join('organization_user_student', 'organization_user_student.organization_user_id', '=', 'organization_user.id')
+                ->join('students', 'students.id', '=', 'organization_user_student.student_id')
+                ->select('organizations.*', 'organization_user.user_id')
+                ->distinct()
+                // ->where('organization_user.user_id', $userid)
+                ->where('organization_user.role_id', 6)
+                ->where('organization_user.status', 1)
+                ->groupBy('organizations.id')
+                ->orderBy('organizations.nama')
+                ->get();
+
+
+            // dd($organization);
+            // ************************* get list fees  *******************************
+
+            $getfees = DB::table('students')
+                ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                ->select('fees_new.category', 'fees_new.organization_id', 'students.id as studentid')
+                ->distinct()
+                ->orderBy('students.id')
+                ->orderBy('fees_new.category')
+                ->where('fees_new.status', 1)
+                ->where('student_fees_new.status', 'Debt')
+                ->get();
+
+            $getfees_bystudent = DB::table('students')
+                ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                ->select('fees_new.*', 'students.id as studentid')
+                ->orderBy('fees_new.name')
+                ->where('fees_new.status', 1)
+                ->where('student_fees_new.status', 'Debt')
+                // ->where('fees_new.category', 'Kategory C')
+                // ->where('fees_new.organization_id', 4)
+                ->get();
+
+            // dd($getfees_bystudent);
+
+            // ************************* get fees category A  *******************************
+
+            $getfees_category_A = DB::table('fees_new')
+                ->join('fees_new_organization_user', 'fees_new_organization_user.fees_new_id', '=', 'fees_new.id')
+                ->join('organization_user', 'organization_user.id', '=', 'fees_new_organization_user.organization_user_id')
+                ->select('fees_new.category', 'organization_user.organization_id')
+                ->distinct()
+                ->orderBy('fees_new.category')
+                ->where('fees_new.status', 1)
+                // ->where('organization_user.user_id', $userid)
+                ->where('organization_user.role_id', 6)
+                ->where('organization_user.status', 1)
+                ->where('fees_new_organization_user.status', 'Debt')
+                ->get();
+
+            // dd($getfees_category_A);
+            $getfees_category_A_byparent  = DB::table('fees_new')
+                ->join('fees_new_organization_user', 'fees_new_organization_user.fees_new_id', '=', 'fees_new.id')
+                ->join('organization_user', 'organization_user.id', '=', 'fees_new_organization_user.organization_user_id')
+                ->select('fees_new.*')
+                ->orderBy('fees_new.category')
+                ->where('fees_new.status', 1)
+                // ->where('organization_user.user_id', $userid)
+                ->where('organization_user.role_id', 6)
+                ->where('organization_user.status', 1)
+                ->where('fees_new_organization_user.status', 'Debt')
+                ->get();
+        }
+        else{
+            $userid = Auth::id();
+
+            // ************************* get list dependent from user id  *******************************
+
+            $list = DB::table('organizations')
             ->join('organization_user', 'organization_user.organization_id', '=', 'organizations.id')
             ->join('users', 'users.id', '=', 'organization_user.user_id')
             ->join('organization_user_student', 'organization_user_student.organization_user_id', '=', 'organization_user.id')
@@ -1996,79 +2205,81 @@ class FeesController extends AppBaseController
             ->orderBy('classes.nama')
             ->get();
 
-        // ************************* get list organization by parent  *******************************
+            // ************************* get list organization by parent  *******************************
 
-        $organization = DB::table('organizations')
-            ->join('organization_user', 'organization_user.organization_id', '=', 'organizations.id')
-            ->join('organization_user_student', 'organization_user_student.organization_user_id', '=', 'organization_user.id')
-            ->join('students', 'students.id', '=', 'organization_user_student.student_id')
-            ->select('organizations.*', 'organization_user.user_id')
-            ->distinct()
-            ->where('organization_user.user_id', $userid)
-            ->where('organization_user.role_id', 6)
-            ->where('organization_user.status', 1)
-            ->orderBy('organizations.nama')
-            ->get();
+            $organization = DB::table('organizations')
+                ->join('organization_user', 'organization_user.organization_id', '=', 'organizations.id')
+                ->join('organization_user_student', 'organization_user_student.organization_user_id', '=', 'organization_user.id')
+                ->join('students', 'students.id', '=', 'organization_user_student.student_id')
+                ->select('organizations.*', 'organization_user.user_id')
+                ->distinct()
+                ->where('organization_user.user_id', $userid)
+                ->where('organization_user.role_id', 6)
+                ->where('organization_user.status', 1)
+                ->groupBy('organizations.id')
+                ->orderBy('organizations.nama')
+                ->get();
 
+
+            // dd($organization);
+            // ************************* get list fees  *******************************
+
+            $getfees = DB::table('students')
+                ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                ->select('fees_new.category', 'fees_new.organization_id', 'students.id as studentid')
+                ->distinct()
+                ->orderBy('students.id')
+                ->orderBy('fees_new.category')
+                ->where('fees_new.status', 1)
+                ->where('student_fees_new.status', 'Debt')
+                ->get();
+
+            $getfees_bystudent = DB::table('students')
+                ->join('class_student', 'class_student.student_id', '=', 'students.id')
+                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+                ->select('fees_new.*', 'students.id as studentid')
+                ->orderBy('fees_new.name')
+                ->where('fees_new.status', 1)
+                ->where('student_fees_new.status', 'Debt')
+                // ->where('fees_new.category', 'Kategory C')
+                // ->where('fees_new.organization_id', 4)
+                ->get();
+
+            // dd($getfees_bystudent);
+
+            // ************************* get fees category A  *******************************
+
+            $getfees_category_A = DB::table('fees_new')
+                ->join('fees_new_organization_user', 'fees_new_organization_user.fees_new_id', '=', 'fees_new.id')
+                ->join('organization_user', 'organization_user.id', '=', 'fees_new_organization_user.organization_user_id')
+                ->select('fees_new.category', 'organization_user.organization_id')
+                ->distinct()
+                ->orderBy('fees_new.category')
+                ->where('fees_new.status', 1)
+                ->where('organization_user.user_id', $userid)
+                ->where('organization_user.role_id', 6)
+                ->where('organization_user.status', 1)
+                ->where('fees_new_organization_user.status', 'Debt')
+                ->get();
+
+            // dd($getfees_category_A);
+            $getfees_category_A_byparent  = DB::table('fees_new')
+                ->join('fees_new_organization_user', 'fees_new_organization_user.fees_new_id', '=', 'fees_new.id')
+                ->join('organization_user', 'organization_user.id', '=', 'fees_new_organization_user.organization_user_id')
+                ->select('fees_new.*')
+                ->orderBy('fees_new.category')
+                ->where('fees_new.status', 1)
+                ->where('organization_user.user_id', $userid)
+                ->where('organization_user.role_id', 6)
+                ->where('organization_user.status', 1)
+                ->where('fees_new_organization_user.status', 'Debt')
+                ->get();
+        }
 
         // dd($organization);
-        // ************************* get list fees  *******************************
-
-        $getfees = DB::table('students')
-            ->join('class_student', 'class_student.student_id', '=', 'students.id')
-            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-            ->select('fees_new.category', 'fees_new.organization_id', 'students.id as studentid')
-            ->distinct()
-            ->orderBy('students.id')
-            ->orderBy('fees_new.category')
-            ->where('fees_new.status', 1)
-            ->where('student_fees_new.status', 'Debt')
-            ->get();
-
-        $getfees_bystudent = DB::table('students')
-            ->join('class_student', 'class_student.student_id', '=', 'students.id')
-            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-            ->select('fees_new.*', 'students.id as studentid')
-            ->orderBy('fees_new.name')
-            ->where('fees_new.status', 1)
-            ->where('student_fees_new.status', 'Debt')
-            // ->where('fees_new.category', 'Kategory C')
-            // ->where('fees_new.organization_id', 4)
-            ->get();
-
-        // dd($getfees_bystudent);
-
-        // ************************* get fees category A  *******************************
-
-        $getfees_category_A = DB::table('fees_new')
-            ->join('fees_new_organization_user', 'fees_new_organization_user.fees_new_id', '=', 'fees_new.id')
-            ->join('organization_user', 'organization_user.id', '=', 'fees_new_organization_user.organization_user_id')
-            ->select('fees_new.category', 'organization_user.organization_id')
-            ->distinct()
-            ->orderBy('fees_new.category')
-            ->where('fees_new.status', 1)
-            ->where('organization_user.user_id', $userid)
-            ->where('organization_user.role_id', 6)
-            ->where('organization_user.status', 1)
-            ->where('fees_new_organization_user.status', 'Debt')
-            ->get();
-
-        // dd($getfees_category_A);
-        $getfees_category_A_byparent  = DB::table('fees_new')
-            ->join('fees_new_organization_user', 'fees_new_organization_user.fees_new_id', '=', 'fees_new.id')
-            ->join('organization_user', 'organization_user.id', '=', 'fees_new_organization_user.organization_user_id')
-            ->select('fees_new.*')
-            ->orderBy('fees_new.category')
-            ->where('fees_new.status', 1)
-            ->where('organization_user.user_id', $userid)
-            ->where('organization_user.role_id', 6)
-            ->where('organization_user.status', 1)
-            ->where('fees_new_organization_user.status', 'Debt')
-            ->get();
-
-        // dd($getfees_category_A);
         return view('fee.pay.index', compact('list', 'organization', 'getfees', 'getfees_bystudent', 'getfees_category_A', 'getfees_category_A_byparent'));
     }
 
@@ -2150,13 +2361,18 @@ class FeesController extends AppBaseController
     }
 
     public function getFeesReceiptDataTable(Request $request){
-
+        $startdate = date_create($request->date_started);
+        $enddate = date_create($request->date_end);
+        $start = date_format($startdate,"Y/d/m H:i:s");
+        $end = date_format($enddate,"Y/d/m H:i:s");
+        
         if(Auth::user()->hasRole('Superadmin'))
         {
             if($request->oid === NULL)
             {
                 $listHisotry = DB::table('transactions as t')
                     ->where('t.description', "like", 'YS%')
+                    ->whereBetween('datetime_created', [$start, $end])
                     ->where('t.status', 'success')
                     ->select('t.id as id', 't.nama as name', 't.description as desc', 't.amount as amount', 't.datetime_created as date')
                     ->get();
@@ -2170,6 +2386,7 @@ class FeesController extends AppBaseController
                     ->where('t.description', "like", 'YS%')
                     ->where('t.status', 'success')
                     ->where('co.organization_id', $request->oid)
+                    ->whereBetween('datetime_created', [$start, $end])
                     ->select('t.id as id', 't.nama as name', 't.description as desc', 't.amount as amount', 't.datetime_created as date')
                     ->distinct('name')
                     ->get();
@@ -2182,6 +2399,7 @@ class FeesController extends AppBaseController
                     ->where('t.user_id', Auth::id())
                     ->where('t.description', "like", 'YS%')
                     ->where('t.status', 'success')
+                    ->whereBetween('datetime_created', [$start, $end])
                     ->select('t.id as id', 't.nama as name', 't.description as desc', 't.amount as amount', 't.datetime_created as date')
                     ->get();
             }
@@ -2195,6 +2413,7 @@ class FeesController extends AppBaseController
                     ->where('t.description', "like", 'YS%')
                     ->where('t.status', 'success')
                     ->where('co.organization_id', $request->oid)
+                    ->whereBetween('datetime_created', [$start, $end])
                     ->select('t.id as id', 't.nama as name', 't.description as desc', 't.amount as amount', 't.datetime_created as date')
                     ->distinct('name')
                     ->get();
@@ -2211,6 +2430,7 @@ class FeesController extends AppBaseController
                     ->where('t.status', 'success')
                     ->where('organization_user.user_id', Auth::id())
                     ->where('co.organization_id', $request->oid)
+                    ->whereBetween('datetime_created', [$start, $end])
                     ->select('t.id as id', 't.nama as name', 't.description as desc', 't.amount as amount', 't.datetime_created as date')
                     ->distinct('name')
                     ->get();
@@ -2225,6 +2445,7 @@ class FeesController extends AppBaseController
                     ->where('t.description', "like", 'YS%')
                     ->where('t.status', 'success')
                     ->where('co.organization_id', $request->oid)
+                    ->whereBetween('datetime_created', [$start, $end])
                     ->select('t.id as id', 't.nama as name', 't.description as desc', 't.amount as amount', 't.datetime_created as date')
                     ->distinct('name')
                     ->get();
@@ -2300,7 +2521,7 @@ class FeesController extends AppBaseController
         $oid = $request->oid;
         if($request->classid == "ALL"){
             $lists = DB::table('fees_new')
-            ->select('fees_new.*')
+            ->select('fees_new.*', DB::raw("CONCAT(fees_new.category, ' - ', fees_new.name) AS name"))
             ->where('organization_id', $oid)
             ->groupBy('category')
             ->orderBy('category')
@@ -2311,7 +2532,7 @@ class FeesController extends AppBaseController
             $class = ClassModel::find($request->classid);
 
             $lists = DB::table('fees_new')
-            ->select('fees_new.*')
+            ->select('fees_new.*', DB::raw("CONCAT(fees_new.category, ' - ', fees_new.name) AS name"))
             ->where('organization_id', $oid)
             ->groupBy('category')
             ->orderBy('category')
@@ -2426,13 +2647,11 @@ class FeesController extends AppBaseController
                 ->leftJoin('students as s', 's.id', '=', 'ous.student_id')
                 ->where([
                     // ['fnou.fees_new_id', $fees->id],
-                    ['fn.status', 1],
                     ['fnou.status', 'Paid'],
                     ['fn.organization_id', $request->oid]
                 ])
                 ->orWhere([
                     // ['fnou.fees_new_id', $fees->id],
-                    ['fn.status', 1],
                     ['sfn.status', 'Paid'],
                     ['fn.organization_id', $request->oid]
                 ])
@@ -2453,7 +2672,6 @@ class FeesController extends AppBaseController
                     ->where([
                         // ['fnou.fees_new_id', $fees->id],
                         ['fn.category', $request->feeid],
-                        ['fn.status', 1],
                         ['fnou.status', 'Paid']
                     ])
                     ->select('fn.name as fee_name', 'fn.category', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
@@ -2466,7 +2684,6 @@ class FeesController extends AppBaseController
                     ->leftJoin('student_fees_new as sfn', 'sfn.fees_id', '=', 'fn.id')
                     ->where([
                         ['fn.category', $request->feeid],
-                        ['fn.status', 1],
                         ['sfn.status', 'Paid'],
                     ])
                     ->select('fn.name as fee_name', 'fn.category', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
@@ -2516,7 +2733,6 @@ class FeesController extends AppBaseController
                     ->where([
                         // ['fnou.fees_new_id', $fees->id],
                         ['fn.category', $request->feeid],
-                        ['fn.status', 1],
                         ['c.id', $request->classid],
                         ['fnou.status', 'Paid']
                     ])
@@ -2537,7 +2753,6 @@ class FeesController extends AppBaseController
                     ->where([
                         // ['fn.id', $fees->id],
                         ['fn.category', $request->feeid],
-                        ['fn.status', 1],
                         ['c.id', $request->classid],
                         ['sfn.status', 'Paid'],
                         // ['t.status', 'Success']
