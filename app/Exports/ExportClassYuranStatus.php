@@ -34,6 +34,7 @@ class ExportClassYuranStatus implements FromCollection, ShouldAutoSize, WithHead
                     ['fou.fees_new_id', $this->yuran->id],
                     ['c.id', $this->class]
                 ])
+                ->where('cs.status', 1)
                 ->select('s.nama', 'c.nama as nama_kelas', 's.gender', 'fou.status')
                 ->orderBy('c.nama')
                 ->orderBy('s.nama')
@@ -50,6 +51,7 @@ class ExportClassYuranStatus implements FromCollection, ShouldAutoSize, WithHead
                     ['sfn.fees_id', $this->yuran->id],
                     ['c.id', $this->class]
                 ])
+                ->where('cs.status', 1)
                 ->select('s.nama', 'c.nama as nama_kelas', 's.gender', 'sfn.status')
                 ->orderBy('c.nama')
                 ->orderBy('s.nama')

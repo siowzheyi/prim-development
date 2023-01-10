@@ -137,7 +137,7 @@
         $('#date').datepicker({
             toggleActive: true,
             todayHighlight:true,
-            format: 'dd/mm/yyyy',
+            format: 'yyyy-mm-dd',
             orientation: 'bottom'
           });
 

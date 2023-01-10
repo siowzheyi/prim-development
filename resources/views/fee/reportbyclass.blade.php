@@ -176,7 +176,8 @@
                 url: "{{ route('fees.studentfees') }}",
                 type: 'get',
                 data: {
-                    student_id: student_id
+                    student_id: student_id,
+                    cat: "",
                 },
                 success: function(response){ 
 

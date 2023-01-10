@@ -249,6 +249,20 @@
                         </thead>
                     </table>
                 </div>
+
+                <div class="table-responsive">
+                    <table id="table-student" class="table table-bordered table-striped dt-responsive nowrap"
+                        style="border-collapse: collapse; border-spacing: 0; width: 100%;">
+                        <thead>
+                            <tr style="text-align:center">
+                                <th> No. </th>
+                                <th>Nama Pelajar</th>
+                                <th>Kelas</th>
+                                <th>Action</th>
+                            </tr>
+                        </thead>
+                    </table>
+                </div>
             </div>
         </div>
 
@@ -317,6 +331,7 @@
         $('#table').hide();
         $('#reportClass').hide();
         $('#table-parent').hide();
+        $('#table-student').hide();
         $('#type-name').hide();
 
         $('.cat-b').hide();
@@ -324,6 +339,13 @@
         $('.cat-d').hide();
 
         $("#category").change(function(){
+
+            $('#table').hide();
+            $('#reportClass').hide();
+            $('#table-parent').hide();
+            $('#table-student').hide();
+            $('#type-name').hide();
+
             if($("#category").val() == 'B')
             {    
                 $('.cat-b').show();
@@ -478,6 +500,8 @@
                         // console.log(item);
                         // console.log(item.datapoint[1][0][1]);
                         $('#reportClass').DataTable().destroy();
+                        $('#table-student').hide();
+                        $('#table-student_wrapper').hide();
                         $('#table-parent').hide();
                         $('#table-parent_wrapper').hide();
                         $('#table').show();
@@ -499,6 +523,8 @@
                         $('#table-parent').DataTable().destroy();
                         $('#reportClass').hide();
                         $('#reportClass_wrapper').hide();
+                        $('#table-student').hide();
+                        $('#table-student_wrapper').hide();
 
                         $('#table').show();
                         $('#table-parent').show();
@@ -513,46 +539,54 @@
                     });
 
                     $("#pie-chart-yuran-category-B").bind("plotclick", function(event, pos, item){
-                        $('#reportClass').DataTable().destroy();
+                        $('#table-student').DataTable().destroy();
+                        $('#reportClass').hide();
+                        $('#reportClass_wrapper').hide();
                         $('#table-parent').hide();
                         $('#table-parent_wrapper').hide();
+
                         $('#table').show();
-                        $('#reportClass').show();
+                        $('#table-student').show();
 
                         var type = item.series.label; //+ "#" + "IS_GENERAL";
                         
                         oid = $("#organization option:selected").val();
-                        fetch_dataB(oid, type, "Kategory B");
+                        fetch_dataBCD(oid, type);
                         document.getElementById("type-name").innerHTML="Senarai Kelas Yang " + type + " Membayar Yuran Kategori B";
                         $('#type-name').show();
                     });
 
                     $("#pie-chart-yuran-category-C").bind("plotclick", function(event, pos, item){
-                        $('#reportClass').DataTable().destroy();
+                        $('#table-student').DataTable().destroy();
+                        $('#reportClass').hide();
+                        $('#reportClass_wrapper').hide();
                         $('#table-parent').hide();
                         $('#table-parent_wrapper').hide();
+
                         $('#table').show();
-                        $('#reportClass').show();
+                        $('#table-student').show();
 
                         var type = item.series.label; //+ "#" + "IS_GENERAL";
                         
                         oid = $("#organization option:selected").val();
-                        fetch_dataC(oid, type, "Kategory C");
+                        fetch_dataBCD(oid, type);
                         document.getElementById("type-name").innerHTML="Senarai Kelas Yang " + type + " Membayar Yuran Kategori C";
                         $('#type-name').show();
                     });
 
                     $("#pie-chart-yuran-category-D").bind("plotclick", function(event, pos, item){
-                        $('#reportClass').DataTable().destroy();
+                        $('#table-student').DataTable().destroy();
+                        $('#reportClass').hide();
+                        $('#reportClass_wrapper').hide();
                         $('#table-parent').hide();
                         $('#table-parent_wrapper').hide();
-                        $('#table').show();
-                        $('#reportClass').show();
 
+                        $('#table').show();
+                        $('#table-student').show();
                         var type = item.series.label; //+ "#" + "IS_GENERAL";
                         
                         oid = $("#organization option:selected").val();
-                        fetch_dataD(oid, type);
+                        fetch_dataBCD(oid, type);
                         document.getElementById("type-name").innerHTML="Senarai Kelas Yang " + type + " Membayar Yuran Kategori D";
                         $('#type-name').show();
                     });
@@ -568,6 +602,12 @@
         }
 
         $('#organization').change(function() {
+            $('#table').hide();
+            $('#reportClass').hide();
+            $('#table-parent').hide();
+            $('#table-student').hide();
+            $('#type-name').hide();
+
             var organizationid = $("#organization option:selected").val();
             data_pie(organizationid);
         });
@@ -627,16 +667,17 @@
             });
         }
 
-        function fetch_dataB(oid, type, category) {
-            reportClass = $('#reportClass').DataTable({
+        function fetch_dataBCD(oid, type) {
+            $('#table-student').DataTable({
                     processing: true,
                     serverSide: true,
 
                     ajax: {
-                        url: "{{ route('fees.getCategoryBDatatable') }}",
+                        url: "{{ route('fees.getCategoryBCDDatatable') }}",
                         data: {
                             type: type,
                             oid: oid,
+                            cat: $("#category option:selected").val(),
                         },
                         type: 'GET',
   
@@ -663,122 +704,8 @@
                         data: "nama",
                         name: 'nama'
                     }, {
-                        data: "total",
-                        name: 'total',
-                        orderable: false,
-                        searchable: false,
-                        defaultContent: 0,
-                        
-                    }, {
-                        data: 'action',
-                        name: 'action',
-                        orderable: false,
-                        searchable: false
-                    },],
-                    error: function (error) {
-                        alert('error');
-                        alert(error.toString());
-                    }
-            });
-        }
-
-        function fetch_dataC(oid, type, category) {
-            reportClass = $('#reportClass').DataTable({
-                    processing: true,
-                    serverSide: true,
-
-                    ajax: {
-                        url: "{{ route('fees.getCategoryCDatatable') }}",
-                        data: {
-                            type: type,
-                            oid: oid,
-                        },
-                        type: 'GET',
-  
-                    },
-                    'columnDefs': [{
-                        "targets": [0], // your case first column
-                        "className": "text-center",
-                        "width": "2%"
-                    },{
-                        "targets": [1,2,3], // your case first column
-                        "className": "text-center",
-                    },],
-                    order: [
-                        [1, 'asc']
-                    ],
-                    columns: [{
-                        "data": null,
-                        searchable: false,
-                        "sortable": false,
-                        render: function (data, type, row, meta) {
-                            return meta.row + meta.settings._iDisplayStart + 1;
-                        }
-                    }, {
-                        data: "nama",
-                        name: 'nama'
-                    }, {
-                        data: "total",
-                        name: 'total',
-                        orderable: false,
-                        searchable: false,
-                        defaultContent: 0,
-                        
-                    }, {
-                        data: 'action',
-                        name: 'action',
-                        orderable: false,
-                        searchable: false
-                    },],
-                    error: function (error) {
-                        alert('error');
-                        alert(error.toString());
-                    }
-            });
-        }
-
-        function fetch_dataD(oid, type, category) {
-            reportClass = $('#reportClass').DataTable({
-                    processing: true,
-                    serverSide: true,
-
-                    ajax: {
-                        url: "{{ route('fees.getCategoryDDatatable') }}",
-                        data: {
-                            type: type,
-                            oid: oid,
-                        },
-                        type: 'GET',
-  
-                    },
-                    'columnDefs': [{
-                        "targets": [0], // your case first column
-                        "className": "text-center",
-                        "width": "2%"
-                    },{
-                        "targets": [1,2,3], // your case first column
-                        "className": "text-center",
-                    },],
-                    order: [
-                        [1, 'asc']
-                    ],
-                    columns: [{
-                        "data": null,
-                        searchable: false,
-                        "sortable": false,
-                        render: function (data, type, row, meta) {
-                            return meta.row + meta.settings._iDisplayStart + 1;
-                        }
-                    }, {
-                        data: "nama",
-                        name: 'nama'
-                    }, {
-                        data: "total",
-                        name: 'total',
-                        orderable: false,
-                        searchable: false,
-                        defaultContent: 0,
-                        
+                        data: "class",
+                        name: 'class',
                     }, {
                         data: 'action',
                         name: 'action',
@@ -890,8 +817,53 @@
 
                 }
             });
+        });
 
+        $(document).on('click', '.student-id', function(){
+            student_id = $(this).attr('id');
 
+            $.ajax({
+                url: "{{ route('fees.studentfees') }}",
+                type: 'get',
+                data: {
+                    student_id: student_id,
+                    cat: $("#category option:selected").val(),
+                },
+                success: function(response){ 
+
+                    var html="";
+                    $('.modal-body').empty();
+
+                    $('.modal-title').text("Butiran Yuran - " +  response[0].studentnama);
+
+                    html += '<table class="table table-bordered" >';
+                        html += '<tr style="text-align:center">';
+                        html += '<th> Nama Yuran </th>';
+                        html += '<th> Jumlah Amaun (RM)</th>';
+                        html += '<th> Status </th>';
+                        html += '</tr>';
+                    for(var i=0; i < response.length; i++){
+
+                        html += '<tr>';
+                        html += '<td><div style="text-align:center">'+response[i].name+'</div></td>';  
+                        html += '<td><div  style="text-align:center">'+response[i].totalAmount.toFixed(2)+'</div></td>';  
+                        if(response[i].status == 'Paid'){
+                            html += '<td><div  style="text-align:center"> <span class="badge badge-success"> Selesai </span></div> </td>';  
+                        }else{
+                            html += '<td><div  style="text-align:center"> <span class="badge badge-danger"> Belum Selesai </span></div> </td>';  
+                        }
+                        html += '</tr>';
+                    }
+                    html += '</table>';      
+                    
+                // Add response in Modal body
+                    $('.modal-body').append(html) 
+
+                // Display Modal
+                    $('#modelId').modal('show');
+
+                }
+            });
 
         });
 

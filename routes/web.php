@@ -107,9 +107,7 @@ Route::group(['prefix' => 'fees'], function () {
     Route::get('/list-collectedFeeDatatable', 'FeesController@collectedFeeDatatable')->name('fees.collectedFeeDatatable');
 
     Route::get('/list', 'FeesController@getTypeDatatable')->name('fees.getTypeDatatable');
-    Route::get('/listB', 'FeesController@getCategoryBDatatable')->name('fees.getCategoryBDatatable');
-    Route::get('/listC', 'FeesController@getCategoryCDatatable')->name('fees.getCategoryCDatatable');
-    Route::get('/listD', 'FeesController@getCategoryDDatatable')->name('fees.getCategoryDDatatable');
+    Route::get('/listBCD', 'FeesController@getCategoryBCDDatatable')->name('fees.getCategoryBCDDatatable');
     Route::get('/listparent', 'FeesController@getParentDatatable')->name('fees.getParentDatatable');
     Route::get('/report', 'FeesController@feesReport')->name('fees.report');
     Route::get('/reportByOid', 'FeesController@feesReportByOrganizationId')->name('fees.reportByOid');

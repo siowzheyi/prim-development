@@ -293,13 +293,17 @@ class FeesController extends AppBaseController
         $all_student = DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-            ->where('class_organization.organization_id', $oid)
+            ->where([
+                ['class_organization.organization_id', $oid],
+                ['class_student.status', 1]
+            ])
             ->count();
 
         $student_complete = DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
             ->where('class_organization.organization_id', $oid)
+            ->where('class_student.status', 1)
             ->where('class_student.fees_status', 'Completed')
             ->count();
 
@@ -307,6 +311,7 @@ class FeesController extends AppBaseController
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
             ->where('class_organization.organization_id', $oid)
+            ->where('class_student.status', 1)
             ->where('class_student.fees_status', 'Not Complete')
             ->count();
 
@@ -318,20 +323,10 @@ class FeesController extends AppBaseController
             ->where([
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory B'],
+                ['class_student.status', 1],
+                ['fees_new.status', 1]
             ])
-            ->groupBy('students.id')
-            ->get());
-
-        $catB_complete = count(DB::table('students')
-            ->join('class_student', 'class_student.student_id', '=', 'students.id')
-            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-            ->where([
-                ['class_organization.organization_id', $oid],
-                ['fees_new.category', 'Kategory B'],
-                ['class_student.feeB_status', 'Completed']
-            ])
+            ->whereIn('student_fees_new.status', ['Debt', 'Paid'])
             ->groupBy('students.id')
             ->get());
 
@@ -343,10 +338,14 @@ class FeesController extends AppBaseController
             ->where([
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory B'],
-                ['class_student.feeB_status', 'Not Complete']
+                ['class_student.status', 1],
+                ['fees_new.status', 1],
+                ['student_fees_new.status', 'Debt']
             ])
             ->groupBy('students.id')
             ->get());
+        
+        $catB_complete = $catB_student - $catB_notcomplete;
 
         $catC_student = count(DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
@@ -356,20 +355,10 @@ class FeesController extends AppBaseController
             ->where([
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory C'],
+                ['class_student.status', 1],
+                ['fees_new.status', 1]
             ])
-            ->groupBy('students.id')
-            ->get());
-
-        $catC_complete = count(DB::table('students')
-            ->join('class_student', 'class_student.student_id', '=', 'students.id')
-            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-            ->where([
-                ['class_organization.organization_id', $oid],
-                ['fees_new.category', 'Kategory C'],
-                ['class_student.feeC_status', 'Complete']
-            ])
+            ->whereIn('student_fees_new.status', ['Debt', 'Paid'])
             ->groupBy('students.id')
             ->get());
 
@@ -381,10 +370,13 @@ class FeesController extends AppBaseController
             ->where([
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory C'],
-                ['class_student.feeC_status', 'Not Complete']
+                ['class_student.status', 1],
+                ['fees_new.status', 1]
             ])
             ->groupBy('students.id')
             ->get());
+
+        $catC_complete = $catC_student - $catC_notcomplete;
 
         $catD_student = count(DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
@@ -394,20 +386,10 @@ class FeesController extends AppBaseController
             ->where([
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory D'],
+                ['class_student.status', 1],
+                ['fees_new.status', 1]
             ])
-            ->groupBy('students.id')
-            ->get());
-
-        $catD_complete = count(DB::table('students')
-            ->join('class_student', 'class_student.student_id', '=', 'students.id')
-            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-            ->where([
-                ['class_organization.organization_id', $oid],
-                ['fees_new.category', 'Kategory D'],
-                ['class_student.feeD_status', 'Complete']
-            ])
+            ->whereIn('student_fees_new.status', ['Debt', 'Paid'])
             ->groupBy('students.id')
             ->get());
 
@@ -419,10 +401,13 @@ class FeesController extends AppBaseController
             ->where([
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory D'],
-                ['class_student.feeD_status', 'Not Complete']
+                ['class_student.status', 1],
+                ['fees_new.status', 1]
             ])
             ->groupBy('students.id')
             ->get());
+
+        $catD_complete = $catD_student - $catD_notcomplete;
 
         $all_parent =  DB::table('organization_user')
             ->where('organization_id', $oid)
@@ -479,6 +464,7 @@ class FeesController extends AppBaseController
                     ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
                     ->where('class_organization.organization_id', $oid)
                     ->where('class_student.fees_status', "Completed")
+                    ->where('class_student.status', 1)
                     ->groupBy('classes.nama')
                     ->orderBy('classes.nama')
                     ->get();
@@ -493,6 +479,7 @@ class FeesController extends AppBaseController
                     ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
                     ->where('class_organization.organization_id', $oid)
                     ->where('class_student.fees_status', "Not Complete")
+                    ->where('class_student.status', 1)
                     ->groupBy('classes.nama')
                     ->orderBy('classes.nama')
                     ->get();
@@ -510,6 +497,7 @@ class FeesController extends AppBaseController
                 ->join('classes', 'classes.id', '=', 'class_organization.class_id')
                 ->select('classes.nama', DB::raw('COUNT(students.id) as totalallstudent'))
                 ->where('class_organization.organization_id', $row->oid)
+                ->where('class_student.status', 1)
                 ->where('classes.id', $row->id)
                 ->groupBy('classes.nama')
                 ->orderBy('classes.nama')
@@ -532,12 +520,13 @@ class FeesController extends AppBaseController
         }
     }
 
-    public function getCategoryBDatatable(Request $request)
+    public function getCategoryBCDDatatable(Request $request)
     {
         // dd($request->oid);
         if (request()->ajax()) {
             $type = $request->type;
             $oid = $request->oid;
+            $cat = "Kategory ". $request->cat;
             // dd($type);
             $userId = Auth::id();
 
@@ -550,14 +539,15 @@ class FeesController extends AppBaseController
                     ->join('classes', 'classes.id', '=', 'class_organization.class_id')
                     ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
                     ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-                    ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
                     ->where([
                         ['class_organization.organization_id', $oid],
-                        ['fees_new.category', "Kategory B"],
+                        ['fees_new.category', $cat],
+                        // ['fees_new.category', "Kategory B"],
                         ['student_fees_new.status', "Paid"],
                         ['class_student.status', 1]
                     ])
-                    ->groupBy('classes.nama')
+                    ->select('students.id as id', 'students.nama as nama', 'classes.nama as class', 'class_organization.organization_id as organization_id')
+                    ->groupBy('students.nama')
                     ->orderBy('classes.nama')
                     ->get();
                 
@@ -568,232 +558,29 @@ class FeesController extends AppBaseController
                 ->join('classes', 'classes.id', '=', 'class_organization.class_id')
                 ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
                 ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-                ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
                 ->where([
                     ['class_organization.organization_id', $oid],
-                    ['fees_new.category', "Kategory B"],
+                    ['fees_new.category', $cat],
+                    // ['fees_new.category', "Kategory B"],
                     ['student_fees_new.status', "Debt"],
                     ['class_student.status', 1]
                 ])
-                    ->groupBy('classes.nama')
-                    ->orderBy('classes.nama')
-                    ->get();
-                
+                ->select('students.id as id', 'students.nama as nama', 'classes.nama as class', 'class_organization.organization_id as organization_id')
+                ->groupBy('students.nama')
+                ->orderBy('classes.nama')
+                ->get();
             }
             
             $table = Datatables::of($data);
 
-            $table->addColumn('total', function ($row) {
-                $first = DB::table('students')
-                ->join('class_student', 'class_student.student_id', '=', 'students.id')
-                ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
-                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-                ->select('classes.nama', DB::raw('COUNT(students.id) as totalallstudent'))
-                ->where([
-                    ['class_organization.organization_id', $row->oid],
-                    ['fees_new.category', "Kategory B"],
-                    ['class_student.status', 1],
-                    ['classes.id', $row->id]
-                ])
-                ->groupBy('classes.nama')
-                ->orderBy('classes.nama')
-                ->first();
-
-                $btn = '<div class="d-flex justify-content-center">';
-                $btn = $btn . $row->totalstudent . '/' . $first->totalallstudent . '</div>';
-                return $btn;
-            });
-
             $table->addColumn('action', function ($row) {
                 $token = csrf_token();
                 $btn = '<div class="d-flex justify-content-center">';
-                $btn = $btn . '<a href="' . route('fees.reportByClass', ['type' => $row->fees_status, 'class_id' => $row->id]) . '"" class="btn btn-primary m-1">Butiran</a></div>';
+                $btn = $btn . '<a class="btn btn-primary m-1 student-id" id="' . $row->id . '">Butiran</a></div>';
                 return $btn;
             });
 
-            $table->rawColumns(['total', 'action']);
-            return $table->make(true);
-        }
-    }
-
-    public function getCategoryCDatatable(Request $request)
-    {
-        // dd($request->oid);
-        if (request()->ajax()) {
-            $type = $request->type;
-            $oid = $request->oid;
-            // dd($type);
-            $userId = Auth::id();
-
-            // $type = explode('#', $type);
-            if ($type == 'Selesai') {
-            
-                $data = DB::table('students')
-                    ->join('class_student', 'class_student.student_id', '=', 'students.id')
-                    ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-                    ->join('classes', 'classes.id', '=', 'class_organization.class_id')
-                    ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-                    ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-                    ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
-                    ->where([
-                        ['class_organization.organization_id', $oid],
-                        ['fees_new.category', "Kategory C"],
-                        ['student_fees_new.status', "Paid"],
-                        ['class_student.status', 1]
-                    ])
-                    ->groupBy('classes.nama')
-                    ->orderBy('classes.nama')
-                    ->get();
-                
-            } else {
-                $data = DB::table('students')
-                ->join('class_student', 'class_student.student_id', '=', 'students.id')
-                ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
-                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-                ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
-                ->where([
-                    ['class_organization.organization_id', $oid],
-                    ['fees_new.category', "Kategory C"],
-                    ['student_fees_new.status', "Debt"],
-                    ['class_student.status', 1]
-                ])
-                    ->groupBy('classes.nama')
-                    ->orderBy('classes.nama')
-                    ->get();
-                
-            }
-            
-
-            // dd($first);
-            $table = Datatables::of($data);
-
-            $table->addColumn('total', function ($row) {
-                $first = DB::table('students')
-                ->join('class_student', 'class_student.student_id', '=', 'students.id')
-                ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
-                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-                ->select('classes.nama', DB::raw('COUNT(students.id) as totalallstudent'))
-                ->where([
-                    ['class_organization.organization_id', $row->oid],
-                    ['fees_new.category', "Kategory C"],
-                    ['class_student.status', 1],
-                    ['classes.id', $row->id]
-                ])
-                ->groupBy('classes.nama')
-                ->orderBy('classes.nama')
-                ->first();
-
-                $btn = '<div class="d-flex justify-content-center">';
-                $btn = $btn . $row->totalstudent . '/' . $first->totalallstudent . '</div>';
-                return $btn;
-            });
-
-            $table->addColumn('action', function ($row) {
-                $token = csrf_token();
-                $btn = '<div class="d-flex justify-content-center">';
-                $btn = $btn . '<a href="' . route('fees.reportByClass', ['type' => $row->fees_status, 'class_id' => $row->id]) . '"" class="btn btn-primary m-1">Butiran</a></div>';
-                // $btn = $btn . '<a href="' . route('fees.edit', $row->feeid) . '" class="btn btn-primary m-1">Edit</a>';
-                // $btn = $btn . '<button id="' . $row->feeid . '" data-token="' . $token . '" class="btn btn-danger m-1">Details</button></div>';
-                return $btn;
-            });
-
-            $table->rawColumns(['total', 'action']);
-            return $table->make(true);
-        }
-    }
-
-    public function getCategoryDDatatable(Request $request)
-    {
-        // dd($request->oid);
-        if (request()->ajax()) {
-            $type = $request->type;
-            $oid = $request->oid;
-            // dd($type);
-            $userId = Auth::id();
-
-            // $type = explode('#', $type);
-            if ($type == 'Selesai') {
-            
-                $data = DB::table('students')
-                    ->join('class_student', 'class_student.student_id', '=', 'students.id')
-                    ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-                    ->join('classes', 'classes.id', '=', 'class_organization.class_id')
-                    ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-                    ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-                    ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
-                    ->where([
-                        ['class_organization.organization_id', $oid],
-                        ['fees_new.category', "Kategory D"],
-                        ['student_fees_new.status', "Paid"],
-                        ['class_student.status', 1]
-                    ])
-                    ->groupBy('classes.nama')
-                    ->orderBy('classes.nama')
-                    ->get();
-                
-            } else {
-                $data = DB::table('students')
-                ->join('class_student', 'class_student.student_id', '=', 'students.id')
-                ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
-                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-                ->select('class_organization.organization_id as oid', 'classes.id', 'classes.nama', DB::raw('COUNT(students.id) as totalstudent'), 'class_student.fees_status')
-                ->where([
-                    ['class_organization.organization_id', $oid],
-                    ['fees_new.category', "Kategory D"],
-                    ['student_fees_new.status', "Debt"],
-                    ['class_student.status', 1]
-                ])
-                    ->groupBy('classes.nama')
-                    ->orderBy('classes.nama')
-                    ->get();
-                
-            }
-            
-
-            // dd($first);
-            $table = Datatables::of($data);
-
-            $table->addColumn('total', function ($row) {
-                $first = DB::table('students')
-                ->join('class_student', 'class_student.student_id', '=', 'students.id')
-                ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-                ->join('classes', 'classes.id', '=', 'class_organization.class_id')
-                ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
-                ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
-                ->select('classes.nama', DB::raw('COUNT(students.id) as totalallstudent'))
-                ->where([
-                    ['class_organization.organization_id', $row->oid],
-                    ['fees_new.category', "Kategory D"],
-                    ['class_student.status', 1],
-                    ['classes.id', $row->id]
-                ])
-                ->groupBy('classes.nama')
-                ->orderBy('classes.nama')
-                ->first();
-
-                $btn = '<div class="d-flex justify-content-center">';
-                $btn = $btn . $row->totalstudent . '/' . $first->totalallstudent . '</div>';
-                return $btn;
-            });
-
-            $table->addColumn('action', function ($row) {
-                $token = csrf_token();
-                $btn = '<div class="d-flex justify-content-center">';
-                $btn = $btn . '<a href="' . route('fees.reportByClass', ['type' => $row->fees_status, 'class_id' => $row->id]) . '"" class="btn btn-primary m-1">Butiran</a></div>';
-                // $btn = $btn . '<a href="' . route('fees.edit', $row->feeid) . '" class="btn btn-primary m-1">Edit</a>';
-                // $btn = $btn . '<button id="' . $row->feeid . '" data-token="' . $token . '" class="btn btn-danger m-1">Details</button></div>';
-                return $btn;
-            });
-
-            $table->rawColumns(['total', 'action']);
+            $table->rawColumns(['action']);
             return $table->make(true);
         }
     }
@@ -861,6 +648,7 @@ class FeesController extends AppBaseController
                 ->select('students.*')
                 ->where('classes.id', $class_id)
                 ->where('class_student.fees_status', $status)
+                ->where('class_student.status', 1)
                 ->orderBy('students.nama')
                 ->get();
 
@@ -2091,7 +1879,6 @@ class FeesController extends AppBaseController
 
     public function dependent_fees()
     {
-
         if(Auth::user()->hasRole('Superadmin')){
             // ************************* get list dependent from user id  *******************************
 
@@ -2107,6 +1894,7 @@ class FeesController extends AppBaseController
             // ->where('organization_user.user_id', $userid)
             ->where('organization_user.role_id', 6)
             ->where('organization_user.status', 1)
+            ->where('class_student.status', 1)
             ->orderBy('organizations.id')
             ->orderBy('classes.nama')
             ->get();
@@ -2139,6 +1927,7 @@ class FeesController extends AppBaseController
                 ->orderBy('students.id')
                 ->orderBy('fees_new.category')
                 ->where('fees_new.status', 1)
+                ->where('class_student.status', 1)
                 ->where('student_fees_new.status', 'Debt')
                 ->get();
 
@@ -2150,6 +1939,7 @@ class FeesController extends AppBaseController
                 ->orderBy('fees_new.name')
                 ->where('fees_new.status', 1)
                 ->where('student_fees_new.status', 'Debt')
+                ->where('class_student.status', 1)
                 // ->where('fees_new.category', 'Kategory C')
                 // ->where('fees_new.organization_id', 4)
                 ->get();
@@ -2201,6 +1991,7 @@ class FeesController extends AppBaseController
             ->where('organization_user.user_id', $userid)
             ->where('organization_user.role_id', 6)
             ->where('organization_user.status', 1)
+            ->where('class_student.status', 1)
             ->orderBy('organizations.id')
             ->orderBy('classes.nama')
             ->get();
@@ -2233,6 +2024,7 @@ class FeesController extends AppBaseController
                 ->orderBy('students.id')
                 ->orderBy('fees_new.category')
                 ->where('fees_new.status', 1)
+                ->where('class_student.status', 1)
                 ->where('student_fees_new.status', 'Debt')
                 ->get();
 
@@ -2244,6 +2036,7 @@ class FeesController extends AppBaseController
                 ->orderBy('fees_new.name')
                 ->where('fees_new.status', 1)
                 ->where('student_fees_new.status', 'Debt')
+                ->where('class_student.status', 1)
                 // ->where('fees_new.category', 'Kategory C')
                 // ->where('fees_new.organization_id', 4)
                 ->get();
@@ -2286,14 +2079,33 @@ class FeesController extends AppBaseController
     public function student_fees(Request $request)
     {
         $student_id = $request->student_id;
-        $getfees_bystudent     = DB::table('students')
+        $cat = 'Kategory ' . $request->cat;
+
+        if(isset($cat)){
+            $getfees_bystudent = DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
             ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
             ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
             ->select('fees_new.*','students.id as studentid', 'students.nama as studentnama', 'student_fees_new.status')
             ->where('students.id', $student_id)
+            ->where('class_student.status', 1)
+            ->where('fees_new.status', 1)
+            ->where('fees_new.category', $cat)
             ->orderBy('fees_new.name')
             ->get();
+        }
+        else{
+            $getfees_bystudent     = DB::table('students')
+            ->join('class_student', 'class_student.student_id', '=', 'students.id')
+            ->join('student_fees_new', 'student_fees_new.class_student_id', '=', 'class_student.id')
+            ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
+            ->select('fees_new.*','students.id as studentid', 'students.nama as studentnama', 'student_fees_new.status')
+            ->where('students.id', $student_id)
+            ->where('class_student.status', 1)
+            ->where('fees_new.status', 1)
+            ->orderBy('fees_new.name')
+            ->get();
+        }
 
         return response()->json($getfees_bystudent, 200);
     }
@@ -2361,11 +2173,9 @@ class FeesController extends AppBaseController
     }
 
     public function getFeesReceiptDataTable(Request $request){
-        $startdate = date_create($request->date_started);
-        $enddate = date_create($request->date_end);
-        $start = date_format($startdate,"Y/d/m H:i:s");
-        $end = date_format($enddate,"Y/d/m H:i:s");
-        
+        $start = date('Y-m-d 00:00:00', strtotime($request->date_started));
+        $end = date('Y-m-d 00:00:00', strtotime($request->date_end));
+        // dd($start, $end);
         if(Auth::user()->hasRole('Superadmin'))
         {
             if($request->oid === NULL)
@@ -2450,6 +2260,8 @@ class FeesController extends AppBaseController
                     ->distinct('name')
                     ->get();
             }
+
+            
         }
         
         if (request()->ajax()) {
@@ -2592,6 +2404,7 @@ class FeesController extends AppBaseController
                     ->leftJoin('class_organization as co', 'co.id', 'cs.organclass_id')
                     ->leftJoin('fees_new_organization_user as fou', 'fou.organization_user_id', 'ou.id')
                     ->where('fou.fees_new_id', $fees->id)
+                    ->where('cs.status', 1)
                     ->where('co.class_id', $request->classid)
                     ->select('s.*', 'fou.status')
                     ->orderBy('s.nama')
@@ -2606,6 +2419,7 @@ class FeesController extends AppBaseController
                     ->leftJoin('student_fees_new as sfn', 'sfn.class_student_id', 'cs.id')
                     ->where('sfn.fees_id', $fees->id)
                     ->where('co.class_id', $request->classid)
+                    ->where('cs.status', 1)
                     ->select('s.*', 'sfn.status')
                     ->orderBy('s.nama')
                     ->get();
@@ -2883,6 +2697,7 @@ class FeesController extends AppBaseController
                 ->leftJoin('classes as c', 'c.id', 'co.class_id')
                 ->leftJoin('fees_new_organization_user as fou', 'fou.organization_user_id', 'ou.id')
                 ->where('fou.fees_new_id', $yuran->id)
+                ->where('cs.status', 1)
                 ->select('s.nama', 'c.nama as nama_kelas', 's.gender', 'fou.status')
                 ->orderBy('c.nama')
                 ->orderBy('s.nama')
@@ -2896,6 +2711,7 @@ class FeesController extends AppBaseController
                 ->leftJoin('classes as c', 'c.id', 'co.class_id')
                 ->leftJoin('student_fees_new as sfn', 'sfn.class_student_id', 'cs.id')
                 ->where('sfn.fees_id', $yuran->id)
+                ->where('cs.status', 1)
                 ->select('s.nama', 'c.nama as nama_kelas', 's.gender', 'sfn.status')
                 ->orderBy('c.nama')
                 ->orderBy('s.nama')
@@ -2941,6 +2757,7 @@ class FeesController extends AppBaseController
                     ['fou.fees_new_id', $yuran->id],
                     ['c.id', $request->classesPDF]
                 ])
+                ->where('cs.status', 1)
                 ->select('s.nama', 'c.nama as nama_kelas', 's.gender', 'fou.status')
                 ->orderBy('c.nama')
                 ->orderBy('s.nama')
@@ -2957,6 +2774,7 @@ class FeesController extends AppBaseController
                     ['sfn.fees_id', $yuran->id],
                     ['c.id', $request->classesPDF]
                 ])
+                ->where('cs.status', 1)
                 ->select('s.nama', 'c.nama as nama_kelas', 's.gender', 'sfn.status')
                 ->orderBy('c.nama')
                 ->orderBy('s.nama')
