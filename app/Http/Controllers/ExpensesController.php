@@ -84,6 +84,14 @@ class ExpensesController extends Controller
                 ]);
                
         }
+        
+        if($request->get('start_date')>date('Y-m-d',strtotime(now())))
+        {
+            $status = 'inactive';
+        }
+        else{
+            $status = 'active';
+        }
         $expenses = Expenses::create([
             'name'          =>  $request->get('name'),
             'description'   =>  $request->get('description'),
@@ -91,7 +99,8 @@ class ExpensesController extends Controller
             'start_date'    =>  $request->get('start_date'),
             'end_date'      =>  $request->get('end_date'),
             'recurring_id'  =>  $recurring_id->id,
-            'organization_id'=> $request->get('organization')
+            'organization_id'=> $request->get('organization'),
+            'status'        =>  $status
 
         ]);
         
@@ -106,7 +115,6 @@ class ExpensesController extends Controller
             $i=0;
             $result=0;
 
-            // dd($expenses->id);
             foreach($related_student as $row)
             {
 
@@ -149,15 +157,29 @@ class ExpensesController extends Controller
         {
             $expenses = Expenses::join('recurrings','recurrings.id','=','expenses.recurring_id')
                 ->select('expenses.*',
-                'recurrings.name as recurring_type',
-                'recurrings.start_date as start_date_recurring',
-                'recurrings.end_date as end_date_recurring')
+                'recurrings.name as recurring_type')
                 ->where('expenses.id', $id)
                 ->first();
+            
+            $start_date_recurring = date('Y-m-d', strtotime(Expenses::join('recurrings','recurrings.id','=','expenses.recurring_id')
+            ->where('expenses.id', $id)
+            ->value('recurrings.start_date')));
+
+            $end_date_recurring = date('Y-m-d', strtotime(Expenses::join('recurrings','recurrings.id','=','expenses.recurring_id')
+            ->where('expenses.id', $id)
+            ->value('recurrings.end_date')));
+
+            $start_date = date('Y-m-d', strtotime(Expenses::join('recurrings','recurrings.id','=','expenses.recurring_id')
+            ->where('expenses.id', $id)
+            ->value('expenses.start_date')));
+
+            $end_date = date('Y-m-d', strtotime(Expenses::join('recurrings','recurrings.id','=','expenses.recurring_id')
+            ->where('expenses.id', $id)
+            ->value('expenses.end_date')));
 
             $organization = $this->getOrganizationByUserId();
 
-            return view('pentadbir.recurring-fees.update', compact('expenses', 'organization', 'id'));
+            return view('pentadbir.recurring-fees.update', compact('expenses', 'organization', 'id','start_date','end_date','start_date_recurring','end_date_recurring'));
         }
         /**
         * Update the specified resource in storage.
@@ -410,35 +432,40 @@ class ExpensesController extends Controller
             // dd($organization);
 
         // *********************** get expenses by recurring and status is unpaid ***************
-        $getfees_by_recurring = DB::table('expenses')
+        $get_class_student_id = DB::table('users')
+                                    ->join('organization_user','organization_user.user_id','=','users.id')
+                                    ->join('organization_user_student','organization_user_student.organization_user_id','=','organization_user.id')
+                                    ->join('students','students.id','=','organization_user_student.student_id')
+                                    ->join('class_student','class_student.student_id','=','students.id')
+                                    // ->select('class_student.id')
+                                    ->where('organization_user.user_id',$userid)
+                                    ->pluck('class_student.id');
+                                    // $array = array();
+                                    // dd($get_class_student_id);
+                                    // PROBLEM: HOW TO CAST THIS INTO ARRAY
+        // $array2 = array_push($array,$get_class_student_id);
+        // dd(array($get_class_student_id));
+         $getfees_by_recurring = DB::table('expenses')
         ->join('recurrings','recurrings.id','=','expenses.recurring_id')
         ->join('student_expenses','student_expenses.expenses_id','=','expenses.id')
         ->join('class_student','class_student.id','=','student_expenses.class_student_id')
 
-        // ->join('organization_user','organization_user.organization_id','=','expenses.organization_id')
-        // ->join('organization_user_student','organization_user_student.organization_user_id','=','organization_user.id')
+        ->join('organization_user','organization_user.organization_id','=','expenses.organization_id')
+        ->join('organization_user_student','organization_user_student.organization_user_id','=','organization_user.id')
+        ->whereIn('student_expenses.class_student_id',$get_class_student_id)
 
-        ->join('organization_user',function($join){
-            $join->on('organization_user.organization_id','=','expenses.organization_id')
-                    ->where('organization_user.user_id',13);
-        })
-        // ->join('organization_user_student','organization_user_student.organization_user_id','=','organization_user.id')
-        // // ->where('organization_user.status',1)
+        ->where('organization_user.status',1)
         ->where('expenses.status','active')
         ->where('student_expenses.status','unpaid')
-        // ->where('organization_user.user_id',$userid)
-        // ->select('expenses.*','recurrings.name',
-        //             'student_expenses.id as student_expenses_id','student_expenses.status as payStatus',
-        //             'student_expenses.expenses_id','organization_user.user_id')
-        // ->groupBy('expenses.name')
+        ->select('expenses.*',
+                    'student_expenses.id as student_expenses_id','recurrings.name as recurring_name','student_expenses.status',
+                    'student_expenses.expenses_id','organization_user_student.id as parentid')
+        ->groupBy('student_expenses.expenses_id')
         ->get();
-        // dd($getfees_by_recurring);
 
         // ************************* get list fees  *******************************
 
             $recurring_type = ['monthly','semester','annually'];
-
-            
 
             $getfees_by_parent = DB::table('expenses')
             ->join('recurrings','recurrings.id','=','expenses.recurring_id')
@@ -452,12 +479,12 @@ class ExpensesController extends Controller
             // ->where('organization_user.role_id',6)
             ->where('organization_user.status',1)
             ->where('expenses.status','active')
-            // ->where('student_expenses.status','unpaid')
+            ->where('student_expenses.status','unpaid')
             ->where('organization_user.user_id',$userid)
             // ->where('student_expenses.')
             ->select('expenses.*','recurrings.name as recurring_name','student_expenses.status')
             ->get();
-            // dd($getfees_by_recurring);
+            // dd($get_class_student_id,$getfees_by_recurring);
 
             return view('parent.recurring-fees.index', compact('list', 'organization', 'getfees_by_parent','recurring_type','getfees_by_recurring'));
     }
@@ -501,53 +528,53 @@ class ExpensesController extends Controller
     //get datatable for pay status
     public function getPayStatusDatatable(Request $request)
     {
-    if (request()->ajax()) {
-        $expensesId = $request->expensesId;
-        // all, paid unpaid
-        $payStatus = $request->payStatus;
+        if (request()->ajax()) {
+            $expensesId = $request->expensesId;
+            // all, paid unpaid
+            $payStatus = $request->payStatus;
 
-        // create recurring data that only contain data which have recurring id
+            // create recurring data that only contain data which have recurring id
 
 
-        $data = DB::table('student_expenses')
-        ->join('class_student', 'class_student.id', '=', 'student_expenses.class_student_id')
-        ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
-        ->join('classes', 'classes.id', '=', 'class_organization.class_id')
-        ->join('students', 'students.id', '=', 'class_student.student_id')
-        ->join('organization_user_student', 'organization_user_student.student_id', '=', 'students.id')
-        ->join('organization_user', 'organization_user.id', '=', 'organization_user_student.organization_user_id')
-        ->join('users', 'users.id', '=', 'organization_user.user_id')
-        ->select('users.name as parentName', 'students.nama as studentName', 'classes.nama as className', 'students.parent_tel as parentTel', 'student_expenses.status')
-        ->where('student_expenses.expenses_id', $expensesId)
-        ->orderBy('users.name');
+            $data = DB::table('student_expenses')
+            ->join('class_student', 'class_student.id', '=', 'student_expenses.class_student_id')
+            ->join('class_organization', 'class_organization.id', '=', 'class_student.organclass_id')
+            ->join('classes', 'classes.id', '=', 'class_organization.class_id')
+            ->join('students', 'students.id', '=', 'class_student.student_id')
+            ->join('organization_user_student', 'organization_user_student.student_id', '=', 'students.id')
+            ->join('organization_user', 'organization_user.id', '=', 'organization_user_student.organization_user_id')
+            ->join('users', 'users.id', '=', 'organization_user.user_id')
+            ->select('users.name as parentName', 'students.nama as studentName', 'classes.nama as className', 'students.parent_tel as parentTel', 'student_expenses.status')
+            ->where('student_expenses.expenses_id', $expensesId)
+            ->orderBy('users.name');
 
-        if ($payStatus == 'paid') {
-            $data = $data->where('student_expenses.status', '=', 'paid')
+            if ($payStatus == 'paid') {
+                $data = $data->where('student_expenses.status', '=', 'paid')
+                            ->get();
+            } elseif ($payStatus == 'unpaid') {
+                $data = $data->where('student_expenses.status', '=', 'unpaid')
                         ->get();
-        } elseif ($payStatus == 'unpaid') {
-            $data = $data->where('student_expenses.status', '=', 'unpaid')
-                    ->get();
-        } else {
-            $data = $data->get();
-        }
-        $table = Datatables::of($data);
-
-        $table->addColumn('payStatus', function ($row) {
-            // if the expenses is recurring
-            $btn = '<div class="d-flex justify-content-center">';
-            if($row->status == 'unpaid')
-            {
-                $btn = $btn . '<span class="badge badge-danger"> '.$row->status.' </span></div>';
+            } else {
+                $data = $data->get();
             }
-            else{
-                $btn = $btn . '<span class="badge badge-success"> '.$row->status.' </span></div>';
-            }
-            return $btn;
-        });
+            $table = Datatables::of($data);
 
-        $table->rawColumns(['payStatus']);
-        return $table->make(true);
-        }
+            $table->addColumn('payStatus', function ($row) {
+                // if the expenses is recurring
+                $btn = '<div class="d-flex justify-content-center">';
+                if($row->status == 'unpaid')
+                {
+                    $btn = $btn . '<span class="badge badge-danger"> '.$row->status.' </span></div>';
+                }
+                else{
+                    $btn = $btn . '<span class="badge badge-success"> '.$row->status.' </span></div>';
+                }
+                return $btn;
+            });
+
+            $table->rawColumns(['payStatus']);
+            return $table->make(true);
+            }
     }
 
     public function exportParentPayStatusReport(Request $request)
@@ -678,50 +705,82 @@ class ExpensesController extends Controller
         return $pdf->download('Report '.$details->expensesName.'.pdf');
     }
 
-    //rmb to modify
     public function printReceipt(Request $request){
+        // dd(123);
         $this->validate($request, [
-            'expensesId'      =>  'required',
-            'payStatus'      =>  'required',
+            'user_expenses_array'      =>  'required'
         ]);
+      
+        if(str_contains($request->user_expenses_array,','))
+        {
+            $array = array();
+            $case= explode(",", $request->user_expenses_array);
+            $array = array_merge($array, $case);
+        }
+        else{
+            $array = $request->user_expenses_array;
+        }
 
-        $details = DB::table('organizations')
-                    ->join('expenses','expenses.organization_id','=','organizations.id')
+        $details = DB::table('user_expenses')
+                    ->join('user_expenses_item as item','item.user_expenses_id','=','user_expenses.id')
+                    ->join('expenses','expenses.id','=','item.expenses_id')
+                    ->join('organizations','organizations.id','=','expenses.organization_id')
+                    ->join('organization_user_student as ous','ous.id','=','user_expenses.organization_user_student_id')
+                    ->join('organization_user','organization_user.id','=','ous.organization_user_id')
+                    ->join('users','users.id','=','organization_user.user_id')
                     ->select('organizations.nama as schoolName',
-                            'organizations.address as schoolAddress',
-                            'organizations.postcode as schoolPostcode',
-                            'organizations.state as schoolState',
-                            'expenses.name as expensesName')
-                    ->where('expenses.id',$request->expensesId)
+                    'organizations.address as schoolAddress',
+                    'organizations.postcode as schoolPostcode',
+                    'organizations.state as schoolState',
+                    'users.name as parentName','organizations.telno as telno')
+                    ->whereIn('item.user_expenses_id',$array)
                     ->first();
 
-        $list = DB::table('student_expenses')
-                    ->join('class_student','class_student.id','=','student_expenses.class_student_id')
+        $student = DB::table('user_expenses')
+                    ->join('organization_user_student','organization_user_student.id','=','user_expenses.organization_user_student_id')
+                    ->join('students','students.id','=','organization_user_student.student_id')
+                    ->join('class_student','class_student.student_id','=','students.id')
                     ->join('class_organization','class_organization.id','=','class_student.organclass_id')
                     ->join('classes','classes.id','=','class_organization.class_id')
-                    ->join('students','students.id','=','class_student.student_id')
-                    ->join('organization_user_student','organization_user_student.student_id','=','students.id')
-                    ->join('organization_user','organization_user.id','=','organization_user_student.organization_user_id')
-                    ->join('users','users.id','=','organization_user.user_id')
-                    ->where('student_expenses.expenses_id',$request->expensesId)
-                    ->select('users.name as parentName','students.parent_tel as parentTel','students.nama as studentName','classes.nama as className','student_expenses.status as payStatus');
+                    ->whereIn('user_expenses.id',$array)
+                    ->select('students.nama as studentName','classes.nama as className')
+                    ->get();
+
+        $list = DB::table('user_expenses_item as item')
+                    ->join('expenses','expenses.id','=','item.expenses_id')
+                    ->join('user_expenses','item.user_expenses_id','=','user_expenses.id')
+                    ->join('recurrings','recurrings.id','=','expenses.recurring_id')
+                    ->join('transactions','transactions.id','=','user_expenses.transaction_id')
+                    ->whereIn('item.user_expenses_id',$array)
+                    ->select('transactions.transac_no as transac_no','user_expenses.total_amount as total_amount',
+                    'expenses.name as expensesName','expenses.amount as expensesAmount',
+                    'expenses.description','recurrings.name as recurringType')
+                    ->get();
                     
-        if($request->payStatus == 'all')
-        {
-            $list = $list->get();
-        }
-        elseif($request->payStatus == 'paid')
-        {
-            $list = $list->where('student_expenses.status','=','paid')->get();
-        }
-        elseif($request->payStatus == 'unpaid')
-        {
-            $list = $list->where('student_expenses.status','=','unpaid')->get();
-        }
+        $date = date('Y-m-d', strtotime(now()));
 
-        $pdf = PDF::loadView('pentadbir.recurring-fees.report.reportParentPayStatusPdfTemplate', compact('list','details'));
+        $total = DB::table('user_expenses')
+        ->whereIn('user_expenses.id',$array)
+        ->pluck('total_amount');
 
-        return $pdf->download('Report '.$details->expensesName.'.pdf');
+        $count = DB::table('user_expenses')
+        ->whereIn('user_expenses.id',$array)->count();
+
+        $total_amount = 0;
+        $myArray = json_decode(json_encode($total), true);
+        $value = array_map('intval',$myArray);
+        // dd($value);
+        for($i = 0; $i < $count; $i++)
+        {
+            $total_amount = $total_amount + $value[$i];
+        }
+        // dd($total_amount,$count);
+
+
+        $pdf = PDF::loadView('parent.recurring-fees.receipt', compact('list','details','date','student','total_amount'));
+
+        // dd($pdf);
+        return $pdf->download('Resit '.$details->parentName.'.pdf');
     }
 
     public function paymentFake(Request $request){
@@ -734,14 +793,19 @@ class ExpensesController extends Controller
         $size = sizeof($user_id_and_expenses_id);
         $size_student = sizeof($oid_and_student_id);
         // dd($size_cb, $data_cb);
-
-        $oid = array();
+        $check=0;
+        
+        $user_expenses_id = array();
+        
+        for($j=0;$j<$size_student;$j++)
+        {
+            $oid = array();
         $student_id  = array();
         $expenses_id  = array();
         $user_id   = array();
         $total_amount = 0;
-        for($j=0;$j<$size_student;$j++)
-        {
+        $check++;
+       
             for ($i = 0; $i < $size; $i++) {
 
                 //want seperate data from request
@@ -755,38 +819,41 @@ class ExpensesController extends Controller
                 $case2           = explode("-", $oid_and_student_id[$j]);
                 $oid[]           = $case2[0];
                 $student_id[]    = $case2[1];
-    
+                
                 //update transaction table
                 $random_code = uniqid();
                 $user = DB::table('users')
                         ->where('id',$user_id[$i])
                         ->first();
+                        
                 $expenses = Expenses::where('id',$expenses_id[$i])
                             ->first();
-                
+                          
                 $total_amount = $total_amount + $expenses->amount;
-                $new_transaction =  DB::table('transactions')->insertGetId([
-                                    'nama'  =>  'Transaction'.$random_code,
-                                    'user_id'   =>  $user->id,
-                                    'username'  =>  $user->username,
-                                    'telno'     =>  $user->telno,
-                                    'amount'    =>  $expenses->amount
-                ]);
-    
-                //update user expenses
+               
+                     
                 $organ_user_student = DB::table('organization_user_student')
                                         ->join('organization_user','organization_user.id','=','organization_user_student.organization_user_id')
-                                        ->where('organization_user.organization_id',$oid[$j])
+                                        ->where('organization_user.organization_id',$oid[$i])
                                         ->where('organization_user.user_id',$user_id[$i])
-                                        ->where('organization_user_student.student_id',$student_id[$j])
+                                        ->where('organization_user_student.student_id',$student_id[$i])
                                         ->value('organization_user_student.id');
-    
+                                                   
                 if($i==0)
                 {
                     //only allow run once
+                    $new_transaction =  DB::table('transactions')->insertGetId([
+                        'nama'  =>  'Transaction'.$random_code,
+                        'user_id'   =>  $user->id,
+                        'username'  =>  $user->username,
+                        'telno'     =>  $user->telno,
+                        'transac_no'=>  $random_code
+                    ]);
+
+                    //insert user expenses
                     $new_user_expenses = DB::table('user_expenses')
                     ->insertGetId([
-                        'organ_user_student_id' =>  $organ_user_student,
+                        'organization_user_student_id' =>  $organ_user_student,
                         'transaction_id'        =>  $new_transaction,
                         'payment_type_id'       =>  4,
                         'status'                =>  'active',
@@ -796,7 +863,6 @@ class ExpensesController extends Controller
                
                 $new_user_expenses_item = DB::table('user_expenses_item')
                                             ->insert([
-                                                'amount'    =>  $expenses->amount,
                                                 'status'    =>  'active',
                                                 'expenses_id'=> $expenses->id,
                                                 'user_expenses_id'  =>  $new_user_expenses
@@ -804,7 +870,7 @@ class ExpensesController extends Controller
                                             
                 //update student_expenses status
                 $class_student = DB::table('class_student')
-                                ->where('student_id',$student_id[$j])
+                                ->where('student_id',$student_id[$i])
                                 ->first();
                 $update = DB::table('student_expenses')
                             ->where('class_student_id',$class_student->id)
@@ -812,10 +878,29 @@ class ExpensesController extends Controller
                             ->update(['status'=>'paid']);
                
             }
-        }
-        
-        $update_total_amount = DB::table('user_expenses')->where('id',$new_user_expenses)->update(['total_amount'=>$total_amount]);
+            // update transaction and user_expenses total amount
+            $update_transaction = DB::table('transactions')
+            ->where('id',$new_transaction)
+            ->update(['amount'=>$total_amount]);
 
-        return $update_total_amount;
+            $update_user_expenses = DB::table('user_expenses')
+            ->where('id',$new_user_expenses)
+            ->update(['total_amount'=>$total_amount]);
+
+            $update_payment = DB::table('payments')
+                            ->insert([
+                                'nama'  =>  'payment'.$new_transaction,
+                                'total_amount'  =>  $total_amount,
+                                'status'    =>  'complete',
+                                'transac_id'    =>  $new_transaction
+                            ]);
+
+            array_push($user_expenses_id,$new_user_expenses);
+           
+        }
+        // dd($user_expenses_id);
+        // $update_total_amount = DB::table('user_expenses')->where('id',$new_user_expenses)->update(['total_amount'=>$total_amount]);
+        // return receipt needed info --> user_expenses_id
+        return $user_expenses_id;
     }
 }

@@ -13,13 +13,13 @@ class CreateRecurringTable extends Migration
      */
     public function up()
     {
-        Schema::create('recurring', function (Blueprint $table) {
+        Schema::create('recurrings', function (Blueprint $table) {
             $table->id();
             $table->timestamps();
             $table->string('name');
             $table->string('description')->nullable();
-            $table->dateTime('start_date');
-            $table->dateTime('end_date');
+            $table->date('start_date');
+            $table->date('end_date');
         });
     }
 

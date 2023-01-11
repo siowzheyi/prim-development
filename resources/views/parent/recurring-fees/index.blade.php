@@ -7,6 +7,34 @@
 <link href="{{ URL::asset('assets/css/accordion.css') }}" rel="stylesheet" type="text/css" />
 
 <style>
+    .unlockedClass{
+        background-color:#555;
+        display: inline-block;
+    font-weight: 400;
+    color: white;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid transparent;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    }
+
+    .lockedClass{
+        background-color:#5562eb;
+        display: inline-block;
+    font-weight: 400;
+    color: white;
+    text-align: center;
+    vertical-align: middle;
+    border: 1px solid transparent;
+    padding: 0.375rem 0.75rem;
+    font-size: 0.875rem;
+    line-height: 1.5;
+    border-radius: 0.25rem;
+    }
+
     body {
         /* overflow: hidden; */
     }
@@ -109,7 +137,7 @@
                                                     class="collapse show">
 
                                                     <div class="card-body pl-0 pr-0">
-                                                        @foreach($getfees_by_parent->where('organization_id', $organizations->id)->where('recurring_name',$data) as $item)
+                                                        @foreach($getfees_by_recurring->where('organization_id', $organizations->id)->where('recurring_name',$data) as $item)
                                                         <div class="inputGroup">
                                                             <input
                                                                 id="option-{{ $item->id }}-{{ $organizations->user_id }}"
@@ -139,8 +167,13 @@
                                             </div>
                                         </div>
                                     </div>
+
                                 </div>
                                 @endforeach
+                                <div class="col-md-12">
+                                    <button type="button" style="margin:20px" id="lockbtn" class="lockedClass" onclick="lockExpenses()">Teruskan</button>
+                                </div>
+                                
 
                                 <!-- Below is to let parent to choose wanna pay for which and how many children -->
                                 @foreach($list->where('oid', $organizations->id) as $row)
@@ -204,8 +237,11 @@
                         Sila tekan butang 'Cetak' untuk mencetak resit anda.
                     </div>
                     <div class="modal-footer">
-                        <form action="route('recurring_fees.printReceipt')" method="post">
-                            <button type="button" data-dismiss="modal" class="btn btn-primary" id="print" name="print">Cetak</button>
+                        <form action="{{ route('recurring_fees.printReceipt') }}" method="post">
+                            {{csrf_field()}}
+
+                            <input type="text" id="user_expenses_array" value="" name="user_expenses_array" hidden>
+                            <input type="submit"  class="btn btn-primary" id="print" name="print" value="Cetak">
                             <button type="button" data-dismiss="modal" class="btn">Batal</button>
                         </form>
                     </div>
@@ -265,8 +301,16 @@
     var myCheckboxes_checkStudent = new Array();
     var organization_cb = new Array();
     var oid;
+    var responseFunction;
+    $( document ).ready(function() {
+        document.getElementById('btn-byr').disabled = true;
+    });
 
     $('#btn-byr').click(function () {
+        amt = amt * myCheckboxes_checkStudent.length;
+                total = parseFloat(amt).toFixed(2);
+                $("#pay").html(total);
+                $("input[name='amount']").val(total);
       Swal.fire({
         title: "Adakah anda pasti?",
         text: "Jumlah yang perlu dibayar RM"+total,
@@ -276,13 +320,7 @@
         cancelButtonColor: "#f46a6a",
       }).then(function (result) {
         if (result.value) {
-           
-            // console.log(myCheckboxes.length());
-            // window.location.href = "{{ route('billIndex')}}";
-
-            //id = {{ $organizations->user_id }}-{{ $item->id }}
-            // item = $getFeesbyparents
-            //studentId = {{ $row->oid }}-{{ $row->studentid }}
+            
             $.ajax({
                 url: "{{ route('recurring_fees.paymentFake') }}",
                 data: { 
@@ -294,10 +332,10 @@
             .done(function(response){
                 // document.write(response);
                 console.log("success");
-                console.log(response);
-                console.log("any");
+                responseFunction = response;
+              
+                $('#user_expenses_array').val(responseFunction);
                 $('#printConfirmationModal').modal('show');
-
 
             });
             
@@ -348,25 +386,35 @@
             $("#pay").html("0.00");
             myCheckboxes = [];
             myCheckboxes_checkStudent = [];
-            if(total == 0){
-            document.getElementById('btn-byr').disabled = true;
-            }else{
-                document.getElementById('btn-byr').disabled = false;
-            }
+            // if(total == 0){
+            // document.getElementById('btn-byr').disabled = true;
+            // }else{
+            //     document.getElementById('btn-byr').disabled = false;
+            // }
         } 
         
     }
     
+    function lockExpenses(){
+        $('#lockbtn').removeClass("lockedClass");
+        console.log("removed");
+        $('#lockbtn').addClass("unlockedClass");
+
+        console.log("123");
+        document.getElementById('btn-byr').disabled = false;
+    }
 
     function checkD(element) {
         var id = element.id;
         var id2 = element.id+"-2";
         if (element.checked) {
-            amt += parseFloat($("#" + id).val());
+            amt +=parseFloat($("#" + id).val());
             // $("#" + id2).prop('checked', true)
 
             $("#" + id2).prop('checked', true).each(function() {
+                
                 myCheckboxes.push($(this).val());
+               
             });
            
 
@@ -384,11 +432,11 @@
         $("#pay").html(total);
         $("input[name='amount']").val(total);
 
-        if(total == 0){
-            document.getElementById('btn-byr').disabled = true;
-        }else{
-            document.getElementById('btn-byr').disabled = false;
-        }
+        // if(total == 0){
+        //     document.getElementById('btn-byr').disabled = true;
+        // }else{
+        //     document.getElementById('btn-byr').disabled = false;
+        // }
     }
 
     function checkStudent(element) {
@@ -399,22 +447,27 @@
             // $("#" + id2).prop('checked', true)
 
             $("#" + id2).prop('checked', true).each(function() {
-                myCheckboxes_checkStudent.push($(this).val());
-               
+                if(jQuery.inArray($(this).val(),myCheckboxes_checkStudent) == -1)
+                {
+                    console.log("entererd");
+                    myCheckboxes_checkStudent.push($(this).val());
+                   
+                }
+                console.log("here student");
+                console.log(myCheckboxes_checkStudent);
+
+                
+
+                // if(total == 0){
+                //     document.getElementById('btn-byr').disabled = true;
+                // }else{
+                //     document.getElementById('btn-byr').disabled = false;
+                // }
             });
             
-        } else {
-            }
+        } 
     }   
-        total = parseFloat(amt).toFixed(2);
-        $("#pay").html(total);
-        $("input[name='amount']").val(total);
-
-        if(total == 0){
-            document.getElementById('btn-byr').disabled = true;
-        }else{
-            document.getElementById('btn-byr').disabled = false;
-        }
+      
         
 
     // function checkD(element) {

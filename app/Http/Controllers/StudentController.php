@@ -301,6 +301,31 @@ class StudentController extends Controller
             }
         }
 
+        // ********* MICOLE EXPENSES ***********
+        $getExpenses = DB::table('expenses')
+                ->where('status','active')
+                ->where('organization_id',$co->oid)
+                ->pluck('id');
+                // ->get();
+                // dd($co->id,$getExpenses);
+        if(count($getExpenses)!=0)
+        {
+            // dd("inside");
+            foreach($getExpenses as $expenses)
+            {
+                $updateExpenses = DB::table('student_expenses')
+                ->insert([
+                    'status'             => 'unpaid',
+                    'expenses_id'        => $expenses, 
+                    'class_student_id'   => $classStu->id           
+                ]);
+                // dd($updateExpenses);
+            }
+           
+        }
+        // dd("iytsude");
+        // ********** DONE *************
+
         return redirect('/student')->with('success', 'New student has been added successfully');
     }
 

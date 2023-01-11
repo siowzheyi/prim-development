@@ -55,12 +55,12 @@
 
                 <div class="form-group">
                     <label>Nama Perbelanjaan</label>
-                    <input type="text" name="name" class="form-control" value={{ $expenses->name }}>
+                    <input type="text" name="name" class="form-control" value="{{ $expenses->name }}">
                 </div>
 
                 <div class="form-group">
                     <label>Diskripsi</label>
-                    <input type="text" name="description" class="form-control" value={{ $expenses->description }}>
+                    <input type="text" name="description" class="form-control" value="{{ $expenses->description }}">
                 </div>
 
                 <div class="form-group">
@@ -90,12 +90,12 @@
                 </div>
                 <div class="form-group">
                     <label>Tempoh Bermula Berulang</label>
-                    <input type="date" name="start_date_recurring" class="form-control" value="{{ $expenses->start_date_recurring }}">
+                    <input type="date" name="start_date_recurring" class="form-control" value="{{ $start_date_recurring }}">
                 </div>
 
                 <div class="form-group">
                     <label>Tempoh Berakhir Berulang</label>
-                    <input type="date" name="end_date_recurring" class="form-control" value="{{ $expenses->end_date_recurring }}">
+                    <input type="date" name="end_date_recurring" class="form-control" value="{{ $end_date_recurring }}">
                 </div>
 
                 <div class="form-group">
@@ -105,12 +105,12 @@
 
                 <div class="form-group">
                     <label>Tempoh Bermula Berkesan</label>
-                    <input type="date" name="start_date" class="form-control"  value="{{ $expenses->start_date }}">
+                    <input type="date" name="start_date" class="form-control"  value="{{ $start_date }}">
                 </div>
 
                 <div class="form-group">
                     <label>Tempoh Berakhir Berkesan</label>
-                    <input type="date" name="end_date" class="form-control"  value="{{ $expenses->end_date }}">
+                    <input type="date" name="end_date" class="form-control"  value="{{ $end_date }}">
                 </div>
 
                
@@ -141,19 +141,14 @@
 <script>
      $(document).ready(function() {
         
-        if($("#getRecurringType").val()=="annualy"){
+        if($("#getRecurringType").val()=="annually"){
             $("#recurring_annualy").prop("checked", true);
-            // console.log("annualy")
-
         }
         else if($("#getRecurringType").val()=="semester"){
             $("#recurring_semester").prop("checked", true);
-            // console.log("semester")
-
         }
         else if($("#getRecurringType").val()=="monthly"){
             $("#recurring_monthly").prop("checked", true);
-            // console.log("monthly")
         }
 
     });
