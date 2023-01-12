@@ -235,9 +235,9 @@ class ExpensesController extends Controller
         
 
         if($expenses)
-            return redirect('/recurring_fees')->with('success', 'The application has been updated');
+            return redirect('/recurring_fees')->with('success', 'Perbelanjaan telah diubahkan');
          else 
-            return redirect('/recurring_fees')->with('fail', 'The application has not been updated');
+            return redirect('/recurring_fees')->with('fail', 'Perbelanjaan tidak diubahkan');
         
     }
 
