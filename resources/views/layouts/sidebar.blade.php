@@ -413,6 +413,12 @@
                             <span>Bayar</span>
                         </a>
                     </li>
+                    <li>
+                        <a href="{{ route('recurring_fees.indexTransaction') }}" class=" waves-effect">
+                            <i class="ti-clipboard"></i>
+                            <span>Sejarah Bayaran</span>
+                        </a>
+                    </li>
                     @endrole
                     @role('Superadmin|Pentadbir|Admin')
                      <li>

@@ -112,6 +112,10 @@ Route::resource('recurring_fees','ExpensesController');
     Route::post('/printParentPayStatusReport','ExpensesController@printParentPayStatusReport')->name('recurring_fees.printParentPayStatusReport');
     Route::post('/printReceipt','ExpensesController@printReceipt')->name('recurring_fees.printReceipt');
     Route::get('/paymentFake','ExpensesController@paymentFake')->name('recurring_fees.paymentFake');
+    Route::get('/indexTransaction','ExpensesController@indexTransaction')->name('recurring_fees.indexTransaction');
+    Route::get('/getIndexTransactionDatatable','ExpensesController@getIndexTransactionDatatable')->name('recurring_fees.getIndexTransactionDatatable');
+    Route::get('/viewTransaction/{id}','ExpensesController@viewTransaction')->name('recurring_fees.viewTransaction');
+
 
 // });
 

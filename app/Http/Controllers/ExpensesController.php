@@ -766,9 +766,9 @@ class ExpensesController extends Controller
         $count = DB::table('user_expenses')
         ->whereIn('user_expenses.id',$array)->count();
 
-        $total_amount = 0;
+        $total_amount = 0.00;
         $myArray = json_decode(json_encode($total), true);
-        $value = array_map('intval',$myArray);
+        $value = array_map('floatval',$myArray);
         // dd($value);
         for($i = 0; $i < $count; $i++)
         {
@@ -776,6 +776,7 @@ class ExpensesController extends Controller
         }
         // dd($total_amount,$count);
 
+        $total_amount = number_format($total_amount,2);
 
         $pdf = PDF::loadView('parent.recurring-fees.receipt', compact('list','details','date','student','total_amount'));
 
@@ -847,7 +848,9 @@ class ExpensesController extends Controller
                         'user_id'   =>  $user->id,
                         'username'  =>  $user->username,
                         'telno'     =>  $user->telno,
-                        'transac_no'=>  $random_code
+                        'transac_no'=>  $random_code,
+                        'status'    =>  'success',
+                        'datetime_created'  =>  now()
                     ]);
 
                     //insert user expenses
@@ -902,5 +905,119 @@ class ExpensesController extends Controller
         // $update_total_amount = DB::table('user_expenses')->where('id',$new_user_expenses)->update(['total_amount'=>$total_amount]);
         // return receipt needed info --> user_expenses_id
         return $user_expenses_id;
+    }
+
+    // ******** transaction history module ***********
+    public function indexTransaction(){
+
+
+        $organization = $this->getOrganizationByUserId();
+        
+        return view('parent.recurring-fees.listTransaction', compact('organization'));
+
+    }
+
+    public function getIndexTransactionDatatable(Request $request)
+    {
+        if (request()->ajax()) {
+            // dd(123);
+            $oid = $request->oid;
+            $user = Auth::id();
+            // all, paid unpaid
+            // $payStatus = $request->payStatus;
+
+            // create recurring data that only contain data which have recurring id
+
+
+            $data = DB::table('transactions as t')
+                    ->join('user_expenses', 'user_expenses.transaction_id', '=','t.id')
+                    ->join('user_expenses_item as item', 'item.user_expenses_id', '=','user_expenses.id')
+                    ->join('expenses', 'expenses.id', '=','item.expenses_id')
+                    ->where('t.user_id', Auth::id())
+                    ->where('t.status', 'success')
+                    ->where('expenses.organization_id', $request->oid)
+                    ->select('user_expenses.id as id', 't.nama as name', 't.amount as amount', 't.datetime_created as date')
+                    ->get();
+
+            $table = Datatables::of($data);
+
+            $table->addColumn('action', function ($row) {
+                $token = csrf_token();
+                $btn = '<div class="d-flex justify-content-center">';
+                $btn = $btn . '<a href="' . route('recurring_fees.viewTransaction', $row->id) . '" class="btn btn-primary m-1">Butiran Transaksi</a>';
+                return $btn;
+
+            });
+
+            $table->rawColumns(['action']);
+            return $table->make(true);
+            }
+    }
+
+    public function viewTransaction($id){
+
+        $user_expenses = $id;
+
+        $details = DB::table('user_expenses')
+                    ->join('user_expenses_item as item','item.user_expenses_id','=','user_expenses.id')
+                    ->join('expenses','expenses.id','=','item.expenses_id')
+                    ->join('organizations','organizations.id','=','expenses.organization_id')
+                    ->join('organization_user_student as ous','ous.id','=','user_expenses.organization_user_student_id')
+                    ->join('organization_user','organization_user.id','=','ous.organization_user_id')
+                    ->join('users','users.id','=','organization_user.user_id')
+                    ->select('organizations.nama as schoolName',
+                    'organizations.address as schoolAddress',
+                    'organizations.postcode as schoolPostcode',
+                    'organizations.state as schoolState',
+                    'users.name as parentName','organizations.telno as telno')
+                    ->where('item.user_expenses_id',$user_expenses)
+                    ->first();
+
+        $student = DB::table('user_expenses')
+                    ->join('organization_user_student','organization_user_student.id','=','user_expenses.organization_user_student_id')
+                    ->join('students','students.id','=','organization_user_student.student_id')
+                    ->join('class_student','class_student.student_id','=','students.id')
+                    ->join('class_organization','class_organization.id','=','class_student.organclass_id')
+                    ->join('classes','classes.id','=','class_organization.class_id')
+                    ->where('user_expenses.id',$user_expenses)
+                    ->select('students.nama as studentName','classes.nama as className')
+                    ->get();
+
+        $list = DB::table('user_expenses_item as item')
+                    ->join('expenses','expenses.id','=','item.expenses_id')
+                    ->join('user_expenses','item.user_expenses_id','=','user_expenses.id')
+                    ->join('recurrings','recurrings.id','=','expenses.recurring_id')
+                    ->join('transactions','transactions.id','=','user_expenses.transaction_id')
+                    ->where('item.user_expenses_id',$user_expenses)
+                    ->select('transactions.transac_no as transac_no','user_expenses.total_amount as total_amount',
+                    'expenses.name as expensesName','expenses.amount as expensesAmount',
+                    'expenses.description','recurrings.name as recurringType')
+                    ->get();
+                    
+        $date = date('Y-m-d', strtotime(now()));
+
+        $total = DB::table('user_expenses')
+        ->where('user_expenses.id',$user_expenses)
+        ->pluck('total_amount');
+
+        $count = DB::table('user_expenses')
+        ->where('user_expenses.id',$user_expenses)->count();
+
+        $total_amount = 0.00;
+        $myArray = json_decode(json_encode($total), true);
+        $value = array_map('floatval',$myArray);
+        // dd($value);
+        for($i = 0; $i < $count; $i++)
+        {
+            (double)$total_amount = (double)$total_amount + (double)$value[$i];
+        }
+
+        $total_amount = number_format($total_amount,2);
+
+        $pdf = PDF::loadView('parent.recurring-fees.viewTransaction', compact('list','details','date','student','total_amount'));
+
+        // dd($pdf);
+        return $pdf->download('Resit '.$details->parentName.'.pdf');
+
     }
 }
