@@ -1418,17 +1418,17 @@ class PayController extends AppBaseController
 
 
     public function createBill(){
-        
+    //    yuqin
         $some_data = array(
-            'userSecretKey'=>config('toyyibpay.key'),
-            'categoryCode'=>config('toyyibpay.category'),
+            'userSecretKey'=>'8upd2huc-hmtz-mzwm-zgne-s7ks1z5jfid3',  //config('toyyibpay.key'),
+            'categoryCode'=>'pcod3z8p', //config('toyyibpay.category'),
             'billName'=>'Car Rental WXX123',
             'billDescription'=>'Car Rental WXX123 On Sunday',
             'billPriceSetting'=>1,
             'billPayorInfo'=>1,
             'billAmount'=>1, //in cent 100 = rm1
-            'billReturnUrl'=>route('paymentStatus2'),
-            'billCallbackUrl'=>route('callback'),
+            'billReturnUrl'=> route('paymentStatus2'),
+            'billCallbackUrl'=>'', //route('callback'),
             'billExternalReferenceNo' => 'AFR341DFI',
             'billTo'=>'Gui Yu Qin',
             'billEmail'=>'yuqin@gmail.com',
@@ -1438,17 +1438,33 @@ class PayController extends AppBaseController
             'billPaymentChannel'=>'0',
             'billContentEmail'=>'Thank you for submitting the payment!',
             'billChargeToCustomer'=>1,
-            'billExpiryDate'=>'7-1-2023 17:00:00',
+            'billExpiryDate'=>'20-1-2023 17:00:00',
             'billExpiryDays'=>3
         );
 
         $url = 'https://toyyibpay.com/index.php/api/createBill';
+        // return redirect('https://toyyibpay.com/index.php/api/createBill');
         $response = Http::asForm()->post($url, $some_data); //Http::post($url, $option);
         // Http::asForm()->post($url, $option);
-        dd($response);
+        // dd($response);
         $billCode = $response[0]['BillCode'];
         
-        return redirect('https://dev.toyyibpay.com/'.$billCode);
+        return redirect('https://toyyibpay.com/'.$billCode);
+
+        // $curl = curl_init();
+        // curl_setopt($curl, CURLOPT_POST, 1);
+        // curl_setopt($curl, CURLOPT_URL, 'https://dev.toyyibpay.com/index.php/bill/createbill');  
+        // curl_setopt($curl, CURLOPT_RETURNTRANSFER, true);
+        // curl_setopt($curl, CURLOPT_POSTFIELDS, $some_data);
+        // $result = curl_exec($curl);
+        // $info = curl_getinfo($curl);  
+        // curl_close($curl);
+        // $obj = json_decode($result,true);
+        // dd($result);
+        // // $billcode=$obj[0]['BillCode'];
+
+        
+        // return redirect('https://toyyibpay.com/'.$billcode);
     }
 
     public function paymentStatus2(){

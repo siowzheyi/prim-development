@@ -2335,6 +2335,73 @@ class FeesController extends AppBaseController
             $lists = DB::table('fees_new')
             ->select('fees_new.*', DB::raw("CONCAT(fees_new.category, ' - ', fees_new.name) AS name"))
             ->where('organization_id', $oid)
+            // ->groupBy('category')
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get();
+        }
+        else{
+            $class = ClassModel::find($request->classid);
+
+            $lists = DB::table('fees_new')
+            ->select('fees_new.*', DB::raw("CONCAT(fees_new.category, ' - ', fees_new.name) AS name"))
+            ->where('organization_id', $oid)
+            // ->groupBy('category')
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get();
+
+            foreach($lists as $key=>$list)
+            {
+                $target = json_decode($list->target);
+                // dd($target->data);
+
+                if($target->data == "All_Level" || $target->data == "ALL" || $target->data == $class->levelid)
+                {
+                    continue;
+                }
+
+                if(is_array($target->data))
+                {
+                    if(in_array($class->id, $target->data))
+                    {
+                        continue;
+                    }
+                }
+
+                if(isset($target->dorm)){
+                    
+                }
+
+                unset($lists[$key]);
+            }
+        }
+        
+        return response()->json(['success' => $lists]);
+    }
+
+    public function fetchYuranByOrganizationId(Request $request)
+    {
+        $oid = $request->oid;
+
+        $yurans = DB::table('fees_new')
+            ->where('organization_id', $oid)
+            ->select('id', DB::raw("CONCAT(fees_new.category, ' - ', fees_new.name) AS name"))
+            ->orderBy('category')
+            ->orderBy('name')
+            ->get();
+        
+        return response()->json(['success' => $yurans]);
+    }
+
+    public function fetchCategoryByOrganizationId(Request $request)
+    {
+        $oid = $request->oid;
+
+        if($request->classid == "ALL"){
+            $lists = DB::table('fees_new')
+            ->select('fees_new.*', DB::raw("CONCAT(fees_new.category, ' - ', fees_new.name) AS name"))
+            ->where('organization_id', $oid)
             ->groupBy('category')
             ->orderBy('category')
             ->orderBy('name')
@@ -2369,25 +2436,15 @@ class FeesController extends AppBaseController
                     }
                 }
 
+                if(isset($target->dorm)){
+                    
+                }
+
                 unset($lists[$key]);
             }
         }
-        
+
         return response()->json(['success' => $lists]);
-    }
-
-    public function fecthYuranByOrganizationId(Request $request)
-    {
-        $oid = $request->oid;
-
-        $yurans = DB::table('fees_new')
-            ->where('organization_id', $oid)
-            ->select('id', DB::raw("CONCAT(fees_new.category, ' - ', fees_new.name) AS name"))
-            ->orderBy('category')
-            ->orderBy('name')
-            ->get();
-        
-        return response()->json(['success' => $yurans]);
     }
 
     public function studentDebtDatatable(Request $request)
@@ -2450,6 +2507,10 @@ class FeesController extends AppBaseController
 
     public function collectedFeeDatatable(Request $request)
     {
+        $start = $request->date_started;
+        $end = $request->date_end;
+
+        // dd($start, $end);
         // $fees = Fee_New::find($request->feeid);
         if (request()->ajax()) {
             if($request->classid == "ALL" && $request->feeid == "ALL"){
@@ -2459,21 +2520,25 @@ class FeesController extends AppBaseController
                 ->leftJoin('organization_user as ou', 'ou.id', '=', 'fnou.organization_user_id')
                 ->leftJoin('organization_user_student as ous', 'ous.organization_user_id', '=', 'ou.id')
                 ->leftJoin('students as s', 's.id', '=', 'ous.student_id')
+                ->leftJoin('fees_transactions_new as ftn', 'ftn.student_fees_id', '=', 'sfn.id')
+                ->leftJoin('transactions as t', function($join){
+                        $join->on('fnou.transaction_id', '=', 't.id')
+                             ->on('ftn.transactions_id', '=', 't.id');
+                })
                 ->where([
-                    // ['fnou.fees_new_id', $fees->id],
-                    ['fnou.status', 'Paid'],
-                    ['fn.organization_id', $request->oid]
+                    ['fn.organization_id', $request->oid],
+                    ['sfn.status', 'Paid']
                 ])
                 ->orWhere([
-                    // ['fnou.fees_new_id', $fees->id],
-                    ['sfn.status', 'Paid'],
-                    ['fn.organization_id', $request->oid]
+                    ['fn.organization_id', $request->oid],
+                    ['fnou.status', 'Paid']
                 ])
-                ->select('fn.name as fee_name', 'fn.category', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
+                // ->whereBetween('t.datetime_created', [$start, $end])
+                ->select('fn.name as fee_name', 't.id', 'fn.category', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
                 ->groupBy('fn.id')
-                ->orderBy('fn.category')
-                ->orderBy('fn.name')
+                ->orderBy('name')
                 ->get();
+                // dd($data);
             }
             elseif($request->classid == "ALL" && $request->feeid != "ALL"){
                 if($request->feeid == "Kategory A")
@@ -2485,10 +2550,12 @@ class FeesController extends AppBaseController
                     ->leftJoin('students as s', 's.id', '=', 'ous.student_id')
                     ->where([
                         // ['fnou.fees_new_id', $fees->id],
+                        ['fn.organization_id', $request->oid],
                         ['fn.category', $request->feeid],
                         ['fnou.status', 'Paid']
                     ])
                     ->select('fn.name as fee_name', 'fn.category', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
+                    ->groupBy('fn.id')
                     ->orderBy('fn.name')
                     ->get();
                 }
@@ -2497,6 +2564,7 @@ class FeesController extends AppBaseController
                     $data = DB::table('fees_new as fn')
                     ->leftJoin('student_fees_new as sfn', 'sfn.fees_id', '=', 'fn.id')
                     ->where([
+                        ['fn.organization_id', $request->oid],
                         ['fn.category', $request->feeid],
                         ['sfn.status', 'Paid'],
                     ])
@@ -2530,8 +2598,6 @@ class FeesController extends AppBaseController
                     ->select('fn.category', 'fn.name', 'c.nama as cname', 'cs.id as csid')
                     // ->select('fn.name as fee_name', 'fn.category', 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
                     ->get();
-
-                    dd($data);
             }
             elseif($request->classid != "ALL" && $request->feeid != "ALL"){
                 if($request->feeid == "Kategory A")
@@ -2546,6 +2612,7 @@ class FeesController extends AppBaseController
                     ->leftJoin('classes as c', 'c.id', '=', 'co.class_id')
                     ->where([
                         // ['fnou.fees_new_id', $fees->id],
+                        ['fn.organization_id', $request->oid],
                         ['fn.category', $request->feeid],
                         ['c.id', $request->classid],
                         ['fnou.status', 'Paid']
@@ -2567,6 +2634,7 @@ class FeesController extends AppBaseController
                     ->where([
                         // ['fn.id', $fees->id],
                         ['fn.category', $request->feeid],
+                        ['fn.organization_id', $request->oid],
                         ['c.id', $request->classid],
                         ['sfn.status', 'Paid'],
                         // ['t.status', 'Success']

@@ -287,7 +287,7 @@
             
                 console.log(classid);
                 $.ajax({
-                    url:"{{ route('fees.fetchYuran') }}",
+                    url:"{{ route('fees.fetchYuranByOrganId') }}",
                     method:"POST",
                     data:{ 
                         classid: classid,
@@ -353,7 +353,7 @@
                 var _token    = $('input[name="_token"]').val();
             
                 $.ajax({
-                    url:"{{ route('fees.fetchYuran') }}",
+                    url:"{{ route('fees.fetchCategorybyOrganId') }}",
                     method:"POST",
                     data:{ 
                         classid: classid,
@@ -381,8 +381,8 @@
             }
         });
         
-        $('#fees').change(function(){
-            if($(this).val() != 0){
+        $('#date_end').change(function(){
+            if($('#fees').val() != 0 && ('#date_started').val != "" && ('#date_end').val != ""){
                 $('#yuranTable').DataTable().destroy();
                 var yuranTable = $('#yuranTable').DataTable({
                 ordering: true,
@@ -395,8 +395,8 @@
                             feeid: $("#fees").val(),
                             classid: $(".classes").val(),
                             oid: $("#organization").val(),
-                            // date_started: $("#date_started").val(),
-                            // date_end: $("#date_end").val()
+                            date_started: $("#date_started").val(),
+                            date_end: $("#date_end").val()
                         }
                     },
                     'columnDefs': [{

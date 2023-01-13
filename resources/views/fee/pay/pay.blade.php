@@ -147,7 +147,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('payment') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('createBill') }}" enctype="multipart/form-data">
                 <!-- <div class="form-group">
                     <label for="sel1">Sila Pilih Bank:</label>
                     <select name="bankid" id="bankid" class="form-control" data-parsley-required-message="Sila pilih bank" required>
@@ -220,7 +220,8 @@
                             the FPX Terms And Condition.</a></label>
                 </div>
                 <button id="bayarBtn" class="btn btn-primary float-right mt-3 w-100 p-2" style="font-size:18px"
-                    type="submit" onclick="return checkBank();" disabled>Teruskan Pembayaran</button>
+                    type="submit"  disabled>Teruskan Pembayaran</button>
+                    <!-- onclick="return checkBank();" -->
                 </form>
             </div>
 
@@ -254,7 +255,7 @@
     $.ajax({
         type: 'GET',
         dataType: 'json',
-        url: "/fpx/getBankList",
+        url: "getBankFPX", //"/fpx/getBankList",
         success: function(data) {
             jQuery.each(data.data, function(key, value){
                 arr.push(key);

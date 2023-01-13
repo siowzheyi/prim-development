@@ -157,7 +157,8 @@ Route::group(['prefix' => 'fees'], function () {
     Route::get('/category/report', 'FeesController@cetegoryReportIndex')->name('fees.category.report');
     Route::post('/list-fetchYuran', 'FeesController@fetchYuran')->name('fees.fetchYuran');
 
-    Route::post('/list-fetchYuranbyOrganId', 'FeesController@fecthYuranByOrganizationId')->name('fees.fetchYuranByOrganId');
+    Route::post('/list-fetchYuranbyOrganId', 'FeesController@fetchYuranByOrganizationId')->name('fees.fetchYuranByOrganId');
+    Route::post('/list-fetchCategorybyOrganId', 'FeesController@fetchCategoryByOrganizationId')->name('fees.fetchCategorybyOrganId');
 });
 
 Route::group(['prefix' => 'parent'], function () {
@@ -295,9 +296,9 @@ Route::post('payment', 'PayController@payment')->name('payment');
 Route::post('paymentSuccess', 'PayController@paymentSuccess')->name('paymentSuccess');
 // created by yuqin for toyyibpay
 Route::get('getBankFPX', 'PayController@getBankFPX')->name('getBankFPX');
-// Route::post('paymentStatus2', 'PayController@paymentStatus2')->name('paymentStatus2');
-// Route::post('createBill', 'PayController@createBill')->name('createBill');
-// Route::post('callback', 'PayController@callback')->name('callback');
+Route::post('paymentStatus2', 'PayController@paymentStatus2')->name('paymentStatus2');
+Route::post('createBill', 'PayController@createBill')->name('createBill');
+Route::post('callback', 'PayController@callback')->name('callback');
 
 Route::post('paymentStatus', 'PayController@paymentStatus')->name('paymentStatus');
 Route::post('transactionReceipt', 'PayController@transactionReceipt')->name('transactionReceipt');
