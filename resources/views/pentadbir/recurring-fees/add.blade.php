@@ -46,7 +46,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Nama Perbelanjaan</label>
+                    <label>Nama Perbelanjaan</label><span style="color: red">  *</span>
                     <input type="text" name="name" class="form-control" placeholder="Nama Perbelanjaan">
                 </div>
 
@@ -56,7 +56,7 @@
                 </div>
 
                 <div class="form-group">
-                        <label>Berulangan</label>
+                        <label>Berulangan</label><span style="color: red">  *</span>
 
                         <div class="form-check">
                             <div>
@@ -76,26 +76,26 @@
                         </div>
                 </div>
                 <div class="form-group">
-                    <label>Tempoh Bermula Berulang</label>
+                    <label>Tempoh Bermula Berulang</label><span style="color: red">  *</span>
                     <input type="date" name="start_date_recurring" class="form-control">
                 </div>
 
                 <div class="form-group">
-                    <label>Tempoh Berakhir Berulang</label>
+                    <label>Tempoh Berakhir Berulang</label><span style="color: red">  *</span>
                     <input type="date" name="end_date_recurring" class="form-control" min="{{ $start }}">
                 </div>
                 <div class="form-group">
-                    <label>Amaun Perbelanjaan</label>
+                    <label>Amaun Perbelanjaan</label><span style="color: red">  *</span>
                     <input type="number" name="amount" class="form-control" step="any" min="0">
                 </div>
 
                 <div class="form-group">
-                    <label>Tempoh Bermula Berkesan</label>
+                    <label>Tempoh Bermula Berkesan</label><span style="color: red">  *</span>
                     <input type="date" name="start_date" class="form-control" min="{{ $start }}">
                 </div>
 
                 <div class="form-group">
-                    <label >Tempoh Berakhir Berkesan</label>
+                    <label >Tempoh Berakhir Berkesan</label><span style="color: red">  *</span>
                     <input type="date" name="end_date" class="form-control" min="{{ $start }}">
                 </div>
 

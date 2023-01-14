@@ -519,10 +519,17 @@ class ExpensesController extends Controller
                 ->where('student_expenses.expenses_id',$id)
                 ->select('users.name as parentName','students.nama as studentName','classes.nama as className','students.parent_tel as parentTel','student_expenses.status as payStatus')
                 ->get();
+        
+        $class = DB::table('classes')
+                ->join('class_organization','class_organization.class_id','=','classes.id')
+                ->join('expenses','expenses.organization_id','=','class_organization.organization_id')
+                ->where('expenses.id',$id)
+                ->select('classes.nama','classes.id')
+                ->get();
 
         $expenses = Expenses::where('id',$id)->first();
 
-        return view('pentadbir.recurring-fees.report.payStatus', compact('user','expenses','id'));
+        return view('pentadbir.recurring-fees.report.payStatus', compact('user','expenses','id','class'));
     }
 
     //get datatable for pay status
@@ -532,6 +539,7 @@ class ExpensesController extends Controller
             $expensesId = $request->expensesId;
             // all, paid unpaid
             $payStatus = $request->payStatus;
+            $class = $request->class;
 
             // create recurring data that only contain data which have recurring id
 
@@ -549,14 +557,21 @@ class ExpensesController extends Controller
             ->orderBy('users.name');
 
             if ($payStatus == 'paid') {
-                $data = $data->where('student_expenses.status', '=', 'paid')
-                            ->get();
+                $data = $data->where('student_expenses.status', '=', 'paid');
             } elseif ($payStatus == 'unpaid') {
-                $data = $data->where('student_expenses.status', '=', 'unpaid')
-                        ->get();
+                $data = $data->where('student_expenses.status', '=', 'unpaid');
             } else {
+                $data = $data;
+            }
+
+            if($class == null || $class == 'all')
+            {
                 $data = $data->get();
             }
+            else{
+                $data = $data->where('classes.id',$class)->get();
+            }
+
             $table = Datatables::of($data);
 
             $table->addColumn('payStatus', function ($row) {
@@ -581,7 +596,8 @@ class ExpensesController extends Controller
     {
         $this->validate($request, [
             'payStatus'      =>  'required',
-            'expensesId'    =>  'required'
+            'expensesId'    =>  'required',
+            'class'         =>  'nullable'
         ]);
 
         $filename = DB::table('expenses')
@@ -590,7 +606,7 @@ class ExpensesController extends Controller
 
         // dd($filename);
 
-        return Excel::download(new ParentPayStatusExport($request->payStatus, $request->expensesId), $filename . '.xlsx');
+        return Excel::download(new ParentPayStatusExport($request->payStatus, $request->expensesId,$request->class), $filename . '.xlsx');
     }
 
     public function exportExpensesPayStatusReport(Request $request)
@@ -652,7 +668,27 @@ class ExpensesController extends Controller
             $list = $list->where('student_expenses.status','=','unpaid')->get();
         }
 
-        $pdf = PDF::loadView('pentadbir.recurring-fees.report.reportExpensesPayStatusPdfTemplate', compact('list','details'));
+        $paid = DB::table('expenses')
+                ->join('recurrings','recurrings.id','=','expenses.recurring_id')
+                ->join('student_expenses','student_expenses.expenses_id','=','expenses.id')
+                ->where('expenses.organization_id','=',$request->organ)
+                ->where('expenses.status','active')
+                ->where('student_expenses.status','=','paid')
+                ->sum('expenses.amount');
+
+        $paid = number_format($paid,2);
+
+        $unpaid = DB::table('expenses')
+        ->join('recurrings','recurrings.id','=','expenses.recurring_id')
+        ->join('student_expenses','student_expenses.expenses_id','=','expenses.id')
+        ->where('expenses.organization_id','=',$request->organ)
+        ->where('expenses.status','active')
+        ->where('student_expenses.status','=','unpaid')
+        ->sum('expenses.amount');
+
+        $unpaid = number_format($unpaid,2);
+
+        $pdf = PDF::loadView('pentadbir.recurring-fees.report.reportExpensesPayStatusPdfTemplate', compact('list','details','paid','unpaid'));
 
         return $pdf->download('Report.pdf');
     }
@@ -664,6 +700,7 @@ class ExpensesController extends Controller
         $this->validate($request, [
             'expensesId'      =>  'required',
             'payStatus'      =>  'required',
+            'class'         =>  'required'
         ]);
 
         $details = DB::table('organizations')
@@ -689,18 +726,58 @@ class ExpensesController extends Controller
                     
         if($request->payStatus == 'all')
         {
-            $list = $list->get();
+            $list = $list;
         }
         elseif($request->payStatus == 'paid')
         {
-            $list = $list->where('student_expenses.status','=','paid')->get();
+            $list = $list->where('student_expenses.status','=','paid');
         }
         elseif($request->payStatus == 'unpaid')
         {
-            $list = $list->where('student_expenses.status','=','unpaid')->get();
+            $list = $list->where('student_expenses.status','=','unpaid');
         }
 
-        $pdf = PDF::loadView('pentadbir.recurring-fees.report.reportParentPayStatusPdfTemplate', compact('list','details'));
+        if($request->class == null || $request->class == 'all')
+            {
+                $list = $list->get();
+            }
+        else{
+            $list = $list->where('classes.id',$request->class)->get();
+        }
+
+        $paid = DB::table('student_expenses')
+                    ->join('expenses','expenses.id','=','student_expenses.expenses_id')
+                    ->join('class_student','class_student.id','=','student_expenses.class_student_id')
+                    ->join('class_organization','class_organization.id','=','class_student.organclass_id')
+                    ->join('classes','classes.id','=','class_organization.class_id')
+                    ->join('students','students.id','=','class_student.student_id')
+                    ->join('organization_user_student','organization_user_student.student_id','=','students.id')
+                    ->join('organization_user','organization_user.id','=','organization_user_student.organization_user_id')
+                    ->join('users','users.id','=','organization_user.user_id')
+                    ->where('student_expenses.expenses_id',$request->expensesId)
+                    ->where('expenses.status','active')
+                  ->where('student_expenses.status','=','paid')
+                 ->sum('expenses.amount');
+
+        $paid = number_format($paid,2);
+
+        $unpaid = DB::table('student_expenses')
+                    ->join('expenses','expenses.id','=','student_expenses.expenses_id')
+                    ->join('class_student','class_student.id','=','student_expenses.class_student_id')
+                    ->join('class_organization','class_organization.id','=','class_student.organclass_id')
+                    ->join('classes','classes.id','=','class_organization.class_id')
+                    ->join('students','students.id','=','class_student.student_id')
+                    ->join('organization_user_student','organization_user_student.student_id','=','students.id')
+                    ->join('organization_user','organization_user.id','=','organization_user_student.organization_user_id')
+                    ->join('users','users.id','=','organization_user.user_id')
+                    ->where('student_expenses.expenses_id',$request->expensesId)
+                    ->where('expenses.status','active')
+                    ->where('student_expenses.status','=','unpaid')
+                   ->sum('expenses.amount');
+
+        $unpaid = number_format($unpaid,2);
+
+        $pdf = PDF::loadView('pentadbir.recurring-fees.report.reportParentPayStatusPdfTemplate', compact('list','details','paid','unpaid'));
 
         return $pdf->download('Report '.$details->expensesName.'.pdf');
     }

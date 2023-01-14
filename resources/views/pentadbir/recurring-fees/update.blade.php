@@ -54,7 +54,7 @@
                 </div>
 
                 <div class="form-group">
-                    <label>Nama Perbelanjaan</label>
+                    <label>Nama Perbelanjaan</label><span style="color: red">  *</span>
                     <input type="text" name="name" class="form-control" value="{{ $expenses->name }}">
                 </div>
 
@@ -65,7 +65,7 @@
 
                 <div class="form-group">
                     <div class="form-check-inline">
-                        <label class="form-check-label">Berulangan</label>
+                        <label class="form-check-label">Berulangan</label><span style="color: red">  *</span>
 
                         <div class="form-group">
                             <div class="form-check">
@@ -89,27 +89,27 @@
                     </div>
                 </div>
                 <div class="form-group">
-                    <label>Tempoh Bermula Berulang</label>
+                    <label>Tempoh Bermula Berulang</label><span style="color: red">  *</span>
                     <input type="date" name="start_date_recurring" class="form-control" value="{{ $start_date_recurring }}">
                 </div>
 
                 <div class="form-group">
-                    <label>Tempoh Berakhir Berulang</label>
+                    <label>Tempoh Berakhir Berulang</label><span style="color: red">  *</span>
                     <input type="date" name="end_date_recurring" class="form-control" value="{{ $end_date_recurring }}">
                 </div>
 
                 <div class="form-group">
-                    <label>Amaun Perbelanjaan</label>
+                    <label>Amaun Perbelanjaan</label><span style="color: red">  *</span>
                     <input type="number" name="amount" class="form-control" step="any" min="0" value="{{ $expenses->amount }}" readonly>
                 </div>
 
                 <div class="form-group">
-                    <label>Tempoh Bermula Berkesan</label>
+                    <label>Tempoh Bermula Berkesan</label><span style="color: red">  *</span>
                     <input type="date" name="start_date" class="form-control"  value="{{ $start_date }}">
                 </div>
 
                 <div class="form-group">
-                    <label>Tempoh Berakhir Berkesan</label>
+                    <label>Tempoh Berakhir Berkesan</label><span style="color: red">  *</span>
                     <input type="date" name="end_date" class="form-control"  value="{{ $end_date }}">
                 </div>
 

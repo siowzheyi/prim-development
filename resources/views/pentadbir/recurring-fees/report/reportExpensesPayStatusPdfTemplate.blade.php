@@ -61,11 +61,25 @@
                                         <td style="text-align: center">{{ $item->payStatus }}</td>
 
                                     </tr>
-                                    @endforeach
-
-                                    
+                                    @endforeach                                    
                                 </table>
 
+                                <br>
+                                <br>
+                                <div class="row">
+                                    <div>
+                                        <h4>
+                                            Jumlah perbelanjaan telah bayar :
+                                            <span>{{$paid}}</span>
+                                        </h4>
+                                    </div>
+                                    <div>
+                                        <h4>
+                                            Jumlah perbelanjaan belum bayar :
+                                            <span>{{$unpaid}}</span>
+                                        </h4>
+                                    </div>
+                                </div>
                             </div>
                         </div>
                     </div>

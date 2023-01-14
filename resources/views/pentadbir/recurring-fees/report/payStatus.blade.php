@@ -14,42 +14,25 @@
     </div>
 </div>
 <div class="row">
-    {{-- <div class="col-md-12">
+    <div class="col-md-12">
         <div class="card card-primary">
 
             {{csrf_field()}}
             <div class="card-body">
-
                 <div class="form-group">
-                    <label>Nama Organisasi</label>
-                    <select name="organization" id="organization" class="form-control">
-                        <option value="" selected disabled>Pilih Organisasi</option>
-                        @foreach($organization as $row)
+                    <label> Kelas</label>
+                    <select name="class" id="class" class="form-control">
+                        <option value="" selected disabled>Pilih Kelas</option>
+                        <option value="all">Semua</option>
+                        @foreach($class as $row)
                         <option value="{{ $row->id }}">{{ $row->nama }}</option>
-                        @endforeach
-                    </select>
-                </div>
-                <div class="form-group">
-                    <label> Tarikh bermula</label>
-                    <input type="date" id="fromTime" name="fromTime" min="{{$minDate}}" max="{{$maxDate}}" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label> Tarikh berakhir</label>
-                    <input type="date" id="untilTime" name="untilTime" min="{{$minDate}}" max="{{$maxDate}}" class="form-control">
-                </div>
-                <div class="form-group">
-                    <label> Jenis Perbelanjaan Berulangan</label>
-                    <select name="recurring_type" id="recurring_type" class="form-control">
-                        <option value="" selected disabled>Pilih Jenis</option>
-                        @foreach($recurring_type as $row)
-                        <option >{{ $row }}</option>
                         @endforeach
                     </select>                
                 </div>
             </div>
 
         </div>
-    </div> --}}
+    </div>
 
     <div class="col-md-12">
         <div class="card">
@@ -120,6 +103,16 @@
                         <div class="modal-body">
                             {{ csrf_field() }}
                             <div class="form-group">
+                                <label>Kelas</label>
+                                <select name="class" id="class" class="form-control">
+                                    <option value="" selected disabled>Pilih Kelas</option>
+                                    <option value="all">Semua</option>
+                                    @foreach($class as $row)
+                                    <option value="{{ $row->id }}">{{ $row->nama }}</option>
+                                    @endforeach
+                                </select>  
+                            </div>
+                            <div class="form-group">
                                 <label>Perbelanjaan {{ $expenses->name }}</label>
                                 <input type="text" name="expensesId" value="{{ $expenses->id }}" hidden>
                                 <select name="payStatus" id="payStatus" class="form-control">
@@ -128,6 +121,7 @@
                                     <option value="unpaid" >Belum bayar</option>
                                 </select>
                             </div>
+                            
                             <div class="modal-footer">
                                 <button id="buttonExport" type="submit" class="btn btn-primary">Export</button>
                             </div>
@@ -150,6 +144,16 @@
                     <form action="{{ route('recurring_fees.printParentPayStatusReport') }}" method="post">
                         <div class="modal-body">
                             {{ csrf_field() }}
+                            <div class="form-group">
+                                <label>Kelas</label>
+                                <select name="class" id="class" class="form-control">
+                                    <option value="" selected disabled>Pilih Kelas</option>
+                                    <option value="all">Semua</option>
+                                    @foreach($class as $row)
+                                    <option value="{{ $row->id }}">{{ $row->nama }}</option>
+                                    @endforeach
+                                </select>  
+                            </div>
                             <div class="form-group">
                                 <label>Perbelanjaan {{ $expenses->name }}</label>
                                 <input type="text" name="expensesId" value="{{ $expenses->id }}" hidden>
@@ -222,7 +226,8 @@
                     url: "{{ route('recurring_fees.getPayStatusDatatable') }}",
                     data: {
                         expensesId: expensesId,
-                        payStatus: payStatus
+                        payStatus: payStatus,
+                        class: $("#class option:selected").val(),
                     },
                     type: 'GET',
                 },
@@ -271,6 +276,12 @@
             });
 
         }
+        $('#class').change(function() {
+
+            $('#parentsTable').DataTable().destroy();
+
+            fetch_data(expensesId);
+        });
 
        
         // csrf token for ajax
