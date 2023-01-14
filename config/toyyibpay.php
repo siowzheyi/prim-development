@@ -1,5 +1,6 @@
 <?php
 return[
-    'key'       => env('TOYYIBPAY_KEY'),
-    'category'  => env('TOYYIBPAY_CATEGORY'),
+    'PAYPAL_CLIENT_ID'       => env('PAYPAL_CLIENT_ID'),
+    'PAYPAL_CLIENT_SECRET'   => env('PAYPAL_CLIENT_SECRET'),
+    'PAYPAL_CURRENCY'        => env('PAYPAL_CURRENCY'),
 ];

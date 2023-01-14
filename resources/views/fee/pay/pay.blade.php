@@ -147,7 +147,7 @@
                     </div>
                 </div>
 
-                <form method="POST" action="{{ route('createBill') }}" enctype="multipart/form-data">
+                <form method="POST" action="{{ route('toyyib.payment') }}" enctype="multipart/form-data">
                 <!-- <div class="form-group">
                     <label for="sel1">Sila Pilih Bank:</label>
                     <select name="bankid" id="bankid" class="form-control" data-parsley-required-message="Sila pilih bank" required>
@@ -155,7 +155,7 @@
                     </select>
                 </div> -->
 
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <label for="sel1">Sila Pilih Bank:</label>
                     <select name="bankid" id="bankid" class="form-control" data-parsley-required-message="Sila pilih bank" required>
                         <option value="">Pilih bank</option>
@@ -181,7 +181,7 @@
                         <option value='BOCM01'>Bank Of China</option>
 
                     </select>
-                </div>
+                </div> -->
 
                 @if ($getfees_category_A)
                 @foreach ($get_fees_by_parent as $get_fees_by_parents)
@@ -200,16 +200,16 @@
                 @endif
 
 
-                <ul>
+                <!-- <ul>
                     <li>
                         <p>Minimum Transaction is RM1 and Maximum Transaction is RM30,000.</p>
                     </li>
-                </ul>
+                </ul> -->
                 {{ csrf_field() }}
                 <input type="hidden" name="amount" id="amount" value={{ $i + $getorganization->fixed_charges }}>
                 <input type="hidden" name="o_id" id="o_id" value="{{ $getorganization->id }}">
                 <input type="hidden" name="desc" id="desc" value="School_Fees">
-                <div class="float-right">
+                <!-- <div class="float-right">
                     <input type="checkbox" id="TC" name="TC" onchange="
                         if (this.checked)
                             document.getElementById('bayarBtn').disabled = false;
@@ -218,9 +218,9 @@
                         "><label style="margin-left: 5px" for="TC"><a
                             href="https://www.mepsfpx.com.my/FPXMain/termsAndConditions.jsp" target="_blank">I Agree to
                             the FPX Terms And Condition.</a></label>
-                </div>
+                </div> -->
                 <button id="bayarBtn" class="btn btn-primary float-right mt-3 w-100 p-2" style="font-size:18px"
-                    type="submit"  disabled>Teruskan Pembayaran</button>
+                    type="submit">Teruskan Pembayaran Di PayPal</button>
                     <!-- onclick="return checkBank();" -->
                 </form>
             </div>

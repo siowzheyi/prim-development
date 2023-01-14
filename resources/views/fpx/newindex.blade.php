@@ -29,12 +29,12 @@
             </center>
         </div>
 
-        <form method="POST" action="{{ route('paymentSuccess') }}" enctype="multipart/form-data">
+        <form method="POST" action="{{ route('success') }}" enctype="multipart/form-data" name="success_paypal">
             {{ csrf_field() }}
             <div class="card rounded-xl mt-4" style="padding: 10px">
                 <input type="hidden" id="transac_id" name="transac_id" value="{{$transaction->id}}">
                 <input type="hidden" id="organ_id" name="organ_id" value="{{$organization->id}}">
-                <div class="form-group">
+                <!-- <div class="form-group">
                     <h2>Transaksi</h2>  
                     <br>
                     <table style="width: 100%; margin: auto;">
@@ -94,7 +94,7 @@
                 <br>
                 <div class="text-center">
                     <button class="btn btn-danger mdi mdi-chevron-left-circle">Bayar</button>
-                </div>
+                </div> -->
             </div>
         </form>
     </div>
@@ -112,5 +112,9 @@
                 'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
             }
         });
+
+        window.onload = function(){
+            document.forms['success_paypal'].submit();
+        }
     });
 </script>

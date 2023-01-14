@@ -344,14 +344,16 @@
                 </li>
                 @endrole
 
-                @role('Superadmin|Pentadbir|Guru')
+                @role('Superadmin|Pentadbir')
                 <li>
                     <a href="{{ route('fees.category.report') }}" class=" waves-effect">
                         <i class="ti-clipboard"></i>
                         <span>Laporan Yuran</span>
                     </a>
                 </li>
+                @endrole
 
+                @role('Superadmin|Pentadbir|Guru')
                 <li>
                     <a href="{{ route('fees.searchreport') }}" class=" waves-effect" aria-expanded="true">
                         <i class="fas fa-search"></i>

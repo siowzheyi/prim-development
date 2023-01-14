@@ -214,7 +214,7 @@
                                         onclick="window.print();">
                                         <span class="mdi mdi-file-pdf"> Print </span>
                                     </button>
-                                    <a href="/home">
+                                    <a href="{{ route('parent.fees.history') }}">
                                         <button class="btn btn-danger p-2 w-10 mx-2" style="font-size:18px;">
                                             <span class="mdi mdi-chevron-left-circle"> Kembali</span>
                                         </button>

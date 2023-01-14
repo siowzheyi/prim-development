@@ -295,10 +295,13 @@ Route::post('fpxIndex', 'PayController@fpxIndex')->name('fpxIndex');
 Route::post('payment', 'PayController@payment')->name('payment');
 Route::post('paymentSuccess', 'PayController@paymentSuccess')->name('paymentSuccess');
 // created by yuqin for toyyibpay
-Route::get('getBankFPX', 'PayController@getBankFPX')->name('getBankFPX');
-Route::post('paymentStatus2', 'PayController@paymentStatus2')->name('paymentStatus2');
-Route::post('createBill', 'PayController@createBill')->name('createBill');
-Route::post('callback', 'PayController@callback')->name('callback');
+Route::post('pay', 'ToyyibpayController@pay')->name('toyyib.payment');
+Route::get('success', 'ToyyibpayController@success')->name('success');
+Route::get('error', 'ToyyibpayController@error')->name('error');
+// Route::get('getBankFPX', 'PayController@getBankFPX')->name('getBankFPX');
+// Route::post('paymentStatus2', 'PayController@paymentStatus2')->name('paymentStatus2');
+// Route::post('createBill', 'PayController@createBill')->name('createBill');
+// Route::post('callback', 'PayController@callback')->name('callback');
 
 Route::post('paymentStatus', 'PayController@paymentStatus')->name('paymentStatus');
 Route::post('transactionReceipt', 'PayController@transactionReceipt')->name('transactionReceipt');
