@@ -136,7 +136,7 @@
                                                                             <span style="font-size: 18px">{{ $item->name }}</span>
                                                                             <br>
                                                                             <span
-                                                                                style="font-size: 14px;font-weight:100;">RM{{  number_format((float)$item->totalAmount, 2, '.', '') }}
+                                                                                style="font-size: 14px;font-weight:100;">$ {{  number_format((float)$item->totalAmount, 2, '.', '') }}
                                                                                 ({{ $item->quantity }}
                                                                                 kuantiti)</span>
                                                                         </label>
@@ -224,7 +224,7 @@
                                                                                             <label for="option-{{ $item->id }}-{{ $data->studentid }}">
                                                                                                 <span style="font-size: 18px">{{ $item->name }}</span>
                                                                                                 <br>
-                                                                                                <span style="font-size: 14px;font-weight:100;">RM{{  number_format((float)$item->totalAmount, 2, '.', '') }} ({{ $item->quantity }} kuantiti)</span>
+                                                                                                <span style="font-size: 14px;font-weight:100;">$ {{  number_format((float)$item->totalAmount, 2, '.', '') }} ({{ $item->quantity }} kuantiti)</span>
                                                                                             </label>
 
                                                                                             {{-- hidden input checkbox second --}}
@@ -262,7 +262,7 @@
 
                 </div>
                 <div class="col-md-8 p-3">
-                    <h4>Jumlah Yang Perlu Dibayar : RM<span id="pay"></span> </h4>
+                    <h4>Jumlah Yang Perlu Dibayar : $ <span id="pay"></span> </h4>
 
                     {{-- <form method="POST" action="{{ route('fpxIndex') }}" enctype="multipart/form-data"> --}}
 
@@ -318,7 +318,7 @@
     $('#btn-byr').click(function () {
       Swal.fire({
         title: "Adakah anda pasti?",
-        text: "Jumlah yang perlu dibayar RM"+total,
+        text: "Jumlah yang perlu dibayar $ "+total,
         type: "warning",
         showCancelButton: true,
         confirmButtonColor: "#34c38f",

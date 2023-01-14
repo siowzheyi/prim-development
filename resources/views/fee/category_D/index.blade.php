@@ -77,10 +77,10 @@
                                 <th> No. </th>
                                 <th>Nama Butiran</th>
                                 <th>Penerangan</th>
-                                <th>Jumlah Amaun (RM)</th>
+                                <th>Jumlah Amaun ($)</th>
                                 <th>Rujukan</th>
                                 <th>Status</th>
-                                <th>Action</th>
+                                <th>Tindakan</th>
                             </tr>
                         </thead>
                     </table>

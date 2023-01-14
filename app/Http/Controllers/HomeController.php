@@ -36,6 +36,7 @@ class HomeController extends AppBaseController
         $donation = DonationController::getDonationByUserId();
         
         return view("index", compact('organization', 'donation'));
+        // return view("index");
     }
 
     /**

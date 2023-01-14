@@ -101,8 +101,8 @@
                                         <th style="width:3%">Bil.</th>
                                         <th>Item</th>
                                         <th style="width:10%">Kuantiti</th>
-                                        <th style="width:20%">Amaun per item (RM)</th>
-                                        <th style="width:20%">Amaun (RM)</th>
+                                        <th style="width:20%">Amaun per item ($)</th>
+                                        <th style="width:20%">Amaun ($)</th>
                                     </tr>
                                     @foreach ($getfees_categoryA as $item)
                                     <tr>
@@ -154,8 +154,8 @@
                                         <th style="width:3%">Bil.</th>
                                         <th>Item</th>
                                         <th style="width:10%">Kuantiti</th>
-                                        <th style="width:20%">Amaun per item (RM)</th>
-                                        <th style="width:20%">Amaun (RM)</th>
+                                        <th style="width:20%">Amaun per item ($)</th>
+                                        <th style="width:20%">Amaun ($)</th>
                                     </tr>
                                     @foreach ($get_fees->where('studentid', $student->id)->where('category',
                                     $category->category) as $item)
@@ -193,7 +193,7 @@
                                     <tr>
                                         <td></td>
                                         <td colspan="3" style="text-align:right">
-                                            Caj yang dikenakan oleh organisasi (RM)
+                                            Caj yang dikenakan oleh organisasi ($)
                                         </td>
                                         <td style="text-align:center;width:20%">
                                             {{  number_format((float)$get_organization->fixed_charges, 2, '.', '') }}
@@ -202,7 +202,7 @@
                                     <tr>
                                         <td></td>
                                         <td colspan="3" style="text-align:right;font-size:18px;"><b>Jumlah Bayaran
-                                                (RM)</b> </td>
+                                            ($)</b> </td>
                                         <td style="text-align:center; width:20%; font-size:18px">
                                             <b>{{  number_format((float)$get_transaction->amount, 2, '.', '') }}</b>
                                         </td>

@@ -137,9 +137,9 @@ class ExportCollectedYuran implements FromCollection, ShouldAutoSize, WithHeadin
         return [
             'Yuran',
             'Kelas',
-            'Harga (RM)',
+            'Harga ($)',
             'Bilangan Telah Bayar',
-            'Jumlah Kutipan (RM)',
+            'Jumlah Kutipan ($)',
         ];
     }
 }

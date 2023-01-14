@@ -95,9 +95,9 @@
                                     <th>No</th>
                                     <th>Yuran</th>
                                     <th>Kelas</th>
-                                    <th>Harga (RM)</th>
+                                    <th>Harga ($)</th>
                                     <th>Bilangan Telah Bayar</th>
-                                    <th>Jumlah Kutipan (RM)</th>
+                                    <th>Jumlah Kutipan ($)</th>
                                 </tr>
                             </thead>
                         </table>

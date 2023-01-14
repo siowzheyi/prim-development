@@ -48,37 +48,37 @@ class ToyyibpayController extends Controller
         $user = User::find(Auth::id());
         $organization = Organization::find($request->o_id);
         
-        $fpx_buyerEmail      = $user->email;
-        $telno               = $user->telno;
-        $fpx_buyerName       = User::where('id', '=', Auth::id())->pluck('name')->first();
-        $fpx_sellerExOrderNo = $request->desc . "_" . date('YmdHis');
-        $fpx_sellerOrderNo  = "YSPRIM" . date('YmdHis') . rand(10000, 99999);
-        $fpx_txnAmount      = $request->amount;
-        $fpx_txnCurrency      = config('toyyibpay.PAYPAL_CURRENCY');
-        $fpx_checkSum       = "";
-        $fpx_buyerBankId    = $request->bankid;
-        $fpx_buyerBankBranch = "";
-        $fpx_buyerAccNo     = "";
-        $fpx_buyerId        = "";
-        $fpx_makerName      = "";
-        $fpx_productDesc    = $request->desc;
-        $fpx_version        = "6.0";
+        $fpx_buyerEmail         = $user->email;
+        $telno                  = $user->telno;
+        $fpx_buyerName          = User::where('id', '=', Auth::id())->pluck('name')->first();
+        $fpx_sellerExOrderNo    = $request->desc . "_" . date('YmdHis');
+        $fpx_sellerOrderNo      = "YSPRIM" . date('YmdHis') . rand(10000, 99999);
+        $fpx_txnAmount          = $request->amount;
+        $fpx_txnCurrency        = config('toyyibpay.PAYPAL_CURRENCY');
+        $fpx_checkSum           = "";
+        $fpx_buyerBankId        = $request->bankid;
+        $fpx_buyerBankBranch    = "";
+        $fpx_buyerAccNo         = "";
+        $fpx_buyerId            = "";
+        $fpx_makerName          = "";
+        $fpx_productDesc        = $request->desc;
+        $fpx_version            = "6.0";
 
-        $transaction = new Transaction();
-        $transaction->nama          = $fpx_sellerExOrderNo;
-        $transaction->description   = $fpx_sellerOrderNo;
-        $transaction->transac_no    = NULL;
-        $transaction->datetime_created = now();
-        $transaction->amount        = $fpx_txnAmount;
-        $transaction->status        = 'Pending';
-        $transaction->email         = $fpx_buyerEmail;
-        $transaction->telno         = $telno;
-        $transaction->user_id       = $user ? $user->id : null;
-        $transaction->username      = strtoupper($fpx_buyerName);
-        $transaction->fpx_checksum  = NULL;
-        $transaction->user_id       = $user ? $user->id : null;
-        $transaction->username      = strtoupper($fpx_buyerName);
-        $transaction->fpx_checksum  = NULL;
+        $transaction                    = new Transaction();
+        $transaction->nama              = $fpx_sellerExOrderNo;
+        $transaction->description       = $fpx_sellerOrderNo;
+        $transaction->transac_no        = NULL;
+        $transaction->datetime_created  = now();
+        $transaction->amount            = $fpx_txnAmount;
+        $transaction->status            = 'Pending';
+        $transaction->email             = $fpx_buyerEmail;
+        $transaction->telno             = $telno;
+        $transaction->user_id           = $user ? $user->id : null;
+        $transaction->username          = strtoupper($fpx_buyerName);
+        $transaction->fpx_checksum      = NULL;
+        $transaction->user_id           = $user ? $user->id : null;
+        $transaction->username          = strtoupper($fpx_buyerName);
+        $transaction->fpx_checksum      = NULL;
 
         $list_student_fees_id   = $getstudentfees;
         $list_parent_fees_id    = $getparentfees;
@@ -126,30 +126,6 @@ class ToyyibpayController extends Controller
     
                 if($response->isRedirect()){
                     $response->redirect();
-                    // dd($response->getTransactionReference(), $this->counter);
-
-                    // ->with(
-                    //     'response',
-                    //     'transaction',
-                    //     'fpx_sellerExOrderNo',
-                    //     'fpx_sellerOrderNo',
-                    //     'fpx_txnAmount',
-                    //     'fpx_txnCurrency',
-                    //     'fpx_buyerEmail',
-                    //     'fpx_checkSum',
-                    //     'fpx_buyerName',
-                    //     'fpx_buyerBankId',
-                    //     'fpx_buyerBankBranch',
-                    //     'fpx_buyerAccNo',
-                    //     'fpx_buyerId',
-                    //     'fpx_makerName',
-                    //     'fpx_productDesc',
-                    //     'fpx_version',
-                    //     'telno',
-                    //     'getstudentfees',
-                    //     'getparentfees',
-                    //     'organization'
-                    // );
                 }
                 else{
                     return $response->getMessage();

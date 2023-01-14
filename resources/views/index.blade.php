@@ -8,7 +8,18 @@
 @endsection
 
 @section('content')
-    <!-- start page title -->
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card card-primary">
+
+                {{csrf_field()}}
+                <div class="card-body">
+                    <span>Welcome to School Fees Management System</span>
+                </div>
+            </div>
+        </div>
+    </div>
+    <!-- start page title
     <div style="padding-top: 12px" class="row">
         <div class="col-md-12 ">
             <div class=" align-items-center">
@@ -110,7 +121,7 @@
                 </div>
             </div>
         </div>
-    </div>
+    </div> -->
     <!-- end page title -->
 
 
@@ -118,7 +129,7 @@
 
 @section('script')
     <!-- Peity chart-->
-    <script src="{{ URL::asset('assets/libs/peity/peity.min.js') }}"></script>
+    <!-- <script src="{{ URL::asset('assets/libs/peity/peity.min.js') }}"></script>
     <script src="{{ URL::asset('assets/libs/chartist/chartist.min.js') }}"></script>
 
     <script src="{{ URL::asset('assets/libs/moment/moment.min.js') }}"></script>
@@ -128,5 +139,5 @@
 
     {{-- <script src="{{ URL::asset('assets/js/pages/dashboard.init.js')}}"></script> --}}
 
-    @include('dashboard.index')
+    @include('dashboard.index') -->
 @endsection

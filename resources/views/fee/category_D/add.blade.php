@@ -48,10 +48,11 @@
 
                 <div class="form-row">
                     <div class="form-group col-md-12">
-                        <label class="control-label required">Harga (RM)</label>
+                        <label class="control-label required">Harga ($)</label>
                         <input class="form-control input-mask text-left"
                         data-inputmask="'alias': 'numeric', 'groupSeparator': ',', 'digits': 2, 'digitsOptional': false, 'placeholder': '0'"
-                            im-insert="true" name="price" onchange="this.value = Math.abs(this.value);">
+                            im-insert="true" name="price" data-parsley-required-message="Sila masukkan harga"
+                            data-parsley-errors-container=".errorMessagePrice" onchange="this.value = Math.abs(this.value);" required>
                     </div>
                 </div>
 

@@ -64,7 +64,7 @@
                         @php
                         $i += $row3->quantity*$row3->price ;
                         @endphp
-                        <h4 class="float-right">RM {{ number_format($row3->quantity*$row3->price, 2) }} </h4>
+                        <h4 class="float-right">$ {{ number_format($row3->quantity*$row3->price, 2) }} </h4>
                     </div>
                     @endforeach
                 </div>
@@ -111,7 +111,7 @@
                         @php
                         $i += $row3->quantity*$row3->price ;
                         @endphp
-                        <h4 class="float-right">RM {{ number_format($row3->quantity*$row3->price, 2) }} </h4>
+                        <h4 class="float-right">$ {{ number_format($row3->quantity*$row3->price, 2) }} </h4>
                     </div>
                     @endforeach
 
@@ -133,7 +133,7 @@
                         <h5 class=" mb-3">Caj yang dikenakan </h5>
                     </div>
                     <div class="col-6">
-                        <h5 class="float-right mb-3">RM<span id="amount">
+                        <h5 class="float-right mb-3">$<span id="amount">
                                 {{ number_format($getorganization->fixed_charges, 2) }}</span> </h5>
                     </div>
                 </div>
@@ -142,7 +142,7 @@
                         <h4 class=" mb-3">Jumlah Bayaran</h4>
                     </div>
                     <div class="col-6">
-                        <h4 class="float-right mb-3">RM<span id="amount" style="font-size: 22px;">
+                        <h4 class="float-right mb-3">$<span id="amount" style="font-size: 22px;">
                                 {{ number_format($i + $getorganization->fixed_charges, 2) }}</span> </h4>
                     </div>
                 </div>
@@ -202,7 +202,7 @@
 
                 <!-- <ul>
                     <li>
-                        <p>Minimum Transaction is RM1 and Maximum Transaction is RM30,000.</p>
+                        <p>Minimum Transaction is $1 and Maximum Transaction is $30,000.</p>
                     </li>
                 </ul> -->
                 {{ csrf_field() }}
@@ -241,11 +241,11 @@
             return false;
         }
         if (a < 1.00) {
-            alert('Transaction Amount is Lower than the Minimum Limit RM1.00 for B2C');
+            alert('Transaction Amount is Lower than the Minimum Limit $1.00 for B2C');
             return false;
         }
         else if (a > 30000.00) {
-            alert('Transaction Amount Limit Exceeded RM30,000.00 for B2C');
+            alert('Transaction Amount Limit Exceeded $30,000.00 for B2C');
             return false;
         }
     }

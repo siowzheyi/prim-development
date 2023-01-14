@@ -53,15 +53,17 @@
 
                 <div class="form-row">
                     <div class="form-group col-md-6">
-                        <label class="control-label required">Harga (RM)</label>
+                        <label class="control-label required">Harga ($)</label>
                         <input class="form-control input-mask text-left"
                             data-inputmask="'alias': 'numeric', 'groupSeparator': ',', 'digits': 2, 'digitsOptional': false, 'placeholder': '0'"
-                            im-insert="true" name="price">
+                            im-insert="true" name="price" data-parsley-required-message="Sila masukkan harga"
+                            data-parsley-errors-container=".errorMessagePrice" onchange="this.value = Math.abs(this.value);" required>
                         <i>*Harga per kuantiti</i>
                     </div>
                     <div class="form-group col-md-6">
                         <label class="control-label required">Kuantiti</label>
-                        <input type="text" name="quantity" class="form-control quantity text-left"  data-inputmask="'alias': 'numeric'" placeholder="Kuantiti">
+                        <input type="text" name="quantity" class="form-control quantity text-left"  
+                        data-inputmask="'alias': 'numeric'" placeholder="Kuantiti" onchange="this.value = Math.abs(Math.round(this.value));">
                     </div>
 
                 </div>
