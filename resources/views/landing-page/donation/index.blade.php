@@ -84,9 +84,9 @@
                             </div>
                         </div>
                 </div> -->
-                <div class="col-lg-5">
+                <!-- <div class="col-lg-5">
                     <div id="headerPoster" class="row d-flex justify-content-center carousel owl-theme"></div>
-                </div>
+                </div> -->
                 <div class="col-lg-7 align-items-center d-none d-lg-block" style="text-align: right">
                     <img src="{{ URL::asset('assets/landing-page/img/pic-front.png') }}" alt="header right image" style="max-width: 100%;">
                 </div>
