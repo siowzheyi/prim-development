@@ -17,25 +17,6 @@
 <div class="row">
     <div class="col-md-12">
         <div class="card card-primary">
-
-            @if(count($errors) > 0)
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach($errors->all() as $error)
-                    <li>{{$error}}</li>
-                    @endforeach
-                </ul>
-            </div>
-            @endif
-            
-            @if(\Session::has('success'))
-            <div class="alert alert-success">
-                <p>{{ \Session::get('success') }}</p>
-            </div>
-            @endif
-            
-            <div class="flash-message"></div>
-            
             <div class="card-body">
 
                 <div class="form-group">
@@ -63,11 +44,32 @@
                 </div>
 
             </div>
-
+        </div>
+        <div class="card">
+            <div class="card-header">Senarai Pelajar</div>
+            
             <div class="col-md-12">
                 <a style="margin: 19px;" class="btn btn-success"  data-toggle="modal" data-target="#modalByYuran"><i class="fas fa-plus"></i> Export</a>
                 <a style="margin: 1px;" href="#" class="btn btn-success " data-toggle="modal" data-target="#modalByYuran2"> <i class="fa fa-download"></i> Muat Turan PDF</a>
             </div>
+
+            @if(count($errors) > 0)
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach($errors->all() as $error)
+                    <li>{{$error}}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+            
+            @if(\Session::has('success'))
+            <div class="alert alert-success">
+                <p>{{ \Session::get('success') }}</p>
+            </div>
+            @endif
+            
+            <div class="flash-message"></div>
 
             <div class="col-md-12">
                 <div class="card">

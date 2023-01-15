@@ -41,8 +41,14 @@
                                 <h5 style="text-align: center">{{$organization->address}}, {{$organization->postcode}} {{$organization->state}}</h5>
                                 <br>
                                 <br>
-                                <span> Laporan Kutipan Yuran {{$setYuran}} Bagi {{$data[0]->class_name}}</span>
-
+                                @if(isset($data[0]->class_name))
+                                    <span> Laporan Kutipan Yuran {{$setYuran}} Bagi {{$data[0]->class_name}}</span>
+                                @else
+                                    <span> Laporan Kutipan Yuran {{$setYuran}} Bagi Semua Kelas</span>
+                                @endif
+                                <br>
+                                <br>    
+                                <span> Pada {{explode(" ",$start)[0]}} hingga {{explode(" ",$end)[0]}}</span>
                                 <br>
                                 <br>
                                 <table class="table table-bordered table-striped" style=" width:100%; color: black">

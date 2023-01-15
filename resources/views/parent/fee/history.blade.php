@@ -73,35 +73,35 @@
 
   <div class="col-md-12">
     <div class="card">
+      <div class="card-header">Senarai Resit</div>
+
+      @if(count($errors) > 0)
+      <div class="alert alert-danger">
+        <ul>
+          @foreach($errors->all() as $error)
+          <li>{{$error}}</li>
+          @endforeach
+        </ul>
+      </div>
+      @endif
+      @if(\Session::has('success'))
+      <div class="alert alert-success">
+        <p>{{ \Session::get('success') }}</p>
+      </div>
+      @endif
+
+      <div class="flash-message"></div>
       <div class="card-body">
-
-        @if(count($errors) > 0)
-        <div class="alert alert-danger">
-          <ul>
-            @foreach($errors->all() as $error)
-            <li>{{$error}}</li>
-            @endforeach
-          </ul>
-        </div>
-        @endif
-        @if(\Session::has('success'))
-        <div class="alert alert-success">
-          <p>{{ \Session::get('success') }}</p>
-        </div>
-        @endif
-
-        <div class="flash-message"></div>
-
         <div class="table-responsive">
           <table id="feesReceiptDataTable" class="table table-bordered table-striped dt-responsive"
             style="border-collapse: collapse; border-spacing: 0; width: 100%;">
             <thead>
               <tr style="text-align:center">
                 <th> No. </th>
-                <th> No Receipt </th>
+                <th> No Resit </th>
                 <th> Tarikh Pembayaran </th>
                 <th> Jumlah </th>
-                <th> Action </th>
+                <th> Tindakan </th>
               </tr>
             </thead>
           </table>

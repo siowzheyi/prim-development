@@ -8,17 +8,43 @@
 @endsection
 
 @section('content')
-    <div class="row">
-        <div class="col-md-12">
-            <div class="card card-primary">
 
-                {{csrf_field()}}
-                <div class="card-body">
-                    <span>Welcome to School Fees Management System</span>
+    <div class="my-5 pt-5">
+        <div class="container">
+            <div class="row justify-content-center">
+                <div class="col-md-8 col-lg-6 col-xl-5">
+                    <div class="card overflow-hidden">
+                        <div class="bg-primary">
+                            <div class="text-primary text-center p-4">
+                                <a href="/derma" class="logo logo-admin">
+                                    <img src="assets/images/logo/prim-logo2.svg" height="60" alt="logo">
+                                </a>
+                                <h5 class="text-white font-size-20">Selamat Datang!</h5>
+                                <p class="text-white-50">{{$user->name}}</p>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
     </div>
+
+    <!-- <div class="row">
+        <div class="col-md-12">
+            <div class="card mini-stat bg-primary">
+                <div class="card card-primary">
+
+                    {{csrf_field()}}
+                    <div class="card-body">
+                        <div class="float-left mini-stat-img mr-4">
+                            <img src="assets/images/services-icon/donation.png" alt="">
+                        </div>
+                        <span>Welcome, {{$user->name}}</span>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div> -->
     <!-- start page title
     <div style="padding-top: 12px" class="row">
         <div class="col-md-12 ">

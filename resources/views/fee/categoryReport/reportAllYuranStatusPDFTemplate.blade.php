@@ -33,10 +33,10 @@
                     <div class="card-body py-5">
                         <div class="row">
                             <div class="col-12 pt-3">
-                                <center>
-                                    <!-- {{$organization->organization_picture}} -->
-                                    <img src="{{ URL::asset('/organization-picture/'.$organization->organization_picture) }}" height="80" alt="" />
-                                </center>
+                                <!-- <center>
+                                    <img src="assets/images/logo/prim-logo2.svg" height="80" alt="" />
+                                    <img src="app/public/organization-picture/smk2.png" height="80" alt="" />
+                                </center> -->
                                 <h4 style="text-align: center">{{$organization->nama}}</h4>
                                 <h5 style="text-align: center">{{$organization->address}}, {{$organization->postcode}} {{$organization->state}}</h5>
                                 <br>

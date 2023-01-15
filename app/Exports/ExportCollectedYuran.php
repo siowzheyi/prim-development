@@ -10,11 +10,13 @@ use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
 class ExportCollectedYuran implements FromCollection, ShouldAutoSize, WithHeadings
 {
-    public function __construct($yuran, $class, $oid)
+    public function __construct($yuran, $class, $oid, $start, $end)
     {
         $this->yuran = $yuran;
         $this->class = $class;
         $this->oid   = $oid;
+        $this->start = $start;
+        $this->end   = $end;
     }
 
     /**
@@ -23,55 +25,65 @@ class ExportCollectedYuran implements FromCollection, ShouldAutoSize, WithHeadin
     public function collection()
     {
         if($this->class == "ALL" && $this->yuran == "ALL"){
-            $data = DB::table('fees_new as fn')
-            ->leftJoin('student_fees_new as sfn', 'sfn.fees_id', '=', 'fn.id')
-            ->leftJoin('fees_new_organization_user as fnou', 'fnou.fees_new_id', '=', 'fn.id')
-            ->leftJoin('organization_user as ou', 'ou.id', '=', 'fnou.organization_user_id')
-            ->leftJoin('organization_user_student as ous', 'ous.organization_user_id', '=', 'ou.id')
-            ->leftJoin('students as s', 's.id', '=', 'ous.student_id')
-            ->where([
-                ['fn.status', 1],
-                ['fnou.status', 'Paid'],
-                ['fn.organization_id', $this->oid]
-            ])
-            ->orWhere([
-                ['fn.status', 1],
-                ['sfn.status', 'Paid'],
-                ['fn.organization_id', $this->oid]
-            ])
-            ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 'fn.organization_id as class_name', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw('fn.totalAmount * count("s.id") as sum'))
+            $data = DB::table('transactions as t')
+            ->leftJoin('fees_new_organization_user as fnou', 'fnou.transaction_id', '=', 't.id')
+            ->leftJoin('fees_new as fn', 'fn.id', '=', 'fnou.fees_new_id')
+            ->where('t.status', 'Success')
+            ->where('fn.organization_id', $this->oid)
+            ->where('fnou.status', 'Paid')
+            ->whereBetween('t.datetime_created', [$this->start, $this->end])
+            ->whereNotNull('fn.name')
+            ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 't.status', 'fn.totalAmount', DB::raw('count("fnou.organization_user_id") as total'), DB::raw('fn.totalAmount * count("fnou.organization_user_id") as sum'))
             ->groupBy('fn.id')
-            ->orderBy('fn.category')
             ->orderBy('fn.name')
             ->get();
+
+            $data1 = DB::table('transactions as t')
+            ->leftJoin('fees_transactions_new as ftn', 'ftn.transactions_id', '=', 't.id')
+            ->leftJoin('student_fees_new as sfn', 'sfn.id', '=', 'ftn.student_fees_id')
+            ->leftJoin('fees_new as fn', 'fn.id', '=', 'sfn.fees_id')
+            ->where('t.status', 'Success')
+            ->where('fn.organization_id', $this->oid)
+            ->where('sfn.status', 'Paid')
+            ->whereBetween('t.datetime_created', [$this->start, $this->end])
+            ->whereNotNull('fn.name')
+            ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 't.status', 'fn.totalAmount', DB::raw('count("fn.class_student_id") as total'), DB::raw('fn.totalAmount * count("fn.class_student_id") as sum'))
+            ->groupBy('fn.id')
+            ->orderBy('fn.name')
+            ->get();
+
+            $data = array_merge($data->toArray(), $data1->toArray());
         }
         elseif($this->class == "ALL" && $this->yuran != "ALL"){
             if($this->yuran == "Kategory A")
             {
-                $data = DB::table('fees_new as fn')
-                ->leftJoin('fees_new_organization_user as fnou', 'fnou.fees_new_id', '=', 'fn.id')
-                ->leftJoin('organization_user as ou', 'ou.id', '=', 'fnou.organization_user_id')
-                ->leftJoin('organization_user_student as ous', 'ous.organization_user_id', '=', 'ou.id')
-                ->leftJoin('students as s', 's.id', '=', 'ous.student_id')
-                ->where([
-                    ['fn.category', $this->yuran],
-                    ['fn.status', 1],
-                    ['fnou.status', 'Paid']
-                ])
-                ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 'fn.organization_id as class_name', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw('fn.totalAmount * count("s.id") as sum'))
+                $data = DB::table('transactions as t')
+                ->leftJoin('fees_new_organization_user as fnou', 'fnou.transaction_id', '=', 't.id')
+                ->leftJoin('fees_new as fn', 'fn.id', '=', 'fnou.fees_new_id')
+                ->where('t.status', 'Success')
+                ->where('fn.organization_id', $this->oid)
+                ->where('fnou.status', 'Paid')
+                ->where('fn.category', $this->yuran)
+                ->whereBetween('t.datetime_created', [$this->start, $this->end])
+                ->whereNotNull('fn.name')
+                ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("fnou.organization_user_id") as total'), DB::raw('fn.totalAmount * count("fnou.organization_user_id") as sum'))
+                ->groupBy('fn.id')
                 ->orderBy('fn.name')
                 ->get();
             }
             else
-            {
-                $data = DB::table('fees_new as fn')
-                ->leftJoin('student_fees_new as sfn', 'sfn.fees_id', '=', 'fn.id')
-                ->where([
-                    ['fn.category', $this->yuran],
-                    ['fn.status', 1],
-                    ['sfn.status', 'Paid'],
-                ])
-                ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 'fn.organization_id as class_name', 'fn.totalAmount', DB::raw('count("s.id") as total'), DB::raw('fn.totalAmount * count("s.id") as sum'))
+            {                   
+                $data = DB::table('transactions as t')
+                ->leftJoin('fees_transactions_new as ftn', 'ftn.transactions_id', '=', 't.id')
+                ->leftJoin('student_fees_new as sfn', 'sfn.id', '=', 'ftn.student_fees_id')
+                ->leftJoin('fees_new as fn', 'fn.id', '=', 'sfn.fees_id')
+                ->where('t.status', 'Success')
+                ->where('fn.organization_id', $oid)
+                ->where('sfn.status', 'Paid')
+                ->where('fn.category', $this->yuran)
+                ->whereBetween('t.datetime_created', [$this->start, $this->end])
+                ->whereNotNull('fn.name')
+                ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("fn.class_student_id") as total'), DB::raw('fn.totalAmount * count("fn.class_student_id") as sum'))
                 ->groupBy('fn.id')
                 ->orderBy('fn.name')
                 ->get();
@@ -80,44 +92,52 @@ class ExportCollectedYuran implements FromCollection, ShouldAutoSize, WithHeadin
         elseif($this->class != "ALL" && $this->yuran != "ALL"){
             if($this->yuran == "Kategory A")
             {
-                $data = DB::table('fees_new as fn')
-                ->leftJoin('fees_new_organization_user as fnou', 'fnou.fees_new_id', '=', 'fn.id')
+                $data = DB::table('transactions as t')
+                ->leftJoin('fees_new_organization_user as fnou', 'fnou.transaction_id', '=', 't.id')
+                ->leftJoin('fees_new as fn', 'fn.id', '=', 'fnou.fees_new_id')
                 ->leftJoin('organization_user as ou', 'ou.id', '=', 'fnou.organization_user_id')
                 ->leftJoin('organization_user_student as ous', 'ous.organization_user_id', '=', 'ou.id')
                 ->leftJoin('students as s', 's.id', '=', 'ous.student_id')
                 ->leftJoin('class_student as cs', 'cs.student_id', '=', 's.id')
                 ->leftJoin('class_organization as co', 'co.id', '=', 'cs.organclass_id')
                 ->leftJoin('classes as c', 'c.id', '=', 'co.class_id')
-                ->where([
-                    ['fn.category', $this->yuran],
-                    ['fn.status', 1],
-                    ['c.id', $this->class],
-                    ['fnou.status', 'Paid']
-                ])
-                ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("cs.id") as total'), DB::raw('fn.totalAmount * count("s.id") as sum'))
+                ->where('t.status', 'Success')
+                ->where('fn.organization_id', $this->oid)
+                ->where('fnou.status', 'Paid')
+                ->where('fn.category', $this->yuran)
+                ->where('c.id', $this->class)
+                ->whereBetween('t.datetime_created', [$this->start, $this->end])
+                ->whereNotNull('fn.name')
+                ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("fnou.organization_user_id") as total'), DB::raw('fn.totalAmount * count("fnou.organization_user_id") as sum'))
+                ->groupBy('fn.id')
                 ->orderBy('c.nama')
                 ->orderBy('fn.name')
                 ->get();
             }
             else
             {
-                $data = DB::table('fees_new as fn')
-                ->leftJoin('student_fees_new as sfn', 'sfn.fees_id', '=', 'fn.id')
+                $data = DB::table('transactions as t')
+                ->leftJoin('fees_transactions_new as ftn', 'ftn.transactions_id', '=', 't.id')
+                ->leftJoin('student_fees_new as sfn', 'sfn.id', '=', 'ftn.student_fees_id')
+                ->leftJoin('fees_new as fn', 'fn.id', '=', 'sfn.fees_id')
                 ->leftJoin('class_student as cs', 'cs.id', '=', 'sfn.class_student_id')
                 ->leftJoin('class_organization as co', 'co.id', '=', 'cs.organclass_id')
                 ->leftJoin('classes as c', 'c.id', '=', 'co.class_id')
-                ->where([
-                    ['fn.category', $this->yuran],
-                    ['fn.status', 1],
-                    ['c.id', $this->class],
-                    ['sfn.status', 'Paid'],
-                ])
-                ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("cs.id") as total'), DB::raw('fn.totalAmount * count("s.id") as sum'))
+                ->where('t.status', 'Success')
+                ->where('fn.organization_id', $this->oid)
+                ->where('sfn.status', 'Paid')
+                ->where('c.id', $this->class)
+                ->where('fn.category', $this->yuran)
+                ->whereBetween('t.datetime_created', [$this->start, $this->end])
+                ->whereNotNull('fn.name')
+                ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("fn.class_student_id") as total'), DB::raw('fn.totalAmount * count("fn.class_student_id") as sum'))
                 ->groupBy('fn.id')
                 ->orderBy('c.nama')
                 ->orderBy('fn.name')
                 ->get();
             }
+
+            // dd($data);
         }
 
         foreach($data as $list){
@@ -134,12 +154,14 @@ class ExportCollectedYuran implements FromCollection, ShouldAutoSize, WithHeadin
 
     public function headings(): array
     {
-        return [
-            'Yuran',
+        return 
+        [
+            ['Laporan Permintaan Pelajar pada ' . explode(" ",$this->start)[0] .' hingga '. explode(" ",$this->end)[0]],
+            ['Yuran',
             'Kelas',
             'Harga ($)',
             'Bilangan Telah Bayar',
-            'Jumlah Kutipan ($)',
+            'Jumlah Kutipan ($)',],
         ];
     }
 }

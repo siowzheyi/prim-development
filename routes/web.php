@@ -119,8 +119,8 @@ Route::group(['prefix' => 'fees'], function () {
 
     Route::get('/A', 'FeesController@CategoryA')->name('fees.A');
     Route::get('/add/A', 'FeesController@createCategoryA')->name('fees.createA');
-    Route::post('/store/A', 'FeesController@StoreCategoryA')->name('fees.storeA');
-    Route::post('/update/A', 'FeesController@updateCategoryA')->name('fees.updateA');
+    Route::post('/store', 'FeesController@StoreCategory')->name('fees.storeFee');
+    Route::post('/update', 'FeesController@updateCategory')->name('fees.updateFee');
 
     Route::get('/B', 'FeesController@CategoryB')->name('fees.B');
     Route::get('/add/B', 'FeesController@createCategoryB')->name('fees.createB');
@@ -156,6 +156,7 @@ Route::group(['prefix' => 'fees'], function () {
 
     Route::get('/category/report', 'FeesController@cetegoryReportIndex')->name('fees.category.report');
     Route::post('/list-fetchYuran', 'FeesController@fetchYuran')->name('fees.fetchYuran');
+    Route::post('/list-fetchInactiveYuranByCategory', 'FeesController@fetchInactiveYuranByCategory')->name('fees.fetchInactiveYuranByCategory');
 
     Route::post('/list-fetchYuranbyOrganId', 'FeesController@fetchYuranByOrganizationId')->name('fees.fetchYuranByOrganId');
     Route::post('/list-fetchCategorybyOrganId', 'FeesController@fetchCategoryByOrganizationId')->name('fees.fetchCategorybyOrganId');
@@ -228,6 +229,7 @@ Route::group(['middleware' => ['auth'], 'prefix' => 'koperasi', 'namespace' => '
         Route::get('/Confirm/delete/{id}','AdminOrderCooperativeController@notConfirm')->name('koperasi.notConfirm');
     });
 });
+
 
 Route::group(['middleware' => ['auth'], 'prefix' => 'merchant', 'namespace' => 'Merchant'], function() {
     Route::group(['prefix' => 'regular'], function() {

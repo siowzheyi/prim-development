@@ -43,31 +43,13 @@
                         <option value="0" disabled selected>Pilih Yuran</option>
                     </select>
                 </div>
-
-                <!-- <div class="form-row">
-                    <div class="form-group col-md-12">
-                        <label>Tempoh</label>
-
-                        <div class="input-daterange input-group" id="date">
-                            <input type="text" class="form-control" name="date_started" placeholder="Tarikh Awal"
-                                autocomplete="off" data-parsley-required-message="Sila masukkan tarikh awal"
-                                data-parsley-errors-container=".errorMessage" required />
-                            <input type="text" class="form-control" name="date_end" placeholder="Tarikh Akhir"
-                                autocomplete="off" data-parsley-required-message="Sila masukkan tarikh akhir"
-                                data-parsley-errors-container=".errorMessage" required />
-                        </div>
-                        <div class="errorMessage"></div>
-                        <div class="errorMessage"></div>
-                    </div>
-                </div> -->
-
             </div>
         </div>
     </div>
 
     <div class="col-md-12">
         <div class="card">
-
+            <div class="card-header">Senarai Pelajar</div>
             <div>
                 <a style="margin: 19px;" class="btn btn-success"  data-toggle="modal" data-target="#modalByYuran"><i class="fas fa-plus"></i> Export</a>
                 <a style="margin: 1px;" href="#" class="btn btn-success " data-toggle="modal" data-target="#modalByYuran2"> <i class="fa fa-download"></i> Muat Turan PDF</a>
@@ -223,17 +205,24 @@
                         </select>
                     </div>
 
-                    <div id="dkelas1" class="form-group">
+                    <!-- <div id="dkelas1" class="form-group">
                         <label class="control-label required"> Kelas </label>
                         <select name="classesUpdate" id="classesUpdate" class="form-control classes">
                             <option value="0" disabled selected>Pilih Kelas</option>
                         </select>
-                    </div>
+                    </div> -->
 
                     <div class="form-group">
                         <label class="control-label required">Kategori</label>
-                        <select name="yuranUpdate" id="yuranUpdate" class="form-control">
+                        <select name="catUpdate" id="catUpdate" class="form-control">
                             <option value="0" disabled selected>Pilih Kategori</option>
+                        </select>
+                    </div>
+
+                    <div class="form-group">
+                        <label class="control-label required">Yuran</label>
+                        <select name="yuranUpdate" id="yuranUpdate" class="form-control">
+                            <option value="0" disabled selected>Pilih Yuran</option>
                         </select>
                     </div>
 
@@ -279,6 +268,25 @@
             })
         }
 
+        function fetchCat(organizationid = '', yuranId = ''){
+            var _token = $('input[name="_token"]').val();
+            $.ajax({
+                url:"{{ route('fees.fetchCategorybyOrganId') }}",
+                method:"POST",
+                data:{ oid:organizationid,
+                    classid: "ALL",
+                        _token:_token },
+                success:function(result)
+                {
+                    $(yuranId).empty();
+                    $(yuranId).append("<option value='' disabled selected> Pilih Kategori</option>");
+                    jQuery.each(result.success, function(key, value){
+                        $(yuranId).append("<option value='"+ value.category +"'>" + value.category + "</option>");
+                    });
+                }
+            })
+        }
+
         $('#organExport').change(function() {
             var organizationid    = $("#organExport").val();
             var _token            = $('input[name="_token"]').val();
@@ -289,6 +297,12 @@
             var organizationid    = $("#organPDF").val();
             var _token            = $('input[name="_token"]').val();
             fetchClass(organizationid, '#yuranPDF');
+        });
+
+        $('#organUpdate').change(function() {
+            var organizationid    = $("#organUpdate").val();
+            var _token            = $('input[name="_token"]').val();
+            fetchCat(organizationid, '#catUpdate');
         });
         
         if($("#organization").val() == ""){
@@ -398,37 +412,33 @@
             }
         });
 
-        $('#classesUpdate').change(function(){
+        $('#catUpdate').change(function(){
             if($(this).val() != '')
             {
-                var classid   = $("#classesUpdate option:selected").val();
+                var catname   = $("#catUpdate option:selected").val();
                 var _token    = $('input[name="_token"]').val();
-
+                // var count     = 0;
                 $.ajax({
-                    url:"{{ route('fees.fetchYuran') }}",
+                    url:"{{ route('fees.fetchInactiveYuranByCategory') }}",
                     method:"POST",
                     data:{ 
-                        classid: classid,
+                        catname: catname,
                         oid : $("#organUpdate").val(),
                         _token: _token 
                     },
                     success:function(result)
                     {
                         $('#yuranUpdate').empty();
-                        $('#yuranUpdate').append("<option value='' disabled selected> Pilih Kategori</option>");
+                        $('#yuranUpdate').append("<option value='' disabled selected> Pilih Yuran</option>");
+                        if((result.success).length > 0){
+                            $('#yuranUpdate').append("<option value='ALL'> Semua</option>");
+                        }
                         jQuery.each(result.success, function(key, value){
                             $('#yuranUpdate').append("<option value='"+ value.id +"'>" + value.name + "</option>");
                         });
                     }
                 })
             }
-        });
-
-        $('#organUpdate').change(function() {
-            
-            var organizationid    = $("#organUpdate").val();
-            var _token            = $('input[name="_token"]').val();
-            fetch_data1(organizationid);
         });
 
         function fetch_data1(oid = ''){ 

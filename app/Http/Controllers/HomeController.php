@@ -34,8 +34,9 @@ class HomeController extends AppBaseController
         // return redirect(route('profile.resetPassword'));
         $organization = OrganizationController::getOrganizationByUserId();
         $donation = DonationController::getDonationByUserId();
+        $user = DB::table('users')->where('id', Auth::user()->id)->first();
         
-        return view("index", compact('organization', 'donation'));
+        return view("index", compact('user', 'organization', 'donation'));
         // return view("index");
     }
 

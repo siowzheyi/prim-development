@@ -1,6 +1,7 @@
 @extends('layouts.master')
 @include('layouts.datatable')
 @section('css')
+<link href="{{ URL::asset('assets/css/required-asterick.css')}}" rel="stylesheet">
 <link href="{{ URL::asset('assets/libs/chartist/chartist.min.css')}}" rel="stylesheet" type="text/css" />
 @endsection
 
@@ -18,24 +19,6 @@
     <div class="col-md-12">
         <div class="card card-primary">
             <input type="hidden" id="role" value="{{$role}}">
-            @if(count($errors) > 0)
-            <div class="alert alert-danger">
-                <ul>
-                    @foreach($errors->all() as $error)
-                    <li>{{$error}}</li>
-                    @endforeach
-                </ul>
-            </div>
-            @endif
-            
-            @if(\Session::has('success'))
-            <div class="alert alert-success">
-                <p>{{ \Session::get('success') }}</p>
-            </div>
-            @endif
-            
-            <div class="flash-message"></div>
-            
             <div class="card-body">
 
                 <div class="form-group">
@@ -79,11 +62,32 @@
                     </div>
                 </div>
             </div>
+        </div>
+        <div class="card">
+            <div class="card-header">Senarai Yuran</div>
 
             <div class="col-md-12">
                 <a style="margin: 19px;" class="btn btn-success"  data-toggle="modal" data-target="#modalByYuran"><i class="fas fa-plus"></i> Export</a>
                 <a style="margin: 1px;" href="#" class="btn btn-success " data-toggle="modal" data-target="#modalByYuran2"> <i class="fa fa-download"></i> Muat Turan PDF</a>
             </div>
+
+            @if(count($errors) > 0)
+            <div class="alert alert-danger">
+                <ul>
+                    @foreach($errors->all() as $error)
+                    <li>{{$error}}</li>
+                    @endforeach
+                </ul>
+            </div>
+            @endif
+            
+            @if(\Session::has('success'))
+            <div class="alert alert-success">
+                <p>{{ \Session::get('success') }}</p>
+            </div>
+            @endif
+            
+            <div class="flash-message"></div>
 
             <div class="col-md-12">
                 <div class="card">
@@ -123,7 +127,7 @@
                 <div class="modal-body">
                     {{ csrf_field() }}
                     <div class="form-group">
-                        <label>Organisasi</label>
+                        <label class="control-label required">Organisasi</label>
                         <select name="organExport" id="organExport" class="form-control organ">
                             <option value="" disabled selected>Pilih Organisasi</option>
                             @foreach($organization as $row)
@@ -133,18 +137,36 @@
                     </div>
 
                     <div id="dkelas1" class="form-group">
-                        <label> Kelas </label>
+                        <label class="control-label required"> Kelas </label>
                         <select name="classesExport" id="classesExport" class="form-control classes">
                             <option value="0" disabled selected>Pilih Kelas</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label>Kategori</label>
+                        <label class="control-label required">Kategori</label>
                         <select name="yuranExport" id="yuranExport" class="form-control">
                             <option value="0" disabled selected>Pilih Kategori</option>
                         </select>
                     </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label class="control-label required">Tempoh</label>
+
+                            <div class="input-daterange input-group" id="dateExport">
+                                <input type="date" class="form-control" name="startExport" id="startExport" placeholder="Tarikh Awal"
+                                    autocomplete="off" data-parsley-required-message="Sila masukkan tarikh awal"
+                                    data-parsley-errors-container=".errorMessage" onclick="this.showPicker()" required />
+                                <input type="date" class="form-control" name="endExport" id="endExport" placeholder="Tarikh Akhir"
+                                    autocomplete="off" data-parsley-required-message="Sila masukkan tarikh akhir"
+                                    data-parsley-errors-container=".errorMessage" onclick="this.showPicker()" required />
+                            </div>
+                            <div class="errorMessage"></div>
+                            <div class="errorMessage"></div>
+                        </div>
+                    </div>
+
                     <div class="modal-footer">
                         <button id="buttonExport" type="submit" class="btn btn-primary">Export</button>
                     </div>
@@ -169,7 +191,7 @@
                 <div class="modal-body">
                     {{ csrf_field() }}
                     <div class="form-group">
-                        <label>Organisasi</label>
+                        <label class="control-label required">Organisasi</label>
                         <select name="organPDF" id="organPDF" class="form-control organ">
                             <option value="" disabled selected>Pilih Organisasi</option>
                             @foreach($organization as $row)
@@ -179,17 +201,34 @@
                     </div>
 
                     <div id="dkelas2" class="form-group">
-                        <label> Kelas </label>
+                        <label class="control-label required"> Kelas </label>
                         <select name="classesPDF" id="classesPDF" class="form-control classes">
                             <option value="0" disabled selected>Pilih Kelas</option>
                         </select>
                     </div>
 
                     <div class="form-group">
-                        <label>Kategori</label>
+                        <label class="control-label required">Kategori</label>
                         <select name="yuranPDF" id="yuranPDF" class="form-control">
                             <option value="0" disabled selected>Pilih Kategori</option>
                         </select>
+                    </div>
+
+                    <div class="form-row">
+                        <div class="form-group col-md-12">
+                            <label class="control-label required">Tempoh</label>
+
+                            <div class="input-daterange input-group" id="datePDF">
+                                <input type="date" class="form-control" name="startPDF" id="startPDF" placeholder="Tarikh Awal"
+                                    autocomplete="off" data-parsley-required-message="Sila masukkan tarikh awal"
+                                    data-parsley-errors-container=".errorMessage" onclick="this.showPicker()" required />
+                                <input type="date" class="form-control" name="endPDF" id="endPDF" placeholder="Tarikh Akhir"
+                                    autocomplete="off" data-parsley-required-message="Sila masukkan tarikh akhir"
+                                    data-parsley-errors-container=".errorMessage" onclick="this.showPicker()" required />
+                            </div>
+                            <div class="errorMessage"></div>
+                            <div class="errorMessage"></div>
+                        </div>
                     </div>
 
                     <div class="modal-footer">
@@ -217,16 +256,40 @@
 <script>
     $(document).ready(function(){
 
-        $('.yearhide').hide();
-        $('.cbhide').hide();
-
         $('#date').datepicker({
             toggleActive: true,
             todayHighlight:true,
             format: 'yyyy-mm-dd',
+            // endDate: '0d',
             orientation: 'bottom'
         });
 
+        endPDF.value = startPDF.value = new Date().toISOString().split("T")[0];
+        endExport.value = startExport.value = new Date().toISOString().split("T")[0];
+
+        $('#startPDF').change(function() {
+            if (startPDF.value > endPDF.value) {
+                endPDF.value = startPDF.value;
+            }
+        });
+
+        $('#endPDF').change(function() {
+            if (startPDF.value > endPDF.value) {
+                startPDF.value = endPDF.value;
+            }
+        });
+
+        $('#startExport').change(function() {
+            if (startExport.value > endExport.value) {
+                endExport.value = startExport.value;
+            }
+        });
+
+        $('#endExport').change(function() {
+            if (startExport.value > endExport.value) {
+                startExport.value = endExport.value;
+            }
+        });
 
         $("#organPDF").prop("selectedIndex", 1).trigger('change');
         $("#organExport").prop("selectedIndex", 1).trigger('change');
@@ -258,7 +321,7 @@
             
                 console.log(classid);
                 $.ajax({
-                    url:"{{ route('fees.fetchYuran') }}",
+                    url:"{{ route('fees.fetchCategorybyOrganId') }}",
                     method:"POST",
                     data:{ 
                         classid: classid,
@@ -287,7 +350,7 @@
             
                 console.log(classid);
                 $.ajax({
-                    url:"{{ route('fees.fetchYuranByOrganId') }}",
+                    url:"{{ route('fees.fetchCategorybyOrganId') }}",
                     method:"POST",
                     data:{ 
                         classid: classid,
@@ -380,9 +443,24 @@
                 fetch_data($("#organization").val());
             }
         });
+
+        $('#fees').change(function(){
+            $('#date_started').val("");
+            $('#date_end').val(""); 
+        });
+
+        $('#yuranExport').change(function(){
+            $('#startExport').val("");
+            $('#endExport').val(""); 
+        });
         
+        $('#yuranPDF').change(function(){
+            $('#startPDF').val("");
+            $('#endPDF').val(""); 
+        });
+
         $('#date_end').change(function(){
-            if($('#fees').val() != 0 && ('#date_started').val != "" && ('#date_end').val != ""){
+            if($('#fees').val() != 0 && $('#date_started').val != "" && $('#date_end').val != ""){
                 $('#yuranTable').DataTable().destroy();
                 var yuranTable = $('#yuranTable').DataTable({
                 ordering: true,

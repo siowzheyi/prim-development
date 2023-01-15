@@ -29,10 +29,11 @@
             </ul>
         </div>
         @endif
-        <form class="form-validation" method="POST" action="{{ route('fees.updateC') }}" enctype="multipart/form-data">
+        <form class="form-validation" method="POST" action="{{ route('fees.updateFee') }}" enctype="multipart/form-data">
 
             @csrf
             <div class="card-body">
+                <input type="hidden" name="categoryFee" value="C">
                 <input type="text" name="id" value="{{$selectedFee->id}}" hidden>
                 <div class="form-group">
                     <label class="control-label required">Nama Organisasi</label>
