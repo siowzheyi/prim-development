@@ -181,6 +181,7 @@ class ToyyibpayController extends Controller
                 ->leftJoin('fees_new_organization_user as fnou', 'fnou.fees_new_id', '=', 'fn.id')
                 ->leftJoin('fees_transactions_new as ftn', 'ftn.student_fees_id', '=', 'sfn.id')
                 ->where('ftn.transactions_id', $id)
+                ->where('fn.status', 1)
                 ->orWhere('fnou.transaction_id', $id)
                 ->value('fn.organization_id');
 
@@ -192,9 +193,11 @@ class ToyyibpayController extends Controller
                 // update debt status for student and parent
                 $list_student_fees_id = DB::table('student_fees_new')
                         ->join('fees_transactions_new', 'fees_transactions_new.student_fees_id', '=', 'student_fees_new.id')
+                        ->join('fees_new', 'fees_new.id', '=', 'student_fees_new.fees_id')
                         ->join('transactions', 'transactions.id', '=', 'fees_transactions_new.transactions_id')
                         ->select('student_fees_new.id as student_fees_id', 'student_fees_new.class_student_id')
                         ->where('transactions.id', $transaction->id)
+                        ->where('fees_new.status', 1)
                         ->get();
 
                 $list_parent_fees_id  = DB::table('fees_new')
@@ -202,12 +205,14 @@ class ToyyibpayController extends Controller
                     ->join('organization_user', 'organization_user.id', '=', 'fees_new_organization_user.organization_user_id')
                     ->select('fees_new_organization_user.*')
                     ->orderBy('fees_new.category')
+                    ->where('fees_new.status', 1)
                     ->where('organization_user.user_id', $transaction->user_id)
                     ->where('organization_user.role_id', 6)
                     ->where('organization_user.status', 1)
                     ->where('fees_new_organization_user.transaction_id', $transaction->id)
                     ->get();
 
+                    
                 for ($i = 0; $i < count($list_student_fees_id); $i++) {
 
                     // ************************* update student fees status fees by transactions *************************
@@ -248,10 +253,12 @@ class ToyyibpayController extends Controller
                         ]);
 
                     // ************************* check the parent if have still debt *************************
-                    if ($i == count($list_student_fees_id) - 1)
+                    if ($i == count($list_parent_fees_id) - 1)
                     {
                         $check_debt = DB::table('organization_user')
                             ->join('fees_new_organization_user', 'fees_new_organization_user.organization_user_id', '=', 'organization_user.id')
+                            ->join('fees_new', 'fees_new.id', '=', 'fees_new_organization_user.fees_new_id')
+                            ->where('fees_new.status', 1)
                             ->where('organization_user.user_id', $transaction->user_id)
                             ->where('organization_user.role_id', 6)
                             ->where('organization_user.status', 1)
@@ -269,6 +276,7 @@ class ToyyibpayController extends Controller
                         }
                     }
                 }
+                
 
                 // details students by transactions 
                 $get_student = DB::table('students')

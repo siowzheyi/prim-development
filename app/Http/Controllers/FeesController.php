@@ -18,13 +18,14 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\View;
+use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Session;
 use Psy\Command\WhereamiCommand;
 use Yajra\DataTables\DataTables;
 use Maatwebsite\Excel\Facades\Excel;
 use Symfony\Component\VarDumper\Cloner\Data;
 use PDF;
-
+use App\Mail\NotifyFee;
 
 class FeesController extends AppBaseController
 {
@@ -200,6 +201,45 @@ class FeesController extends AppBaseController
         }
     }
 
+    public function sendEmail($id, $category){
+        
+        if($category == "A"){
+            $arrayRecipientEmail = DB::table('users')
+            ->join('organization_user', 'organization_user.user_id', '=', 'users.id')
+            ->join('fees_new_organization_user as fnou', 'fnou.organization_user_id', '=', 'organization_user.id')
+            ->join('fees_new', 'fees_new.id', '=', 'fnou.fees_new_id')
+            ->where('fees_new.status', 1)
+            ->where('fees_new.id', $id)
+            ->select('users.email', 'fees_new.end_date', 'fees_new.name')
+            ->distinct()
+            ->get();
+        }
+        else{
+            $arrayRecipientEmail = DB::table('users')
+            ->join('organization_user', 'organization_user.user_id', '=', 'users.id')
+            ->join('organization_user_student as ous', 'ous.organization_user_id', '=', 'organization_user.id')
+            ->join('class_student as cs', 'cs.student_id', '=', 'ous.student_id')
+            ->join('student_fees_new as sfn', 'sfn.class_student_id', '=', 'cs.id')
+            ->join('fees_new', 'fees_new.id', '=', 'sfn.fees_id')
+            ->where('fees_new.status', 1)
+            ->where('fees_new.id', $id)
+            ->select('users.email', 'fees_new.end_date', 'fees_new.name')
+            ->distinct()
+            ->get();
+        }
+        // dd($arrayRecipientEmail);
+
+        if (isset($arrayRecipientEmail)) {
+            foreach ($arrayRecipientEmail as $email) {
+                Mail::to($email->email)->send(new NotifyFee($email->name, $email->end_date));
+
+                if (Mail::failures()) {
+                    return response()->Fail('Sorry! Please try again latter');
+                }
+            }
+        } 
+    }
+
     public function fetchYear(Request $request)
     {
         $oid = $request->get('oid');
@@ -371,7 +411,8 @@ class FeesController extends AppBaseController
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory C'],
                 ['class_student.status', 1],
-                ['fees_new.status', 1]
+                ['fees_new.status', 1],
+                ['student_fees_new.status', 'Debt']
             ])
             ->groupBy('students.id')
             ->get());
@@ -402,7 +443,8 @@ class FeesController extends AppBaseController
                 ['class_organization.organization_id', $oid],
                 ['fees_new.category', 'Kategory D'],
                 ['class_student.status', 1],
-                ['fees_new.status', 1]
+                ['fees_new.status', 1],
+                ['student_fees_new.status', 'Debt']
             ])
             ->groupBy('students.id')
             ->get());
@@ -728,6 +770,13 @@ class FeesController extends AppBaseController
                     }
     
                     if($updateResult){
+                        if($fees->category == "Kategory A"){
+                            $this->sendEmail($fees->id, "A");
+                        }
+                        else{
+                            $this->sendEmail($fees->id, "B");
+                        }
+                        
                         return redirect('/fees/category/report')->with('success', 'Yuran telah berjaya dikemaskini');
                     }
                 }
@@ -943,6 +992,7 @@ class FeesController extends AppBaseController
                     ]);
                 }
 
+                $this->sendEmail($fee->id, "A");
                 return redirect('/fees/A')->with('success', 'Yuran Kategori A telah berjaya dimasukkan');
             }
         }
@@ -1017,7 +1067,7 @@ class FeesController extends AppBaseController
             }
         }
         else{
-            dd(123);
+            
         }
     }
 
@@ -1641,8 +1691,10 @@ class FeesController extends AppBaseController
             }
 
             if ($category == "Kategory B") {
+                $this->sendEmail($fees, "B");
                 return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dimasukkan');
             } else {
+                $this->sendEmail($fees, "C");
                 return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dimasukkan');
             }
         }
@@ -1662,8 +1714,10 @@ class FeesController extends AppBaseController
 
             if($result){
                 if ($category == "Kategory B") {
+                    $this->sendEmail($id, "B");
                     return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dikemaskini');
                 } else {
+                    $this->sendEmail($id, "C");
                     return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dikemaskini');
                 }
             }
@@ -1738,10 +1792,12 @@ class FeesController extends AppBaseController
                     'class_student_id' => $list[$i]->class_student_id,
                 ]);
             }
-    
+            
             if ($category == "Kategory B") {
+                $this->sendEmail($fees, "B");
                 return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dimasukkan');
             } else {
+                $this->sendEmail($fees, "C");
                 return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dimasukkan');
             }
         }
@@ -1767,8 +1823,10 @@ class FeesController extends AppBaseController
 
             if($result){
                 if ($category == "Kategory B") {
+                    $this->sendEmail($id, "B");
                     return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dikemaskini');
                 } else {
+                    $this->sendEmail($id, "C");
                     return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dikemaskini');
                 }
             }
@@ -1860,8 +1918,10 @@ class FeesController extends AppBaseController
             }
             
             if ($category == "Kategory B") {
+                $this->sendEmail($fees, "B");
                 return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dimasukkan');
             } else {
+                $this->sendEmail($fees, "C");
                 return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dimasukkan');
             }
         }
@@ -1886,8 +1946,10 @@ class FeesController extends AppBaseController
 
             if($result){
                 if ($category == "Kategory B") {
+                    $this->sendEmail($id, "B");
                     return redirect('/fees/B')->with('success', 'Yuran Kategori B telah berjaya dikemaskini');
                 } else {
+                    $this->sendEmail($id, "C");
                     return redirect('/fees/C')->with('success', 'Yuran Kategori C telah berjaya dikemaskini');
                 }
             }
@@ -1949,6 +2011,7 @@ class FeesController extends AppBaseController
                     'class_student_id' => $list[$i]->class_student_id,
                 ]);
             }
+            $this->sendEmail($fees, "D");
 
             return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dimasukkan');
         }
@@ -1966,6 +2029,7 @@ class FeesController extends AppBaseController
             ->update($fees);
 
             if($result){
+                $this->sendEmail($id, "D");
                 return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dikemaskini');
             }
             else{
@@ -2041,6 +2105,8 @@ class FeesController extends AppBaseController
                     'class_student_id' => $list[$i]->class_student_id,
                 ]);
             }
+
+            $this->sendEmail($fees, "D");
     
             return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dimasukkan');
         }
@@ -2059,6 +2125,7 @@ class FeesController extends AppBaseController
             ->update($fees);
 
             if($result){
+                $this->sendEmail($id, "D");
                 return redirect('/fees/D')->with('success', 'Yuran Kategori D telah berjaya dikemaskini');
             }
             else{

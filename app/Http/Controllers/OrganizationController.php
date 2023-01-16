@@ -83,7 +83,7 @@ class OrganizationController extends Controller
 
         if (!is_null($request->organization_picture)) {
             $extension = $request->organization_picture->extension();
-            $storagePath  = $request->organization_picture->storeAs('/public/organization-picture', $str . '.' . $extension);
+            $storagePath  = $request->organization_picture->storeAs('/organization-picture', $str . '.' . $extension);
             $file_name = basename($storagePath);
         }
         else
