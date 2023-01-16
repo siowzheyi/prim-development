@@ -357,7 +357,8 @@ class StudentController extends Controller
             ]);
         }
 
-        return $update;
+        if(isset($update))
+            return $update;
     }
 
     public function show($id)

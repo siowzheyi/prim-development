@@ -102,6 +102,11 @@
                         <button type="submit" class="btn btn-primary waves-effect waves-light mr-1">
                             Simpan
                         </button>
+                        <a href="{{ route('fees.D') }}">
+                            <button type="button" class="btn btn-secondary waves-effect waves-light mr-1">
+                                <span class="mdi"> Kembali</span>
+                            </button>
+                        </a>
                     </div>
                 </div>
             </div>
@@ -228,7 +233,7 @@
 
         // ************************** organization on change ********************************
         
-        $("#organization").prop("selectedIndex", 1).trigger('change');
+        $("#organization").prop("selectedIndex", 0).trigger('change');
         $("#name").prop("selectedIndex", 0);
         fetchDorm($("#organization").val());
 

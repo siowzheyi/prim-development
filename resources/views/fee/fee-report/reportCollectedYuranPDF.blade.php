@@ -33,10 +33,9 @@
                     <div class="card-body py-5">
                         <div class="row">
                             <div class="col-12 pt-3">
-                                <!-- <center>
-                                    {{$organization->organization_picture}}
+                                <center>
                                     <img src="{{ URL::asset('/organization-picture/'.$organization->organization_picture) }}" height="80" alt="" />
-                                </center> -->
+                                </center>
                                 <h4 style="text-align: center">{{$organization->nama}}</h4>
                                 <h5 style="text-align: center">{{$organization->address}}, {{$organization->postcode}} {{$organization->state}}</h5>
                                 <br>
@@ -78,12 +77,23 @@
 
 
                                 </table>
-
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
+
+        <div class="col-12 pt-5 text-center">
+            <button class="btn btn-primary p-2 w-10 mx-2 btn-fill" style="font-size:18px"
+                onclick="window.print();">
+                <span class="mdi mdi-file-pdf"> Print </span>
+            </button>
+            <a href="{{ route('fees.collectreport') }}">
+                <button class="btn btn-danger p-2 w-10 mx-2" style="font-size:18px;">
+                    <span class="mdi mdi-chevron-left-circle"> Kembali</span>
+                </button>
+            </a>
         </div>
     </div>
 </body>

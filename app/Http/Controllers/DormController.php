@@ -965,7 +965,9 @@ class DormController extends Controller
                 'fees_status' => "Not Complete"
             ]);
         }
-        return $update;
+        
+        if(isset($update))
+            return $update;
     }
 
 

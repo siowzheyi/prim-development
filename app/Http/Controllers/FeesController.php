@@ -2276,7 +2276,7 @@ class FeesController extends AppBaseController
     {
         $student_id = $request->student_id;
 
-        if(isset($cat)){
+        if(isset($request->cat)){
             $cat = 'Kategory ' . $request->cat;
             $getfees_bystudent = DB::table('students')
             ->join('class_student', 'class_student.student_id', '=', 'students.id')
@@ -2686,6 +2686,7 @@ class FeesController extends AppBaseController
         ->where('organization_id', $oid)
         ->where('category', $catname)
         ->where('status', 0)
+        ->where('end_date', '<', date("Y-m-d"))
         ->select('fees_new.*', DB::raw("CONCAT(fees_new.category, ' - ', fees_new.name) AS name"))
         ->groupBy('id')
         ->get();
@@ -3084,10 +3085,10 @@ class FeesController extends AppBaseController
             $student->status = $student->status == "Debt" ? "Masih Berhutang" : "Telah Bayar";
         }
 
-        $pdf = PDF::loadView('fee.categoryReport.reportAllYuranStatusPDFTemplate', compact('yuran', 'organization', 'data'));
+        // $pdf = PDF::loadView('fee.categoryReport.reportAllYuranStatusPDFTemplate', compact('yuran', 'organization', 'data'));
 
-        return $pdf->download('Report ' . $yuran->name . '.pdf');
-        // return view('fee.categoryReport.reportAllYuranStatusPDFTemplate', compact('yuran', 'organization', 'data'));
+        // return $pdf->download('Report ' . $yuran->name . '.pdf');
+        return view('fee.categoryReport.reportAllYuranStatusPDFTemplate', compact('yuran', 'organization', 'data'));
     }
 
     public function PrintClassYuranStatus(Request $request)
@@ -3147,10 +3148,10 @@ class FeesController extends AppBaseController
             $student->status = $student->status == "Debt" ? "Masih Berhutang" : "Telah Bayar";
         }
 
-        $pdf = PDF::loadView('fee.report-search.reportClassYuranStatusPDF', compact('yuran', 'organization', 'data'));
+        // $pdf = PDF::loadView('fee.report-search.reportClassYuranStatusPDF', compact('yuran', 'organization', 'data'));
 
-        return $pdf->download('Report ' . $yuran->name . ' (' . $data[0]->nama_kelas . ').pdf');
-        // return view('fee.report-search.reportClassYuranStatusPDF', compact('yuran', 'organization', 'data'));
+        // return $pdf->download('Report ' . $yuran->name . ' (' . $data[0]->nama_kelas . ').pdf');
+        return view('fee.report-search.reportClassYuranStatusPDF', compact('yuran', 'organization', 'data'));
     }
 
     public function PrintCollectedYuran(Request $request)
@@ -3308,10 +3309,10 @@ class FeesController extends AppBaseController
             }
         }
 
-        $pdf = PDF::loadView('fee.fee-report.reportCollectedYuranPDF', compact('setYuran', 'organization', 'data', 'start', 'end'));
+        // $pdf = PDF::loadView('fee.fee-report.reportCollectedYuranPDF', compact('setYuran', 'organization', 'data', 'start', 'end'));
 
-        return $pdf->download('Report Kutipan Yuran ' . $setYuran . ' (' . $setClass . ').pdf');
-        // return view('fee.fee-report.reportCollectedYuranPDF', compact('setYuran', 'organization', 'data'));
+        // return $pdf->download('Report Kutipan Yuran ' . $setYuran . ' (' . $setClass . ').pdf');
+        return view('fee.fee-report.reportCollectedYuranPDF', compact('setYuran', 'organization', 'data', 'start', 'end'));
     }
 
     public function ExportStudentStatus(Request $request)

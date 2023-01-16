@@ -96,6 +96,11 @@
                         <button type="submit" class="btn btn-primary waves-effect waves-light mr-1">
                             Simpan
                         </button>
+                        <a href="{{ route('fees.A') }}">
+                            <button type="button" class="btn btn-secondary waves-effect waves-light mr-1">
+                                <span class="mdi"> Kembali</span>
+                            </button>
+                        </a>
                     </div>
                 </div>
             </div>

@@ -82,6 +82,7 @@
                         </div>
                     </div>
 
+                    <br>
                     <div class="col-sm-6 cat-a">
                         <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori A
                             mengikut keluarga </h4>

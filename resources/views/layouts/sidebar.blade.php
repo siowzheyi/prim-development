@@ -23,7 +23,7 @@
                     </a>
                 </li>
 
-                <li>
+                <!-- <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
                         <i class="fas fa-hand-holding-heart"></i>
                         <span>Derma</span>
@@ -62,7 +62,7 @@
                         @endrole --}}
                         
                     </ul>
-                </li>
+                </li> -->
 
 
                 @role('Jaim')
