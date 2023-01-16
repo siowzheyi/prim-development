@@ -32,7 +32,7 @@
                         <div class="row">
                             <div class="col-lg-2 col-sm-12 p-0">
                                 <center>
-                                    <img src="{{ URL::asset('/organization-picture/'.$get_organization->organization_picture) }}" height="80"
+                                    <img src="{{ asset('/organization-picture/'.$get_organization->organization_picture) }}" height="80"
                                         alt="" />
                                 </center>
                             </div>
