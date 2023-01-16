@@ -7,6 +7,19 @@
 <link href="{{ URL::asset('assets/css/accordion.css') }}" rel="stylesheet" type="text/css" />
 
 <style>
+
+    .lockedBtn{
+        pointer-events: none;
+        float: right;
+        margin:20px;
+    }
+
+    .unlockedBtn{
+        pointer-events: auto;
+        float: right;
+        margin:20px;
+    }
+
     .unlockedClass{
         background-color:#555;
         display: inline-block;
@@ -69,6 +82,7 @@
 @endsection
 
 @section('content')
+
 <div class="row align-items-center">
     <div class="col-sm-6">
         <div class="page-title-box">
@@ -258,13 +272,15 @@
         </div>
         <div class="col-md-4 p-2">
 
-            <button id="btn-byr" disabled class="btn btn-success float-right" type="submit">Proses
-                Pembayaran</button>
+            <button id="btn-byr" disabled class="btn btn-success float-right" type="submit">Tunjukkan Jumlah Pembayaran</button>
+                  <!-- Set up a container element for the button -->
+            <div class="lockedBtn" id="paypal-button-container" ></div>
             {{-- </form> --}}
         </div>
+       
 
-        <input type="hidden" name="ttlpay" id="ttlpay" value="0.00">
-        <input type="hidden" value="{{ route('payment') }}" id="routepay">
+        {{-- <input type="hidden" name="ttlpay" id="ttlpay" value="0.00"> --}}
+        {{-- <input type="hidden" value="{{ route('payment') }}" id="routepay"> --}}
 
     </div>
 </div>
@@ -287,6 +303,8 @@
 <script src="{{ URL::asset('assets/js/pages/dashboard.init.js')}}"></script>
 
 <script src="{{ URL::asset('assets/libs/sweetalert2/sweetalert2.min.js')}}"></script>
+<!-- Replace "test" with your own sandbox Business account app client ID -->
+<script src="https://www.paypal.com/sdk/js?client-id=AYg4qyay_IkFEo-KB2RTjpv-LorCzJDsWjRaqTpv6uF2tWk4yDJ4IohXslEHU9RDPOuHLX7F58pVb60D&currency=USD"></script>
 
 <script>
     // return array like this 1-2-3
@@ -296,6 +314,7 @@
 
     var amt = 0;
     var total = 0;
+    var usd = 0;
     $("#pay").html("0.00");
     var myCheckboxes = new Array();
     var myCheckboxes_checkStudent = new Array();
@@ -304,6 +323,7 @@
     var responseFunction;
     $( document ).ready(function() {
         document.getElementById('btn-byr').disabled = true;
+
     });
 
     $('#btn-byr').click(function () {
@@ -311,39 +331,12 @@
                 total = parseFloat(amt).toFixed(2);
                 $("#pay").html(total);
                 $("input[name='amount']").val(total);
-      Swal.fire({
-        title: "Adakah anda pasti?",
-        text: "Jumlah yang perlu dibayar RM"+total,
-        type: "warning",
-        showCancelButton: true,
-        confirmButtonColor: "#34c38f",
-        cancelButtonColor: "#f46a6a",
-      }).then(function (result) {
-        if (result.value) {
-            
-            $.ajax({
-                url: "{{ route('recurring_fees.paymentFake') }}",
-                data: { 
-                    user_id_and_expenses_id: myCheckboxes,
-                    oid_and_student_id: myCheckboxes_checkStudent
-                },
-                
-            })
-            .done(function(response){
-                // document.write(response);
-                console.log("success");
-                responseFunction = response;
-              
-                $('#user_expenses_array').val(responseFunction);
-                $('#printConfirmationModal').modal('show');
+                $('#paypal-button-container').removeClass("lockedBtn");
+                $('#paypal-button-container').addClass("unlockedBtn");
+                usd = parseFloat(amt*0.238).toFixed(2);
 
-            });
-            
-        }
-        else{
-            console.log("denied");
-        }
-      });
+
+      
     }); //Parameter
    
     ///*************** function for if different organization *****************
@@ -468,44 +461,59 @@
         } 
     }   
       
-        
+    // PAYPAL API
+    paypal.Buttons({
+      // Sets up the transaction when a payment button is clicked
+      createOrder: (data, actions) => {
+        return actions.order.create({
+          purchase_units: [{
+            amount: {
+              value: usd // Can also reference a variable or function
+            }
+          }]
+        });
+      },
+      // Finalize the transaction after payer approval
+      onApprove: (data, actions) => {
+        return actions.order.capture().then(function(orderData) {
+          // Successful capture! For dev/demo purposes:
+          console.log('Capture result', orderData, JSON.stringify(orderData, null, 2));
+          const transaction = orderData.purchase_units[0].payments.captures[0];
+        //   alert(`Transaction ${transaction.status}: ${transaction.id}\n\nSee console for all available details`);
+          // When ready to go live, remove the alert and show a success message within this page. For example:
+          // const element = document.getElementById('paypal-button-container');
+          // element.innerHTML = '<h3>Thank you for your payment!</h3>';
+          // Or go to another URL:  actions.redirect('thank_you.html');
 
-    // function checkD(element) {
-    //     var id = element.id;
-    //     if (element.checked) {
-    //         amt += parseFloat($("#" + id).val());
-    //     } else {
-    //         if(amt != 0)
-    //         {
-    //             amt -= parseFloat($("#" + id).val());
-    //         }
-    //     }   
-    //     total = parseFloat(amt).toFixed(2);
-    //     $("#pay").html(total);
-    //     $("input[name='amount']").val(total);
+          $.ajax({
+                method:"POST",
+                url: "{{ route('recurring_fees.paymentFake') }}",
+                data: { 
+                    user_id_and_expenses_id: myCheckboxes,
+                    oid_and_student_id: myCheckboxes_checkStudent
+                },
+                
+            })
+            .done(function(response){
+                // document.write(response);
+                console.log("success");
+                responseFunction = response;
+              
+                $('#user_expenses_array').val(responseFunction);
+                $('#printConfirmationModal').modal('show');
 
-    //     if(total == 0){
-    //         document.getElementById('btn-byr').disabled = true;
-    //     }else{
-    //         document.getElementById('btn-byr').disabled = false;
-    //     }
-    // }
+            });
 
-    
+        });
+      }
+    }).render('#paypal-button-container');
 
-        // $('.getid').children().prop('disabled', true);
-
-        // $('.getid').on("click",function(){
-        //     var id =  $(this).attr("id");
-        //     console.log(id);
-        // var id = "#"+$(".getid").attr("id");
-
-        //     $(".getid").children().prop('disabled', true);
-        //     //post code
-        // });
-
-    // var elem = $('a[href="'+id+'"]');
-    // elem.attr('disabled','disabled')
+        // csrf token for ajax
+        $.ajaxSetup({
+            headers: {
+                'X-CSRF-TOKEN': $('meta[name="csrf-token"]').attr('content')
+            }
+        });
 
 </script>
 

@@ -67,13 +67,13 @@
                                 <div class="row">
                                     <div>
                                         <h4>
-                                            Jumlah perbelanjaan telah bayar :
+                                            Jumlah perbelanjaan telah bayar : RM 
                                             <span>{{$paid}}</span>
                                         </h4>
                                     </div>
                                     <div>
                                         <h4>
-                                            Jumlah perbelanjaan belum bayar :
+                                            Jumlah perbelanjaan belum bayar : RM 
                                             <span>{{$unpaid}}</span>
                                         </h4>
                                     </div>

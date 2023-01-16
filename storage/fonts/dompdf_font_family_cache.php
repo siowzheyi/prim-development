@@ -100,5 +100,8 @@ return array (
   'typicons' => array(
     'normal' => $fontDir . '/typicons_normal_6d7ca969b07231f396dcbd0a78183a1b',
   ),
+  'fontawesome' => array(
+    'normal' => $fontDir . '/fontawesome_normal_f6b2e9286a2b9f34642c243947f39e1a',
+  ),
 );
 }; ?>

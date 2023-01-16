@@ -91,12 +91,12 @@
 
                 <div class="form-group">
                     <label>Tempoh Bermula Berkesan</label><span style="color: red">  *</span>
-                    <input type="date" name="start_date" class="form-control" min="{{ $start }}">
+                    <input type="date" name="start_date" class="form-control" id="start_date" min="{{ $start }}">
                 </div>
 
                 <div class="form-group">
                     <label >Tempoh Berakhir Berkesan</label><span style="color: red">  *</span>
-                    <input type="date" name="end_date" class="form-control" min="{{ $start }}">
+                    <input type="date" name="end_date" class="form-control" id="end_date" min="{{ $start }}">
                 </div>
 
                 <div class="form-group mb-0">
@@ -123,11 +123,7 @@
 <script src="{{ URL::asset('assets/js/pages/dashboard.init.js')}}"></script>
 
 <script>
-    $(document).ready(function() {
-
-        // ************************** radio button recurring ********************************
-        
-    });
+   
 </script>
 
 @endsection

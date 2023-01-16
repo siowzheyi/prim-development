@@ -1182,7 +1182,7 @@
                             <div class="row">
                                 <div class="col-sm-5 pull-right">
                                     <h4 class="pull-right">
-                                        Total amount :
+                                        Total amount : RM 
                                         <span class="red">{{$total_amount}}</span>
                                     </h4>
                                 </div>

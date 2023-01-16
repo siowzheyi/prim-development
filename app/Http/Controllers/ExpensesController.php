@@ -831,10 +831,11 @@ class ExpensesController extends Controller
                     ->whereIn('item.user_expenses_id',$array)
                     ->select('transactions.transac_no as transac_no','user_expenses.total_amount as total_amount',
                     'expenses.name as expensesName','expenses.amount as expensesAmount',
-                    'expenses.description','recurrings.name as recurringType')
+                    'expenses.description','recurrings.name as recurringType','item.user_expenses_id')
+                    ->orderBy('item.user_expenses_id')
                     ->get();
                     
-        $date = date('Y-m-d', strtotime(now()));
+        $date = date('d-m-Y', strtotime(now()));
 
         $total = DB::table('user_expenses')
         ->whereIn('user_expenses.id',$array)
@@ -862,15 +863,12 @@ class ExpensesController extends Controller
     }
 
     public function paymentFake(Request $request){
-        // dd($request->all());
 
         // ************  id from value checkbox (hidden) **************
         $user_id_and_expenses_id  = collect($request)->get('user_id_and_expenses_id');
-        //oid_and_student_id
         $oid_and_student_id  = collect($request)->get('oid_and_student_id');
         $size = sizeof($user_id_and_expenses_id);
         $size_student = sizeof($oid_and_student_id);
-        // dd($size_cb, $data_cb);
         $check=0;
         
         $user_expenses_id = array();
@@ -878,11 +876,11 @@ class ExpensesController extends Controller
         for($j=0;$j<$size_student;$j++)
         {
             $oid = array();
-        $student_id  = array();
-        $expenses_id  = array();
-        $user_id   = array();
-        $total_amount = 0;
-        $check++;
+            $student_id  = array();
+            $expenses_id  = array();
+            $user_id   = array();
+            $total_amount = 0;
+            $check++;
        
             for ($i = 0; $i < $size; $i++) {
 
@@ -978,8 +976,7 @@ class ExpensesController extends Controller
             array_push($user_expenses_id,$new_user_expenses);
            
         }
-        // dd($user_expenses_id);
-        // $update_total_amount = DB::table('user_expenses')->where('id',$new_user_expenses)->update(['total_amount'=>$total_amount]);
+        
         // return receipt needed info --> user_expenses_id
         return $user_expenses_id;
     }
@@ -1071,7 +1068,7 @@ class ExpensesController extends Controller
                     'expenses.description','recurrings.name as recurringType')
                     ->get();
                     
-        $date = date('Y-m-d', strtotime(now()));
+        $date = date('d-m-Y', strtotime(now()));
 
         $total = DB::table('user_expenses')
         ->where('user_expenses.id',$user_expenses)
