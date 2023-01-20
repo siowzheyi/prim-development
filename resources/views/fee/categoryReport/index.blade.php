@@ -73,8 +73,8 @@
                 @endif
                 <div class="flash-message"></div>
 
-                <div class="col-md-12">
-                    <div class="card">
+                <!-- <div class="col-md-12"> -->
+                    <div class="card-body">
                         <div class="table-responsive">
                             <table id="yuranTable" class="table table-bordered table-striped dt-responsive wrap"
                                 style="border-collapse: collapse; border-spacing: 0; width: 100%;">
@@ -89,7 +89,7 @@
                             </table>
                         </div>
                     </div>
-                </div>
+                <!-- </div> -->
             </div>
         </div>
     </div>
