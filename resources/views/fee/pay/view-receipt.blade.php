@@ -70,10 +70,10 @@
                                         <td class="py-2">:</td>
                                         <td class="py-2 w-50">{{ $getparent->name }}</td>
                                         <td class="py-2" colspan="3"></td>
-                                        <td class="py-2">No. Kad Pengenalan
+                                        <td class="py-2">Nombor Telefon
                                         </td>
                                         <td class="py-2">:</td>
-                                        <td class="py-2">{{ $getparent->icno }}</td>
+                                        <td class="py-2">{{ $getparent->telno }}</td>
                                     </tr>
                                     <tr style="background-color:#e9ecef">
                                         <th colspan="9" class="text-center">Maklumat Yuran</th>

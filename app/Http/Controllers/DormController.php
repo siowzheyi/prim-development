@@ -975,7 +975,7 @@ class DormController extends Controller
     {
         // 
         $this->validate($request, [
-            'name'          =>  'required|unique:dorms',
+            'name'          =>  'required',
             'capacity'      =>  'required',
             'organization'  =>  'required',
             'grade'         =>  'required'

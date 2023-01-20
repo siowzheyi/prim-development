@@ -30,7 +30,7 @@ use League\CommonMark\Inline\Parser\EscapableParser;
 
 class ToyyibpayController extends Controller
 {
-    //
+    //this is the controller for payment api (PayPal is used)
     private $gateway;
 
     public function __construct(){

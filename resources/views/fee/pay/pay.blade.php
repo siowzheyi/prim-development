@@ -223,6 +223,9 @@
                     type="submit">Teruskan Pembayaran Di PayPal</button>
                     <!-- onclick="return checkBank();" -->
                 </form>
+                <a href="{{ route('error') }}">
+                    <button type="button" class="btn btn-danger float-right mt-3 w-100 p-2" style="font-size:18px">Batalkan</button>
+                </a>
             </div>
 
         </div>

@@ -2765,8 +2765,8 @@ class FeesController extends AppBaseController
                     ->where('fn.organization_id', $request->oid)
                     ->where('fnou.status', 'Paid')
                     ->where('fn.category', $request->feeid)
-                    // ->whereBetween('t.datetime_created', [$start, $end])
-                    // ->whereNotNull('fn.name')
+                    ->whereBetween('t.datetime_created', [$start, $end])
+                    ->whereNotNull('fn.name')
                     ->select('fn.name as fee_name', 'fn.category', 'fn.totalAmount', DB::raw('count("fnou.organization_user_id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
                     ->groupBy('fn.id')
                     ->orderBy('fn.name')
@@ -2809,7 +2809,7 @@ class FeesController extends AppBaseController
                     ->where('c.id', $request->classid)
                     ->whereBetween('t.datetime_created', [$start, $end])
                     ->whereNotNull('fn.name')
-                    ->select('fn.name as fee_name', 'fn.category', 'fn.totalAmount', DB::raw('count("fnou.organization_user_id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
+                    ->select('fn.name as fee_name', 'fn.category', 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("fnou.organization_user_id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
                     ->groupBy('fn.id')
                     ->orderBy('c.nama')
                     ->orderBy('fn.name')
@@ -2831,7 +2831,7 @@ class FeesController extends AppBaseController
                     ->where('fn.category', $request->feeid)
                     ->whereBetween('t.datetime_created', [$start, $end])
                     ->whereNotNull('fn.name')
-                    ->select('fn.name as fee_name', 'fn.category', 'fn.totalAmount', DB::raw('count("fn.class_student_id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
+                    ->select('fn.name as fee_name', 'fn.category', 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("fn.class_student_id") as total'), DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"))
                     ->groupBy('fn.id')
                     ->orderBy('c.nama')
                     ->orderBy('fn.name')
@@ -2892,6 +2892,11 @@ class FeesController extends AppBaseController
 
     public function ExportAllYuranStatus(Request $request)
     {
+        $this->validate($request, [
+            'organExport'      =>  'required',
+            'yuranExport'      =>  'required',
+        ]);
+
         $yuran = DB::table('fees_new')
             ->where('id', $request->yuranExport)
             ->first();
@@ -2901,6 +2906,12 @@ class FeesController extends AppBaseController
 
     public function ExportClassYuranStatus(Request $request)
     {
+        $this->validate($request, [
+            'organExport'      =>  'required',
+            'yuranExport'      =>  'required',
+            'classesExport'      =>  'required',
+        ]);
+
         $class = $request->classesExport;
         $classname = DB::table('classes')
             ->where('id', $class)
@@ -2915,6 +2926,14 @@ class FeesController extends AppBaseController
 
     public function ExportCollectedYuran(Request $request)
     {
+        $this->validate($request, [
+            'organExport'      =>  'required',
+            'yuranExport'      =>  'required',
+            'classesExport'      =>  'required',
+            'startExport'      =>  'required',
+            'endExport'        =>  'required',
+        ]);
+
         $class  = $request->classesExport;
         $oid    = $request->organExport;
         $yuran  = $request->yuranExport;

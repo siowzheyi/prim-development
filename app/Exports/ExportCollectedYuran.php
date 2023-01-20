@@ -78,7 +78,7 @@ class ExportCollectedYuran implements FromCollection, ShouldAutoSize, WithHeadin
                 ->leftJoin('student_fees_new as sfn', 'sfn.id', '=', 'ftn.student_fees_id')
                 ->leftJoin('fees_new as fn', 'fn.id', '=', 'sfn.fees_id')
                 ->where('t.status', 'Success')
-                ->where('fn.organization_id', $oid)
+                ->where('fn.organization_id', $this->oid)
                 ->where('sfn.status', 'Paid')
                 ->where('fn.category', $this->yuran)
                 ->whereBetween('t.datetime_created', [$this->start, $this->end])
