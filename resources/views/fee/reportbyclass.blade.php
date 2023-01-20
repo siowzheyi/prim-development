@@ -189,7 +189,7 @@
                     html += '<table class="table table-bordered" >';
                         html += '<tr style="text-align:center">';
                         html += '<th> Nama Yuran </th>';
-                        html += '<th> Jumlah Amaun (RM)</th>';
+                        html += '<th> Jumlah Amaun ($)</th>';
                         html += '<th> Status </th>';
                         html += '</tr>';
                     for(var i=0; i < response.length; i++){

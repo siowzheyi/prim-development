@@ -1308,7 +1308,7 @@ class FeesController extends AppBaseController
                         {  
                             $d->target = "Semua Jenis";
                             if($level->repeat > 0)
-                                $d->target = "Semua Jenis<br>Ulang setiap " . $level->repeat . " bulan";
+                                $d->target = "Semua Jenis<br>Ulang selama " . $level->repeat . " bulan";
                         }
                         elseif(is_array($level->dorm))
                         {
@@ -1330,7 +1330,7 @@ class FeesController extends AppBaseController
                                 $d->target = $d->target .  $dorm->name  . (sizeof($dorms) - 1 == $i ? "" : ", ");
                             }
                             if($level->repeat > 0)
-                                $d->target = $d->target . "<br>Ulang setiap " . $level->repeat . " bulan";
+                                $d->target = $d->target . "<br>Ulang selama " . $level->repeat . " bulan";
                         }
                     }
                 } 
@@ -1386,59 +1386,6 @@ class FeesController extends AppBaseController
         return view('fee.category_B.add', compact('organization'));
     }
 
-
-    public function StoreCategoryB(Request $request)
-    {
-        $id             = NULL;
-        $gender         = "";
-        $class          = $request->get('cb_class');
-        $level          = $request->get('level');
-        $year           = $request->get('year');
-        $name           = $request->get('name');
-        $price          = $request->get('price');
-        $quantity       = $request->get('quantity');
-        $desc           = $request->get('description');
-        $oid            = $request->get('organization');
-        $date_started   = Carbon::createFromFormat(config('app.date_format'), $request->get('date_started'))->format('Y-m-d');
-        $date_end       = Carbon::createFromFormat(config('app.date_format'), $request->get('date_end'))->format('Y-m-d');
-        $total          = $price * $quantity;
-        $category       = "Kategory B";
-
-        if ($level == "All_Level") {
-            return $this->allLevel($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
-        } elseif ($year == "All_Year") {
-            return $this->allYear($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
-        } else {
-            return $this->allClasses($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category);
-        }
-    }
-
-    public function updateCategoryB(Request $request)
-    {
-        $id             = $request->get('id');
-        $gender         = "";
-        $class          = $request->get('cb_class');
-        $level          = $request->get('level');
-        $year           = $request->get('year');
-        $name           = $request->get('name');
-        $price          = $request->get('price');
-        $quantity       = $request->get('quantity');
-        $desc           = $request->get('description');
-        $oid            = $request->get('organization');
-        $date_started   = $request->get('date_started');
-        $date_end       = $request->get('date_end');
-        $total          = $price * $quantity;
-        $category       = "Kategory B";
-
-        if ($level == "All_Level") {
-            return $this->allLevel($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
-        } elseif ($year == "All_Year") {
-            return $this->allYear($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
-        } else {
-            return $this->allClasses($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category);
-        }
-    }
-
     public function CategoryC()
     {
         $organization = $this->getOrganizationByUserId();
@@ -1451,60 +1398,6 @@ class FeesController extends AppBaseController
         $organization = $this->getOrganizationByUserId();
 
         return view('fee.category_C.add', compact('organization'));
-    }
-
-    public function StoreCategoryC(Request $request)
-    {
-        // dd($request->toArray());
-        $id         = NULL;
-        $gender     = $request->get('gender');
-        $class      = $request->get('cb_class');
-        $level      = $request->get('level');
-        $year       = $request->get('year');
-        $name       = $request->get('name');
-        $price          = $request->get('price');
-        $quantity       = $request->get('quantity');
-        $desc           = $request->get('description');
-        $oid            = $request->get('organization');
-        $date_started   = Carbon::createFromFormat(config('app.date_format'), $request->get('date_started'))->format('Y-m-d');
-        $date_end       = Carbon::createFromFormat(config('app.date_format'), $request->get('date_end'))->format('Y-m-d');
-        $total          = $price * $quantity;
-        $category       = "Kategory C";
-
-        if ($level == "All_Level") {
-            return $this->allLevel($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
-        } elseif ($year == "All_Year") {
-            return $this->allYear($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
-        } else {
-            return $this->allClasses($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category);
-        }
-    }
-
-    public function updateCategoryC(Request $request)
-    {
-        // dd($request->toArray());
-        $id         = $request->get('id');
-        $gender     = $request->get('gender');
-        $class      = $request->get('cb_class');
-        $level      = $request->get('level');
-        $year       = $request->get('year');
-        $name       = $request->get('name');
-        $price          = $request->get('price');
-        $quantity       = $request->get('quantity');
-        $desc           = $request->get('description');
-        $oid            = $request->get('organization');
-        $date_started   = $request->get('date_started');
-        $date_end       = $request->get('date_end');
-        $total          = $price * $quantity;
-        $category       = "Kategory C";
-
-        if ($level == "All_Level") {
-            return $this->allLevel($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
-        } elseif ($year == "All_Year") {
-            return $this->allYear($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $gender, $category);
-        } else {
-            return $this->allClasses($id, $name, $desc, $quantity, $price, $total, $date_started, $date_end, $level, $oid, $class, $gender, $category);
-        }
     }
 
     public function CategoryD()
@@ -1520,69 +1413,7 @@ class FeesController extends AppBaseController
 
         return view('fee.category_D.add', compact('organization'));
     }
-
-    public function StoreCategoryD(Request $request)
-    {
-        $id             = NULL;
-        $name           = $request->get('name');
-        $desc           = $request->get('desc');
-        $price          = $request->get('price');
-        $quantity       = 1;
-        $oid            = $request->get('organization');
-        $date_started   = Carbon::createFromFormat(config('app.date_format'), $request->get('date_started'))->format('Y-m-d');
-        $date_end       = Carbon::createFromFormat(config('app.date_format'), $request->get('date_end'))->format('Y-m-d');
-        $total          = $price * $quantity;
-        $repeat         = $request->get('renew');
-        $dorm           = $request->get('cb_dorm');
-        $grade          = $request->get('grade');
-        $category       = "Kategory D";
-
-        if ($grade == "ALL_TYPE") 
-        {
-            return $this->allType($id, $name, $desc, $quantity, $price, $total, $repeat, $date_started, $date_end, $oid, $grade, $category);
-        }
-        else 
-        {
-            return $this->allDorm($id, $name, $desc, $quantity, $price, $total, $repeat, $date_started, $date_end, $dorm, $oid, $grade, $category);
-        }
-    }
-
-    public function updateCategoryD(Request $request)
-    {
-        $id             = $request->get('id');
-        $name           = $request->get('name');
-        $desc           = $request->get('desc');
-        $price          = $request->get('price');
-        $quantity       = 1;
-        $oid            = $request->get('organization');
-        $date_started   = $request->get('date_started');
-        $date_end       = $request->get('date_end');
-        $total          = $price * $quantity;
-        $repeat         = $request->get('renew');
-        $category       = "Kategory D";
-
-        $getTarget = DB::table('fees_new')
-            ->where('fees_new.id', $id)
-            ->select('fees_new.target')
-            ->get();
-
-        foreach($getTarget as $list){
-            $target = json_decode($list->target);
-        }
-
-        $grade  = $target->data;
-
-        if ($grade == "ALL_TYPE") 
-        {
-            return $this->allType($id, $name, $desc, $quantity, $price, $total, $repeat, $date_started, $date_end, $oid, $grade, $category);
-        }
-        else 
-        {
-            $dorm = $target->dorm;
-            return $this->allDorm($id, $name, $desc, $quantity, $price, $total, $repeat, $date_started, $date_end, $dorm, $oid, $grade, $category);
-        }
-    }
-
+    
     public function fetchClassYear(Request $request)
     {
 
@@ -3293,7 +3124,7 @@ class FeesController extends AppBaseController
                 ->where('fn.category', $yuran)
                 ->whereBetween('t.datetime_created', [$start, $end])
                 ->whereNotNull('fn.name')
-                ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("fnou.organization_user_id") as total'), DB::raw('fn.totalAmount * count("fnou.organization_user_id") as sum'))
+                ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 't.status', 'fn.totalAmount', DB::raw('count("fnou.organization_user_id") as total'), DB::raw('fn.totalAmount * count("fnou.organization_user_id") as sum'))
                 ->groupBy('fn.id')
                 ->orderBy('fn.name')
                 ->get();
@@ -3310,7 +3141,7 @@ class FeesController extends AppBaseController
                 ->where('fn.category', $yuran)
                 ->whereBetween('t.datetime_created', [$start, $end])
                 ->whereNotNull('fn.name')
-                ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 'c.nama as class_name', 'fn.totalAmount', DB::raw('count("fn.class_student_id") as total'), DB::raw('fn.totalAmount * count("fn.class_student_id") as sum'))
+                ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 't.status', 'fn.totalAmount', DB::raw('count("fn.class_student_id") as total'), DB::raw('fn.totalAmount * count("fn.class_student_id") as sum'))
                 ->groupBy('fn.id')
                 ->orderBy('fn.name')
                 ->get();

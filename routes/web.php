@@ -124,18 +124,12 @@ Route::group(['prefix' => 'fees'], function () {
 
     Route::get('/B', 'FeesController@CategoryB')->name('fees.B');
     Route::get('/add/B', 'FeesController@createCategoryB')->name('fees.createB');
-    Route::post('/store/B', 'FeesController@StoreCategoryB')->name('fees.storeB');
-    Route::post('/update/B', 'FeesController@updateCategoryB')->name('fees.updateB');
 
     Route::get('/C', 'FeesController@CategoryC')->name('fees.C');
     Route::get('/add/C', 'FeesController@createCategoryC')->name('fees.createC');
-    Route::post('/store/C', 'FeesController@StoreCategoryC')->name('fees.storeC');
-    Route::post('/update/C', 'FeesController@updateCategoryC')->name('fees.updateC');
 
     Route::get('/D', 'FeesController@CategoryD')->name('fees.D');
     Route::get('/add/D', 'FeesController@createCategoryD')->name('fees.createD');
-    Route::post('/store/D', 'FeesController@StoreCategoryD')->name('fees.storeD');
-    Route::post('/update/D', 'FeesController@updateCategoryD')->name('fees.updateD');
     Route::post('/fetchDorm', 'FeesController@fetchDorm')->name('fees.fetchDorm');
 
     Route::get('/dependent_fees', 'FeesController@dependent_fees')->name('dependent_fees');

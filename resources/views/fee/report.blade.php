@@ -44,10 +44,10 @@
                     <select name="category" id="category" class="form-control">
                         <option value="" disabled>Pilih Kategori</option>
                         <option value="ALL" selected>Umum</option>
-                        <option value="A">Kategori A</option>
-                        <option value="B">Kategori B</option>
-                        <option value="C">Kategori C</option>
-                        <option value="D">Kategori D</option>
+                        <option value="A">Kategori A - Mengikut Keluarga</option>
+                        <option value="B">Kategori B - Mengikut Pelajar</option>
+                        <option value="C">Kategori C - Pilihan</option>
+                        <option value="D">Kategori D - Asrama</option>
                     </select>
                 </div>
                 
@@ -111,8 +111,8 @@
                     </div>
                     
                     <div class="col-sm-6 cat-b">
-                        <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori B mengikut
-                            pecahan kelas </h4>
+                        <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori B 
+                        bagi pelajar </h4>
 
                         <div class="row justify-content-center">
                             <div class="col-sm-6">
@@ -138,8 +138,8 @@
                     </div>
                     
                     <div class="col-sm-6 cat-c">
-                        <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori C mengikut
-                            pecahan kelas </h4>
+                        <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori C 
+                        bagi pelajar </h4>
 
                         <div class="row justify-content-center">
                             <div class="col-sm-6">
@@ -165,8 +165,7 @@
                     </div>
                     
                     <div class="col-sm-6 cat-d">
-                        <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori D mengikut
-                            pecahan asrama </h4>
+                        <h4 class="card-title mb-4 text-center">Carta pie untuk pembayaran yuran <br> Kategori D bagi pelajar </h4>
 
                         <div class="row justify-content-center">
                             <input type="checkbox" id="cat_cb" hidden>
@@ -553,7 +552,7 @@
                         
                         oid = $("#organization option:selected").val();
                         fetch_dataBCD(oid, type);
-                        document.getElementById("type-name").innerHTML="Senarai Kelas Yang " + type + " Membayar Yuran Kategori B";
+                        document.getElementById("type-name").innerHTML="Senarai Pelajar Yang " + type + " Membayar Yuran Kategori B";
                         $('#type-name').show();
                     });
 
@@ -571,7 +570,7 @@
                         
                         oid = $("#organization option:selected").val();
                         fetch_dataBCD(oid, type);
-                        document.getElementById("type-name").innerHTML="Senarai Kelas Yang " + type + " Membayar Yuran Kategori C";
+                        document.getElementById("type-name").innerHTML="Senarai Pelajar Yang " + type + " Membayar Yuran Kategori C";
                         $('#type-name').show();
                     });
 
@@ -588,7 +587,7 @@
                         
                         oid = $("#organization option:selected").val();
                         fetch_dataBCD(oid, type);
-                        document.getElementById("type-name").innerHTML="Senarai Kelas Yang " + type + " Membayar Yuran Kategori D";
+                        document.getElementById("type-name").innerHTML="Senarai Pelajar Yang " + type + " Membayar Yuran Kategori D";
                         $('#type-name').show();
                     });
                 }
@@ -840,7 +839,7 @@
                     html += '<table class="table table-bordered" >';
                         html += '<tr style="text-align:center">';
                         html += '<th> Nama Yuran </th>';
-                        html += '<th> Jumlah Amaun (RM)</th>';
+                        html += '<th> Jumlah Amaun ($)</th>';
                         html += '<th> Status </th>';
                         html += '</tr>';
                     for(var i=0; i < response.length; i++){

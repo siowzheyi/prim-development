@@ -100,7 +100,7 @@
                 @endrole
 
                 <!-- yuqin add penjaga and warden -->
-                @role('Superadmin|Pentadbir|Guru|Penjaga|Warden|Guard')
+                @role('Superadmin|Pentadbir|Warden|Guard|Guru')
 
                 <li>
                     <a href="javascript: void(0);" class="has-arrow waves-effect">
@@ -149,7 +149,7 @@
 
                         @endrole
 
-                        @role('Superadmin|Pentadbir|Admin|Guru|Warden|Penjaga|Guard')
+                        @role('Superadmin|Pentadbir|Admin|Warden|Penjaga|Guard')
                         <li>
                             <a href="javascript: void(0);" class="has-arrow waves-effect">
                                 <i class="fas fa-book"></i>
@@ -240,7 +240,7 @@
                         </li>
                         @endrole
 
-                        @role('Superadmin|Pentadbir|Guru|Warden|Guard')
+                        @role('Superadmin|Pentadbir|Warden|Guard')
                         <li>
                             <a href="javascript: void(0);" class="has-arrow waves-effect">
                                 <i class="fas fa-hotel"></i>
@@ -297,7 +297,7 @@
                             </ul>
                         </li>
                         @endrole
-                        @role('Superadmin|Pentadbir|Guru|Warden')
+                        @role('Superadmin|Pentadbir|Warden')
                         <li>
                             <a href="{{ route('dorm.indexReportAll') }}" class=" waves-effect">
                                 <i class="fas fa-list-ul"></i>

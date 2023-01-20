@@ -52,7 +52,7 @@
             <div class="card-header">Senarai Pelajar</div>
             <div>
                 <a style="margin: 19px;" class="btn btn-success"  data-toggle="modal" data-target="#modalByYuran"><i class="fas fa-plus"></i> Export</a>
-                <a style="margin: 1px;" href="#" class="btn btn-success " data-toggle="modal" data-target="#modalByYuran2"> <i class="fa fa-download"></i> Muat Turan PDF</a>
+                <a style="margin: 1px;" href="#" class="btn btn-success " data-toggle="modal" data-target="#modalByYuran2"> <i class="fa fa-download"></i> Cetak</a>
                 <a style="margin: 19px;" class="btn btn-primary float-right"  data-toggle="modal" data-target="#modalByYuran3"><i class="fas fa-user-cog"></i> Memperbaharui Yuran</a>
             </div>
 

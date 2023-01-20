@@ -68,7 +68,7 @@
 
             <div class="col-md-12">
                 <a style="margin: 19px;" class="btn btn-success"  data-toggle="modal" data-target="#modalByYuran"><i class="fas fa-plus"></i> Export</a>
-                <a style="margin: 1px;" href="#" class="btn btn-success " data-toggle="modal" data-target="#modalByYuran2"> <i class="fa fa-download"></i> Muat Turan PDF</a>
+                <a style="margin: 1px;" href="#" class="btn btn-success " data-toggle="modal" data-target="#modalByYuran2"> <i class="fa fa-download"></i> Cetak</a>
             </div>
 
             @if(count($errors) > 0)
@@ -264,6 +264,8 @@
             orientation: 'bottom'
         });
 
+        var flag      = "";
+
         endPDF.value = startPDF.value = new Date().toISOString().split("T")[0];
         endExport.value = startExport.value = new Date().toISOString().split("T")[0];
 
@@ -318,7 +320,7 @@
             {
                 var classid   = $("#classesExport option:selected").val();
                 var _token    = $('input[name="_token"]').val();
-            
+                
                 console.log(classid);
                 $.ajax({
                     url:"{{ route('fees.fetchCategorybyOrganId') }}",
@@ -335,7 +337,15 @@
                         if($("#classesExport option:selected").val() == "ALL")
                             $("#yuranExport").append("<option value='ALL'> Semua Kategori</option>");
                         jQuery.each(result.success, function(key, value){
-                            $('#yuranExport').append("<option value='"+ value.category +"'>" + value.category + "</option>");
+                            if(value.category == "Kategory A")
+                                flag = " - Mengikut keluarga";
+                            else if(value.category == "Kategory B")
+                                flag = " - Mengikut murid";
+                            else if(value.category == "Kategory C")
+                                flag = " - Pilihan";
+                            else
+                                flag = " - Asrama";
+                            $('#yuranExport').append("<option value='"+ value.category +"'>" + value.category + flag + "</option>");
                         });
                     }
                 })
@@ -364,7 +374,15 @@
                         if($("#classesPDF option:selected").val() == "ALL")
                             $("#yuranPDF").append("<option value='ALL'> Semua Kategori</option>");
                         jQuery.each(result.success, function(key, value){
-                            $('#yuranPDF').append("<option value='"+ value.category +"'>" + value.category + "</option>");
+                            if(value.category == "Kategory A")
+                                flag = " - Mengikut keluarga";
+                            else if(value.category == "Kategory B")
+                                flag = " - Mengikut murid";
+                            else if(value.category == "Kategory C")
+                                flag = " - Pilihan";
+                            else
+                                flag = " - Asrama";
+                            $('#yuranPDF').append("<option value='"+ value.category +"'>" + value.category + flag + "</option>");
                         });
                     }
                 })
@@ -430,7 +448,15 @@
                         if($("#classes option:selected").val() == "ALL")
                             $("#fees").append("<option value='ALL'> Semua Kategori</option>");
                         jQuery.each(result.success, function(key, value){
-                            $("#fees").append("<option value='"+ value.category +"'>" + value.category + "</option>");
+                            if(value.category == "Kategory A")
+                                flag = " - Mengikut keluarga";
+                            else if(value.category == "Kategory B")
+                                flag = " - Mengikut murid";
+                            else if(value.category == "Kategory C")
+                                flag = " - Pilihan";
+                            else
+                                flag = " - Asrama";
+                            $("#fees").append("<option value='"+ value.category +"'>" + value.category + flag + "</option>");
                         });
                     }
                 })
