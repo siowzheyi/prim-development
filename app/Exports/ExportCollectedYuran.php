@@ -33,7 +33,7 @@ class ExportCollectedYuran implements FromCollection, ShouldAutoSize, WithHeadin
             ->where('fnou.status', 'Paid')
             ->whereBetween('t.datetime_created', [$this->start, $this->end])
             ->whereNotNull('fn.name')
-            ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 't.status', 'fn.totalAmount', DB::raw('count("fnou.organization_user_id") as total'), DB::raw('fn.totalAmount * count("fnou.organization_user_id") as sum'))
+            ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 't.status as class_name', 'fn.totalAmount', DB::raw('count("fnou.organization_user_id") as total'), DB::raw('fn.totalAmount * count("fnou.organization_user_id") as sum'))
             ->groupBy('fn.id')
             ->orderBy('fn.name')
             ->get();
@@ -47,7 +47,7 @@ class ExportCollectedYuran implements FromCollection, ShouldAutoSize, WithHeadin
             ->where('sfn.status', 'Paid')
             ->whereBetween('t.datetime_created', [$this->start, $this->end])
             ->whereNotNull('fn.name')
-            ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 't.status', 'fn.totalAmount', DB::raw('count("fn.class_student_id") as total'), DB::raw('fn.totalAmount * count("fn.class_student_id") as sum'))
+            ->select(DB::raw("CONCAT(fn.category, ' - ', fn.name) AS name"), 't.status as class_name', 'fn.totalAmount', DB::raw('count("fn.class_student_id") as total'), DB::raw('fn.totalAmount * count("fn.class_student_id") as sum'))
             ->groupBy('fn.id')
             ->orderBy('fn.name')
             ->get();
@@ -149,7 +149,7 @@ class ExportCollectedYuran implements FromCollection, ShouldAutoSize, WithHeadin
             }
         }
 
-        return $data;
+        return collect($data);
     }
 
     public function headings(): array

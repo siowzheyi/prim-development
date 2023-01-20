@@ -268,6 +268,7 @@
             })
         }
 
+        var flag = "";
         function fetchCat(organizationid = '', yuranId = ''){
             var _token = $('input[name="_token"]').val();
             $.ajax({
@@ -281,7 +282,15 @@
                     $(yuranId).empty();
                     $(yuranId).append("<option value='' disabled selected> Pilih Kategori</option>");
                     jQuery.each(result.success, function(key, value){
-                        $(yuranId).append("<option value='"+ value.category +"'>" + value.category + "</option>");
+                        if(value.category == "Kategory A")
+                            flag = " - Mengikut keluarga";
+                        else if(value.category == "Kategory B")
+                            flag = " - Mengikut murid";
+                        else if(value.category == "Kategory C")
+                            flag = " - Pilihan";
+                        else
+                            flag = " - Asrama";
+                        $(yuranId).append("<option value='"+ value.category +"'>" + value.category + flag + "</option>");
                     });
                 }
             })
@@ -412,6 +421,7 @@
             }
         });
 
+        
         $('#catUpdate').change(function(){
             if($(this).val() != '')
             {
@@ -434,6 +444,7 @@
                             $('#yuranUpdate').append("<option value='ALL'> Semua</option>");
                         }
                         jQuery.each(result.success, function(key, value){
+                            
                             $('#yuranUpdate').append("<option value='"+ value.id +"'>" + value.name + "</option>");
                         });
                     }
